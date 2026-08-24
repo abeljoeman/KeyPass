@@ -35,7 +35,7 @@
 
 - [x] **T020** Identify features outside prototype PRD.
 - [x] **T021** Remove/disable TOTP UI and flows.
-- [ ] **T022** Remove/disable passkey flows.
+- [x] **T022** Remove/disable passkey flows.
 - [ ] **T023** Remove/disable cloud/network-dependent features if present.
 - [ ] **T024** Remove/disable backup/import/export flows not required for prototype.
 - [ ] **T025** Remove/disable Autofill Service for v0.1.
