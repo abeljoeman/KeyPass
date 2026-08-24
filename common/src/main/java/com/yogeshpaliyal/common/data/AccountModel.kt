@@ -6,7 +6,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.yogeshpaliyal.common.constants.AccountType
-import com.yogeshpaliyal.common.utils.TOTPHelper
 import com.yogeshpaliyal.common.utils.getRandomString
 
 /*
@@ -65,8 +64,4 @@ data class AccountModel(
         title?.firstOrNull() ?: username?.firstOrNull() ?: site?.firstOrNull()
             ?: notes?.firstOrNull() ?: 'K'
         ).toString()
-
-    fun getOtp(): String = TOTPHelper.generate(secret)
-
-    fun getTOtpProgress() = TOTPHelper.progress.toInt()
 }

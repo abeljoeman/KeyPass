@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.yogeshpaliyal.common.constants.ScannerType
-import com.yogeshpaliyal.common.utils.TOTPHelper
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
@@ -38,13 +37,11 @@ import com.yogeshpaliyal.keypass.ui.detail.components.Fields
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
 import com.yogeshpaliyal.keypass.ui.redux.states.PasswordGeneratorState
 import org.reduxkotlin.compose.rememberDispatcher
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.net.MalformedURLException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -81,26 +78,6 @@ fun AccountDetailPage(
         when (it.type) {
             ScannerType.Password -> {
                 viewModel.setAccountModel(accountModel.copy(password = it.scannedText))
-            }
-            ScannerType.Secret -> {
-                it.scannedText ?: return@rememberLauncherForActivityResult
-                var totp: TOTPHelper? = null
-                try {
-                    totp = TOTPHelper(it.scannedText)
-                } catch (e: MalformedURLException) {
-                    dispatchAction(ToastAction(R.string.invalid_secret_key))
-                    return@rememberLauncherForActivityResult
-                }
-                var newAccountModel = accountModel.copy(secret = totp.secret)
-
-                if (newAccountModel.title.isNullOrEmpty()) {
-                    newAccountModel = newAccountModel.copy(title = totp.label)
-                }
-
-                if (newAccountModel.username.isNullOrEmpty()) {
-                    newAccountModel = newAccountModel.copy(username = totp.issuer)
-                }
-                viewModel.setAccountModel(newAccountModel)
             }
         }
     }

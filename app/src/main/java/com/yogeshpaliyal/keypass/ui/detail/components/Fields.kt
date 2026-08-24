@@ -120,25 +120,6 @@ fun Fields(
         }
 
         KeyPassInputField(
-            modifier = Modifier.testTag("secretKey"),
-            placeholder = R.string.secret_key,
-            value = accountModel.secret,
-            setValue = {
-                updateAccountModel(accountModel.copy(secret = it))
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    scanClicked(ScannerType.Secret)
-                }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_twotone_qr_code_scanner_24),
-                        contentDescription = ""
-                    )
-                }
-            }
-        )
-
-        KeyPassInputField(
             modifier = Modifier.testTag("tags"),
             placeholder = R.string.tags_comma_separated_optional,
             value = accountModel.tags,

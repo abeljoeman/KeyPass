@@ -2,11 +2,6 @@ package com.yogeshpaliyal.keypass.ui.home.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,17 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -52,9 +41,7 @@ import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
-import kotlinx.coroutines.delay
 import org.reduxkotlin.compose.rememberDispatcher
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
@@ -116,10 +103,6 @@ fun Account(
                     text = accountModel.getInitials(),
                     textAlign = TextAlign.Center
                 )
-
-                if (accountModel.secret != null) {
-                    WrapWithProgress(accountModel)
-                }
             }
 
             Column(
@@ -155,21 +138,8 @@ fun Account(
 
 @Composable
 fun RenderUserName(accountModel: AccountModel) {
-    val (username, setUsername) = remember { mutableStateOf("") }
-
-    LaunchedEffect(accountModel) {
-        if (accountModel.secret != null) {
-            while (true) {
-                setUsername(accountModel.getOtp())
-                delay(1.seconds)
-            }
-        } else {
-            setUsername(accountModel.username ?: "")
-        }
-    }
-
     Text(
-        text = username,
+        text = accountModel.username ?: "",
         style = MaterialTheme.typography.bodyMedium.merge(
             TextStyle(
                 fontSize = 14.sp
@@ -207,32 +177,5 @@ fun NoDataFound() {
 }
 
 private fun getPassword(model: AccountModel): String {
-    if (model.secret != null) {
-        return model.getOtp()
-    }
     return model.password.orEmpty()
-}
-
-@Composable
-fun WrapWithProgress(accountModel: AccountModel) {
-    accountModel.secret ?: return
-
-    val (initialProgress, setInitialProgress) = remember { mutableStateOf(0f) }
-
-    LaunchedEffect(key1 = accountModel.uniqueId, block = {
-        setInitialProgress(1f - (accountModel.getTOtpProgress().toFloat() / 30))
-    })
-
-    val infiniteTransition = rememberInfiniteTransition()
-    val progress by infiniteTransition.animateFloat(
-        initialValue = initialProgress,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(30000, easing = LinearEasing))
-    )
-
-    CircularProgressIndicator(
-        modifier = Modifier
-            .fillMaxSize(),
-        progress = progress
-    )
 }
