@@ -33,7 +33,7 @@
 
 ## Phase 2 — Reduce Scope
 
-- [ ] **T020** Identify features outside prototype PRD.
+- [x] **T020** Identify features outside prototype PRD.
 - [ ] **T021** Remove/disable TOTP UI and flows.
 - [ ] **T022** Remove/disable passkey flows.
 - [ ] **T023** Remove/disable cloud/network-dependent features if present.
