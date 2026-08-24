@@ -26,7 +26,7 @@
 - [ ] **T010** Fork or create a working branch from `yogeshpaliyal/KeyPass`.
 - [ ] **T011** Build the unmodified base project with the repository Gradle Wrapper.
 - [ ] **T012** Install and run the base APK on a physical Android device.
-- [ ] **T013** Record the exact build command and environment prerequisites in project README.
+- [x] **T013** Record the exact build command and environment prerequisites in project README.
 - [ ] **T014** Create a clean baseline commit/tag before prototype modifications.
 
 **Acceptance:** clean checkout builds and runs.
