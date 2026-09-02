@@ -43,12 +43,6 @@ suspend fun Context.getUserSettingsOrNull(): UserSettings? {
     return getUserSettingsDataStore().data.firstOrNull()
 }
 
-suspend fun Context.setKeyPassPassword(password: String?) {
-    getUserSettingsDataStore().updateData {
-        it.copy(keyPassPassword = password)
-    }
-}
-
 suspend fun Context.setDefaultPasswordLength(password: Float) {
     getUserSettingsDataStore().updateData {
         it.copy(passwordConfig = it.passwordConfig.copy(length = password))
@@ -107,10 +101,6 @@ suspend fun Context.migrateOldDataToNewerDataStore() {
 
     if (olderData.contains(BIOMETRIC_ENABLE)) {
         userSettings = userSettings.copy(isBiometricEnable = olderData[BIOMETRIC_ENABLE] ?: false)
-    }
-
-    if (olderData.contains(KEYPASS_PASSWORD)) {
-        userSettings = userSettings.copy(keyPassPassword = olderData[KEYPASS_PASSWORD])
     }
 
     if (olderData.contains(KEYPASS_PASSWORD_LENGTH)) {

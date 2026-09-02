@@ -32,7 +32,6 @@ import com.yogeshpaliyal.keypass.MyApplication
 import com.yogeshpaliyal.keypass.ui.about.AboutScreen
 import com.yogeshpaliyal.keypass.ui.auth.AuthScreen
 import com.yogeshpaliyal.keypass.ui.changeDefaultPasswordLength.ChangeDefaultPasswordLengthScreen
-import com.yogeshpaliyal.keypass.ui.changePassword.ChangePassword
 import com.yogeshpaliyal.keypass.ui.detail.AccountDetailPage
 import com.yogeshpaliyal.keypass.ui.generate.ui.GeneratePasswordScreen
 import com.yogeshpaliyal.keypass.ui.home.Homepage
@@ -47,7 +46,6 @@ import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
 import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppHintState
-import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppPasswordState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeDefaultPasswordLengthState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import com.yogeshpaliyal.keypass.ui.redux.states.KeyPassState
@@ -173,10 +171,6 @@ fun CurrentPage() {
 
       is AuthState -> {
         AuthScreen(it)
-      }
-
-      is ChangeAppPasswordState -> {
-        ChangePassword(it)
       }
 
       is ChangeDefaultPasswordLengthState -> {

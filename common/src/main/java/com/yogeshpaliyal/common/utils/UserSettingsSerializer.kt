@@ -10,6 +10,10 @@ class UserSettingsSerializer(
     private val cryptoManager: CryptoManager
 ) : Serializer<UserSettings> {
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override val defaultValue: UserSettings
         get() = UserSettings()
 
@@ -17,7 +21,7 @@ class UserSettingsSerializer(
         val decryptedBytes = cryptoManager.decrypt(input)
 
         val decodedString = decryptedBytes.decodeToString()
-        return Json.decodeFromString(
+        return json.decodeFromString(
             deserializer = UserSettings.serializer(),
             string = decodedString
         )
@@ -25,12 +29,12 @@ class UserSettingsSerializer(
     }
 
     override suspend fun writeTo(t: UserSettings, output: OutputStream) {
-        val json = Json.encodeToString(
+        val encodedSettings = json.encodeToString(
             serializer = UserSettings.serializer(),
             value = t
         )
         cryptoManager.encrypt(
-            bytes = json.encodeToByteArray(),
+            bytes = encodedSettings.encodeToByteArray(),
             outputStream = output
         )
     }

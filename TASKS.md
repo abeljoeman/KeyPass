@@ -63,7 +63,7 @@
 - [x] **T040** Implement create-vault flow.
 - [x] **T041** Implement unlock-vault flow.
 - [x] **T042** Implement explicit lock action.
-- [ ] **T043** Ensure master password is not persisted in plaintext.
+- [x] **T043** Ensure master password is not persisted in plaintext.
 - [ ] **T044** Clear accessible decrypted application state on lock.
 - [ ] **T045** Implement simple background/timeout lock behavior.
 - [ ] **T046** Verify vault reopens correctly after process/app restart.

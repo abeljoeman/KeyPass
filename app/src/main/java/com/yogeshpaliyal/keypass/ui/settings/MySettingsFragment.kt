@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.Feedback
 import androidx.compose.material.icons.rounded.Fingerprint
 import androidx.compose.material.icons.rounded.LockReset
-import androidx.compose.material.icons.rounded.Password
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -59,7 +58,6 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppHintState
-import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppPasswordState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeDefaultPasswordLengthState
 import kotlinx.coroutines.launch
 import org.reduxkotlin.compose.rememberTypedDispatcher
@@ -139,13 +137,6 @@ fun MySettingCompose() {
   val securitySettings = SettingsCategory(
     titleRes = R.string.security,
     preferences = listOf(
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.change_app_password,
-        summaryRes = R.string.change_app_password,
-        iconRes = Icons.Rounded.Password,
-        onClick = { dispatchAction(NavigationAction(ChangeAppPasswordState())) }
-      ),
       SettingsPreference(
         type = PreferenceType.NORMAL,
         titleRes = R.string.app_password_hint,

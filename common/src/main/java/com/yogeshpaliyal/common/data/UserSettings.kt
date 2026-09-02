@@ -8,7 +8,6 @@ const val DEFAULT_PASSWORD_LENGTH = 10f
 @Keep
 @Serializable
 data class UserSettings(
-    val keyPassPassword: String? = null,
     val dbPassword: String? = null,
     @Deprecated("Use passwordConfig instead")
     val defaultPasswordLength: Float = DEFAULT_PASSWORD_LENGTH,
