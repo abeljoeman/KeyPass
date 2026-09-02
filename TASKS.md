@@ -53,7 +53,7 @@
 - [x] **T034** Implement `VaultRepository` interface.
 - [x] **T035** Implement `KotpassVaultRepository`.
 - [x] **T036** Add test fixture KDBX vaults where license-safe.
-- [ ] **T037** Verify repository can open a known test vault.
+- [x] **T037** Verify repository can open a known test vault.
 - [ ] **T038** Verify wrong password fails closed.
 
 **Checkpoint:** repository can read a KDBX vault independently of UI.
