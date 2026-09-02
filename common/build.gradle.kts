@@ -38,14 +38,6 @@ dependencies {
     api("androidx.core:core-ktx:1.16.0")
     api("androidx.appcompat:appcompat:1.7.1")
 
-    // apache common codec
-    implementation("commons-codec:commons-codec:1.18.0")
-
-    // Androidx Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha07")
-
-    api("androidx.documentfile:documentfile:1.1.0")
-
     api("androidx.room:room-runtime:${Versions.room}")
     kapt("androidx.room:room-compiler:${Versions.room}")
     api("androidx.room:room-ktx:${Versions.room}")
@@ -53,11 +45,6 @@ dependencies {
     // dependency injection
     api("com.google.dagger:hilt-android:${Versions.hilt}")
     kapt("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
-    api("androidx.hilt:hilt-work:1.2.0")
-    // When using Kotlin.
-    kapt("androidx.hilt:hilt-compiler:1.2.0")
-
-    api("androidx.work:work-runtime-ktx:2.8.1")
 
     api("com.google.android.material:material:1.12.0")
 
@@ -74,6 +61,4 @@ dependencies {
 
     implementation("net.zetetic:sqlcipher-android:4.7.2@aar")
     implementation("androidx.sqlite:sqlite:2.5.1")
-
-    api("com.opencsv:opencsv:5.11")
 }

@@ -39,7 +39,7 @@
 - [x] **T023** Remove/disable cloud/network-dependent features if present.
 - [x] **T024** Remove/disable backup/import/export flows not required for prototype.
 - [x] **T025** Remove/disable Autofill Service for v0.1.
-- [ ] **T026** Remove unused dependencies introduced only by removed features.
+- [x] **T026** Remove unused dependencies introduced only by removed features.
 - [ ] **T027** Verify app still builds and launches.
 
 **Checkpoint:** retained app matches prototype scope.

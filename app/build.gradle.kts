@@ -146,14 +146,7 @@ dependencies {
     // dependency injection
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
     kapt("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
-    implementation("androidx.hilt:hilt-work:1.2.0")
-    // When using Kotlin.
-    kapt("androidx.hilt:hilt-compiler:1.2.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-
-    // zxing library
-    // implementation "com.googl.ezxing:android-core:3.4.1"
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     // For instrumented tests.
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.56.2")
