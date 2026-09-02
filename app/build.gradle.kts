@@ -162,4 +162,5 @@ dependencies {
     implementation("me.saket.cascade:cascade-compose:2.3.0")
 
     implementation("androidx.biometric:biometric:1.1.0")
+    implementation("app.keemobile:kotpass:0.13.0")
 }

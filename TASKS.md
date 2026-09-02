@@ -46,7 +46,7 @@
 
 ## Phase 3 — Kotpass Integration
 
-- [ ] **T030** Add Kotpass dependency using a pinned stable version.
+- [x] **T030** Add Kotpass dependency using a pinned stable version.
 - [ ] **T031** Create `Credential` application model if not already suitable.
 - [ ] **T032** Create explicit KDBX ↔ `Credential` mapper.
 - [ ] **T033** Add mapper unit tests using representative values.
