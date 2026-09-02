@@ -85,10 +85,6 @@
     <string name="change_password_length">Change password length</string>
     <string name="default_password_length">Default password length</string>
     <string name="enter_password_hint">Enter password hint</string>
-    <string name="autofill_service">AutoFill Service</string>
-    <string name="autofill_service_enable">Enable AutoFill Service</string>
-    <string name="autofill_service_disable">Disable AutoFill Service</string>
-    <string name="autofill_not_available">It is only available on android 10 and above</string>
     <string name="biometric_disabled_due_to_timeout">Please login via password because you haven\'t used password in last 24 hours</string>
     <string name="invalid_package_signature">Invalid package signature</string>
     <string name="auto_lock">Auto Lock on background</string>

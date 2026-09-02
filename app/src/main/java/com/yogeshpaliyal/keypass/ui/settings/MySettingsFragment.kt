@@ -45,13 +45,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
 import com.yogeshpaliyal.common.utils.email
-import com.yogeshpaliyal.common.utils.enableAutoFillService
-import com.yogeshpaliyal.common.utils.isAutoFillServiceEnabled
 import com.yogeshpaliyal.common.utils.setBiometricEnable
 import com.yogeshpaliyal.common.utils.setBiometricLoginTimeoutEnable
 import com.yogeshpaliyal.common.utils.setUserSettings
 import com.yogeshpaliyal.keypass.BuildConfig
-import com.yogeshpaliyal.keypass.MyApplication
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.commonComponents.PreferenceItem
 import com.yogeshpaliyal.keypass.ui.generate.ui.components.DEFAULT_PASSWORD_LENGTH
@@ -89,7 +86,7 @@ data class SettingsPreference(
 )
 
 enum class PreferenceType {
-    NORMAL, AUTO_FILL, BIOMETRIC, AUTO_LOCK, AUTO_DISABLE_BIOMETRIC
+    NORMAL, BIOMETRIC, AUTO_LOCK, AUTO_DISABLE_BIOMETRIC
 }
 
 @Composable
@@ -97,7 +94,6 @@ fun MySettingCompose() {
   val dispatchAction = rememberTypedDispatcher<Action>()
   val context = LocalContext.current
   val userSettings = LocalUserSettings.current
-  var isAutoFillServiceEnable by remember { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
 
   // Search functionality
@@ -113,11 +109,6 @@ fun MySettingCompose() {
     userSettings.passwordConfig.length.let { value -> savedPasswordLength = value }
   }
 
-  LaunchedEffect(context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      isAutoFillServiceEnable = context.isAutoFillServiceEnabled()
-    }
-  }
 
   // Biometrics related states
   var canAuthenticate by remember { mutableStateOf(BiometricManager.BIOMETRIC_STATUS_UNKNOWN) }
@@ -167,13 +158,6 @@ fun MySettingCompose() {
         titleRes = R.string.change_password_length,
         summaryStr = "${context.getString(R.string.default_password_length)}: ${savedPasswordLength.toInt()}",
         onClick = { dispatchAction(NavigationAction(ChangeDefaultPasswordLengthState())) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.AUTO_FILL,
-        titleRes = R.string.autofill_service,
-        summaryRes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          if (isAutoFillServiceEnable) R.string.autofill_service_disable else R.string.autofill_service_enable
-        } else R.string.autofill_not_available
       ),
       SettingsPreference(
         type = PreferenceType.BIOMETRIC,
@@ -309,20 +293,6 @@ fun MySettingCompose() {
                   onClickItem = preference.onClick
                 )
               }
-              PreferenceType.AUTO_FILL -> {
-                val autoFillClick = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                  {
-                    (context.applicationContext as? MyApplication)?.knownActivityLaunchTriggered()
-                    context.enableAutoFillService()
-                  }
-                } else null
-                
-                PreferenceItem(
-                  title = preference.titleRes,
-                  summary = preference.summaryRes,
-                  onClickItem = autoFillClick
-                )
-              }
               PreferenceType.BIOMETRIC -> {
                 PreferenceItem(
                   title = preference.titleRes,
@@ -439,5 +409,5 @@ fun MySettingCompose() {
   }
 }
 
-// The existing helper functions (AutoFillPreferenceItem, BiometricsOption, AutoLockPreferenceItem, AutoDisableBiometric)
+// The existing helper functions (BiometricsOption, AutoLockPreferenceItem, AutoDisableBiometric)
 // are no longer needed as their functionality has been integrated into the main composable
