@@ -50,7 +50,7 @@
 - [x] **T031** Create `Credential` application model if not already suitable.
 - [x] **T032** Create explicit KDBX ↔ `Credential` mapper.
 - [x] **T033** Add mapper unit tests using representative values.
-- [ ] **T034** Implement `VaultRepository` interface.
+- [x] **T034** Implement `VaultRepository` interface.
 - [ ] **T035** Implement `KotpassVaultRepository`.
 - [ ] **T036** Add test fixture KDBX vaults where license-safe.
 - [ ] **T037** Verify repository can open a known test vault.
