@@ -2,6 +2,7 @@ package com.yogeshpaliyal.keypass.ui.nav.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.VpnKey
@@ -18,12 +19,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultBottomAppBar
 import com.yogeshpaliyal.keypass.ui.nav.BottomNavViewModel
+import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.redux.actions.BottomSheetAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
+import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import com.yogeshpaliyal.keypass.ui.redux.states.KeyPassState
 import com.yogeshpaliyal.keypass.ui.redux.states.ScreenState
@@ -39,6 +44,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
     val currentScreen: ScreenState by selectState<KeyPassState, ScreenState> { this.currentScreen }
     val showMainBottomAppBar = currentScreen.showMainBottomAppBar
     val dispatchAction = rememberDispatcher()
+    val vaultRepository = LocalVaultRepository.current
     val navigationItems by viewModel.navigationList.observeAsState()
 
     if (!showMainBottomAppBar) {
@@ -91,6 +97,17 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             Icon(
                 painter = rememberVectorPainter(image = Icons.Outlined.Settings),
                 contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        IconButton(onClick = {
+            vaultRepository.lock()
+            dispatchAction(NavigationAction(AuthState.Login, true))
+        }) {
+            Icon(
+                painter = rememberVectorPainter(image = Icons.Outlined.Lock),
+                contentDescription = stringResource(R.string.lock_vault),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
