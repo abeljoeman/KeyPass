@@ -40,7 +40,7 @@
 - [x] **T024** Remove/disable backup/import/export flows not required for prototype.
 - [x] **T025** Remove/disable Autofill Service for v0.1.
 - [x] **T026** Remove unused dependencies introduced only by removed features.
-- [ ] **T027** Verify app still builds and launches.
+- [x] **T027** Verify app still builds and launches.
 
 **Checkpoint:** retained app matches prototype scope.
 
