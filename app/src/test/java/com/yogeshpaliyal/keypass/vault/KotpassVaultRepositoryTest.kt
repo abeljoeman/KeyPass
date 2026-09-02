@@ -3,21 +3,14 @@ package com.yogeshpaliyal.keypass.vault
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class KotpassVaultRepositoryTest {
 
     @Test
     fun openVault_withKnownFixture_exposesExpectedCredentials() = runBlocking {
-        val fixture = javaClass.getResourceAsStream("/vault/known-vault.kdbx")
-            ?: throw AssertionError("Known vault fixture is missing.")
-        val vaultFile = File.createTempFile("known-vault-", ".kdbx")
-
-        try {
-            fixture.use { input ->
-                vaultFile.outputStream().use { output -> input.copyTo(output) }
-            }
-
+        withKnownVaultFixture { vaultFile ->
             val repository = KotpassVaultRepository(vaultFile)
             repository.openVault("test-password".toCharArray())
 
@@ -48,6 +41,38 @@ class KotpassVaultRepositoryTest {
                 assertEquals(expected, credentialsById[expected.id])
             }
             repository.lock()
+        }
+    }
+
+    @Test
+    fun openVault_withWrongPassword_failsClosed() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val repository = KotpassVaultRepository(vaultFile)
+            repository.openVault("test-password".toCharArray())
+            assertEquals(2, repository.listCredentials().size)
+
+            val wrongPasswordOpen = runCatching {
+                repository.openVault("wrong-password".toCharArray())
+            }
+            assertTrue("Wrong-password open must fail.", wrongPasswordOpen.isFailure)
+
+            val credentialAccess = runCatching { repository.listCredentials() }
+            assertTrue(
+                "Repository must be locked after a failed open.",
+                credentialAccess.exceptionOrNull() is IllegalStateException
+            )
+        }
+    }
+
+    private suspend fun withKnownVaultFixture(block: suspend (File) -> Unit) {
+        val vaultFile = File.createTempFile("known-vault-", ".kdbx")
+        try {
+            val fixture = javaClass.getResourceAsStream("/vault/known-vault.kdbx")
+                ?: throw AssertionError("Known vault fixture is missing.")
+            fixture.use { input ->
+                vaultFile.outputStream().use { output -> input.copyTo(output) }
+            }
+            block(vaultFile)
         } finally {
             if (vaultFile.exists() && !vaultFile.delete()) {
                 vaultFile.deleteOnExit()
