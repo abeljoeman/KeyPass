@@ -52,7 +52,7 @@
 - [x] **T033** Add mapper unit tests using representative values.
 - [x] **T034** Implement `VaultRepository` interface.
 - [x] **T035** Implement `KotpassVaultRepository`.
-- [ ] **T036** Add test fixture KDBX vaults where license-safe.
+- [x] **T036** Add test fixture KDBX vaults where license-safe.
 - [ ] **T037** Verify repository can open a known test vault.
 - [ ] **T038** Verify wrong password fails closed.
 
