@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.auth.components.ButtonBar
 import com.yogeshpaliyal.keypass.ui.auth.components.PasswordInputField
+import com.yogeshpaliyal.keypass.ui.nav.LocalVaultFile
+import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.nav.LocalUserSettings
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
@@ -40,9 +43,11 @@ import org.reduxkotlin.compose.rememberDispatcher
 @Composable
 fun AuthScreen(state: AuthState) {
     val userSettings = LocalUserSettings.current
+    val vaultFile = LocalVaultFile.current
+    val vaultRepository = LocalVaultRepository.current
     val dispatchAction = rememberDispatcher()
 
-    val password = rememberSaveable { mutableStateOf("") }
+    val password = remember { mutableStateOf("") }
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val passwordError = rememberSaveable { mutableStateOf<Int?>(null) }
 
@@ -59,12 +64,11 @@ fun AuthScreen(state: AuthState) {
         }
     }
 
-    LaunchedEffect(key1 = userSettings.keyPassPassword) {
-        val mPassword = userSettings.keyPassPassword
-        if (mPassword == null) {
-            dispatchAction(NavigationAction(AuthState.CreatePassword, true))
-        } else {
+    LaunchedEffect(key1 = vaultFile) {
+        if (vaultFile.isFile) {
             dispatchAction(NavigationAction(AuthState.Login, true))
+        } else {
+            dispatchAction(NavigationAction(AuthState.CreatePassword, true))
         }
     }
 
@@ -114,6 +118,7 @@ fun AuthScreen(state: AuthState) {
         ButtonBar(
             state = state,
             password = password.value,
+            vaultRepository = vaultRepository,
             setPasswordError = { passwordError.value = it }
         ) {
             dispatchAction(it)

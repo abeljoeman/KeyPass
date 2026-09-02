@@ -56,14 +56,24 @@ import com.yogeshpaliyal.keypass.ui.redux.states.SettingsState
 import com.yogeshpaliyal.keypass.ui.settings.MySettingCompose
 import com.yogeshpaliyal.keypass.ui.style.KeyPassTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import org.reduxkotlin.compose.StoreProvider
 import org.reduxkotlin.compose.rememberDispatcher
 import com.yogeshpaliyal.keypass.ui.redux.selectState
+import com.yogeshpaliyal.keypass.vault.KotpassVaultRepository
+import com.yogeshpaliyal.keypass.vault.VaultRepository
 
 val LocalUserSettings = compositionLocalOf { UserSettings() }
+val LocalVaultFile = compositionLocalOf<File> { error("Vault file is not provided.") }
+val LocalVaultRepository = compositionLocalOf<VaultRepository> {
+  error("Vault repository is not provided.")
+}
 
 @AndroidEntryPoint
 class DashboardComposeActivity : AppCompatActivity() {
+
+  private val vaultFile by lazy { File(filesDir, "vault.kdbx") }
+  private val vaultRepository: VaultRepository by lazy { KotpassVaultRepository(vaultFile) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -76,7 +86,10 @@ class DashboardComposeActivity : AppCompatActivity() {
     setContent {
       val localUserSettings by getUserSettingsFlow().collectAsState(initial = UserSettings())
 
-      CompositionLocalProvider(LocalUserSettings provides localUserSettings) {
+      CompositionLocalProvider(
+          LocalUserSettings provides localUserSettings,
+          LocalVaultFile provides vaultFile,
+          LocalVaultRepository provides vaultRepository) {
         KeyPassTheme { StoreProvider(store = KeyPassRedux.createStore()) { Dashboard() } }
       }
 

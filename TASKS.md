@@ -60,7 +60,7 @@
 
 ## Phase 4 — Vault Lifecycle
 
-- [ ] **T040** Implement create-vault flow.
+- [x] **T040** Implement create-vault flow.
 - [ ] **T041** Implement unlock-vault flow.
 - [ ] **T042** Implement explicit lock action.
 - [ ] **T043** Ensure master password is not persisted in plaintext.

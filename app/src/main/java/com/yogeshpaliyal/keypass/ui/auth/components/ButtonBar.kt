@@ -14,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import com.yogeshpaliyal.common.utils.setKeyPassPassword
 import com.yogeshpaliyal.common.utils.updateLastPasswordLoginTime
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.nav.LocalUserSettings
@@ -25,6 +24,8 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
+import com.yogeshpaliyal.keypass.vault.VaultRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -33,6 +34,7 @@ import kotlin.time.toDuration
 fun ButtonBar(
     state: AuthState,
     password: String,
+    vaultRepository: VaultRepository,
     setPasswordError: (Int?) -> Unit,
     dispatchAction: (Action) -> Unit
 ) {
@@ -40,10 +42,11 @@ fun ButtonBar(
     val context = LocalContext.current
     val userSettings = LocalUserSettings.current
     val (biometricEnable, setBiometricEnable) = remember(state) { mutableStateOf(false) }
+    val (creatingVault, setCreatingVault) = remember(state) { mutableStateOf(false) }
 
     Row(modifier = Modifier.fillMaxWidth(1f), Arrangement.SpaceEvenly) {
         AnimatedVisibility(state is AuthState.ConfirmPassword) {
-            Button(onClick = {
+            Button(enabled = !creatingVault, onClick = {
                 dispatchAction(NavigationAction(AuthState.CreatePassword, true))
             }) {
                 Text(text = stringResource(id = R.string.back))
@@ -84,10 +87,23 @@ fun ButtonBar(
                 }
 
                 is AuthState.ConfirmPassword -> {
+                    if (creatingVault) {
+                        return@Button
+                    }
                     if (state.password == password) {
+                        setCreatingVault(true)
+                        setPasswordError(null)
                         coroutineScope.launch {
-                            context.setKeyPassPassword(password)
-                            dispatchAction(NavigationAction(HomeState(), true))
+                            try {
+                                vaultRepository.createVault(password.toCharArray())
+                                dispatchAction(NavigationAction(HomeState(), true))
+                            } catch (cancelled: CancellationException) {
+                                throw cancelled
+                            } catch (_: Exception) {
+                                setPasswordError(R.string.vault_creation_failed)
+                            } finally {
+                                setCreatingVault(false)
+                            }
                         }
                     } else {
                         setPasswordError(R.string.password_no_match)
@@ -110,7 +126,7 @@ fun ButtonBar(
                     }
                 }
             }
-        }) {
+        }, enabled = !creatingVault) {
             Text(text = stringResource(id = R.string.str_continue))
         }
     }
