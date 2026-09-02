@@ -1,7 +1,6 @@
 package com.yogeshpaliyal.keypass.ui.redux.actions
 
 import android.content.Context
-import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.keypass.ui.home.DashboardViewModel
 import com.yogeshpaliyal.keypass.ui.redux.states.DialogState
 import com.yogeshpaliyal.keypass.ui.redux.states.ScreenState
@@ -29,11 +28,6 @@ class UpdateViewModalAction(val viewModal: DashboardViewModel?) : Action
  * @param clearBackStack: Boolean Clear BackStack or not
  */
 data class NavigationAction(val state: ScreenState, val clearBackStack: Boolean = false) : Action
-
-/**
- * Used to send Accounts list which we want to restore
- */
-data class RestoreAccountsAction(val accounts: List<AccountModel>) : Action
 
 /**
  * Used to update Screen State in redux store

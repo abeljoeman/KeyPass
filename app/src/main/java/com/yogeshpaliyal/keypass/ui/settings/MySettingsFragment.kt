@@ -42,7 +42,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
 import com.yogeshpaliyal.common.utils.email
@@ -61,14 +60,10 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateDialogAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
-import com.yogeshpaliyal.keypass.ui.redux.states.BackupImporterState
-import com.yogeshpaliyal.keypass.ui.redux.states.BackupScreenState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppHintState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppPasswordState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeDefaultPasswordLengthState
-import com.yogeshpaliyal.keypass.ui.redux.states.ValidateKeyPhrase
 import kotlinx.coroutines.launch
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
@@ -155,20 +150,6 @@ fun MySettingCompose() {
     preferences = listOf(
       SettingsPreference(
         type = PreferenceType.NORMAL,
-        titleRes = R.string.credentials_backups,
-        summaryRes = R.string.credentials_backups_desc,
-        iconRes = painterResource(id = R.drawable.credentials_backup),
-        onClick = { dispatchAction(NavigationAction(BackupScreenState())) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.restore_credentials,
-        summaryRes = R.string.restore_credentials_desc,
-        iconRes = painterResource(id = R.drawable.import_credentials),
-        onClick = { dispatchAction(NavigationAction(BackupImporterState())) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
         titleRes = R.string.change_app_password,
         summaryRes = R.string.change_app_password,
         iconRes = Icons.Rounded.Password,
@@ -186,12 +167,6 @@ fun MySettingCompose() {
         titleRes = R.string.change_password_length,
         summaryStr = "${context.getString(R.string.default_password_length)}: ${savedPasswordLength.toInt()}",
         onClick = { dispatchAction(NavigationAction(ChangeDefaultPasswordLengthState())) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.validate_keyphrase,
-        summaryRes = R.string.validate_keyphrase,
-        onClick = { dispatchAction(UpdateDialogAction(ValidateKeyPhrase)) }
       ),
       SettingsPreference(
         type = PreferenceType.AUTO_FILL,

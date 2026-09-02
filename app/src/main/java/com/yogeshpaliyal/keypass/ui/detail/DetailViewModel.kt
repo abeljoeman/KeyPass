@@ -1,24 +1,15 @@
 package com.yogeshpaliyal.keypass.ui.detail
 
 import android.app.Application
-import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.WriterException
-import com.google.zxing.common.BitMatrix
 import com.yogeshpaliyal.common.data.AccountModel
-import com.yogeshpaliyal.common.worker.executeAutoBackup
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 import javax.inject.Inject
 
 /*
@@ -56,7 +47,6 @@ class DetailViewModel @Inject constructor(
                 withContext(Dispatchers.IO) {
                     appDb.getDao().deleteAccount(it)
                 }
-                autoBackup()
                 onExecCompleted()
             }
         }
@@ -66,32 +56,9 @@ class DetailViewModel @Inject constructor(
             accountModel.let {
                 withContext(Dispatchers.IO) {
                     appDb.getDao().insertOrUpdateAccount(it)
-                    autoBackup()
                 }
             }
             onExecCompleted()
         }
-    }
-    private fun autoBackup() {
-        viewModelScope.launch {
-            app.executeAutoBackup()
-        }
-    }
-    fun generateQrCode(accountModel: AccountModel): Bitmap? {
-        val accountJson = Gson().toJson(accountModel)
-        println("JSON String:$accountJson")
-
-        val hints = Hashtable<EncodeHintType, String>()
-        hints[EncodeHintType.CHARACTER_SET] = "UTF-8"
-
-        val multiFormatWriter = MultiFormatWriter()
-        try {
-            val bitMatrix: BitMatrix = multiFormatWriter.encode(accountJson, BarcodeFormat.QR_CODE, 200, 200, hints)
-            val barcodeEncoder = com.journeyapps.barcodescanner.BarcodeEncoder()
-            return barcodeEncoder.createBitmap(bitMatrix)
-        } catch (e: WriterException) {
-            e.printStackTrace()
-        }
-        return null
     }
 }

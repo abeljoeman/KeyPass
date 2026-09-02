@@ -2,16 +2,9 @@ package com.yogeshpaliyal.common
 
 import android.app.Application
 import android.content.Intent
-import android.util.Log
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
 import com.google.android.material.color.DynamicColors
-import javax.inject.Inject
 
-abstract class CommonMyApplication : Application(), Configuration.Provider {
-
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+abstract class CommonMyApplication : Application() {
 
     abstract fun getCrashActivityIntent(throwable: Throwable): Intent
 
@@ -27,12 +20,5 @@ abstract class CommonMyApplication : Application(), Configuration.Provider {
         }
 
         DynamicColors.applyToActivitiesIfAvailable(this)
-    }
-
-    override fun getWorkManagerConfiguration(): Configuration {
-        return Configuration.Builder()
-            .setMinimumLoggingLevel(Log.INFO)
-            .setWorkerFactory(workerFactory)
-            .build()
     }
 }

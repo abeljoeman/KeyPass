@@ -26,6 +26,4 @@ data class UserSettings(
     val lastPasswordLoginTime: Long? = null,
     val lastKeyPhraseEnterTime: Long? = null,
     val autoLockEnabled: Boolean? = true
-) {
-  fun isKeyPresent() = backupKey != null
-}
+)

@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.viewModelScope
 import com.yogeshpaliyal.common.data.AccountModel
-import com.yogeshpaliyal.common.dbhelper.saveToDb
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,14 +39,6 @@ class DashboardViewModel @Inject constructor(
             } else {
                 mediator.postValue(appDao.getAllAccountsDescending(keyword ?: "", tag, sortField))
             }
-        }
-    }
-
-    fun restoreBackup(
-        list: List<AccountModel>
-    ) {
-        viewModelScope.launch {
-            appDb.saveToDb(list)
         }
     }
 }

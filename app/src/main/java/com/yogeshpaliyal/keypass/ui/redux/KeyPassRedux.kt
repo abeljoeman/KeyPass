@@ -9,7 +9,6 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
 import com.yogeshpaliyal.keypass.ui.redux.actions.BottomSheetAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.RestoreAccountsAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.StateUpdateAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateContextAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateDialogAction
@@ -89,11 +88,6 @@ object KeyPassRedux {
 
             is UpdateViewModalAction -> {
                 state.copy(viewModel = action.viewModal)
-            }
-
-            is RestoreAccountsAction -> {
-                state.viewModel?.restoreBackup(action.accounts)
-                state
             }
 
             else -> state

@@ -2,29 +2,23 @@ package com.yogeshpaliyal.keypass.ui.detail.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.common.constants.ScannerType
 import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.common.utils.PasswordGenerator
 import com.yogeshpaliyal.keypass.R
@@ -37,8 +31,7 @@ fun Fields(
     modifier: Modifier = Modifier,
     accountModel: AccountModel,
     updateAccountModel: (newAccountModel: AccountModel) -> Unit,
-    copyToClipboardClicked: (String) -> Unit,
-    scanClicked: (scannerType: Int) -> Unit
+    copyToClipboardClicked: (String) -> Unit
 ) {
     val passwordConfig = LocalUserSettings.current.passwordConfig
 
@@ -108,15 +101,6 @@ fun Fields(
                 visualTransformation = visualTransformation,
                 copyToClipboardClicked = copyToClipboardClicked
             )
-            Button(onClick = { scanClicked(ScannerType.Password) }) {
-                Row {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_twotone_qr_code_scanner_24),
-                        contentDescription = ""
-                    )
-                    Text(text = stringResource(id = R.string.scan_password))
-                }
-            }
         }
 
         KeyPassInputField(

@@ -9,19 +9,7 @@
 
     <string name="generate_shortcut_short_label">Generate Password</string>
 
-    <string name="backup_restored">Backup Restored</string>
-    <string name="invalid_csv">Invalid CSV file</string>
-
-    <string name="invalid_keyphrase">Invalid Keyphrase</string>
-
-    <string name="backup_completed">Backup Completed</string>
-
     <!-- Sync Preferences -->
-    <string name="credentials_backups">Credentials Backups</string>
-    <string name="credentials_backups_desc">Backup Credentials to external storage</string>
-    <string name="backup_screen_desc">Securely back up your credentials to prevent data loss. Backups are encrypted with a keyphrase.</string>
-    <string name="restore_credentials">Import Credentials</string>
-    <string name="restore_credentials_desc">Restore your passwords from a backup</string>
     <string name="send_feedback">Send feedback</string>
     <string name="send_feedback_desc">Report technical issues or suggest new features</string>
     <string name="share">Share</string>
@@ -37,23 +25,16 @@
     <string name="copied_to_clipboard">Copied to clipboard</string>
     <string name="login_to_enter_keypass">Login to enter KeyPass</string>
 
-    <string name="last_backup_date">Last backup : %s</string>
     <string name="delete_account_title">Are you sure?</string>
     <string name="delete_account_msg">Do you really want to delete this entry, it can\'t be restored</string>
     <string name="cancel">Cancel</string>
     <string name="feedback_to_keypass">Feedback to KeyPass</string>
     <string name="share_keypass">Share KeyPass</string>
     <string name="message_no_accounts">No Accounts found, please add from below button</string>
-    <string name="turn_off_backup">Turn Off Backups</string>
-    <string name="backup_folder">Backup Folder</string>
-    <string name="turn_on_backup">Turn On Backups</string>
-    <string name="backup_desc">Backups are encrypted with a passphrase and stored on your device</string>
     <string name="yes">Yes</string>
-    <string name="create_backup">Create Backup</string>
     <string name="create_account">Create Account</string>
     <string name="edit_account">Edit Account</string>
     <string name="alert">Alert</string>
-    <string name="copy_keypharse_msg">Copy This Key Phrase this will be used to recover this backup, this will not be provided by KeyPass Again, have you copied or written down?</string>
     <string name="help">Help</string>
     <string name="security">Security</string>
     <string name="account_name">Account Name</string>
@@ -61,23 +42,9 @@
     <string name="tags_comma_separated_optional">Tags comma separated (optional)</string>
     <string name="website_url_optional">Website url (optional)</string>
     <string name="notes_optional">Notes (optional)</string>
-    <string name="auto_backup">Auto Backup</string>
     <string name="disabled">Disabled</string>
     <string name="enabled">Enabled</string>
-    <string name="override_auto_backup_file">Override Auto Backup File</string>
     <string name="alert_black_account_name">Please enter account name</string>
-    <string name="scan_password">Scan Password</string>
-    <string name="custom_keyphrase">Custom Keyphrase</string>
-    <string name="generate_keyphrase">Generate Keyphrase</string>
-    <string name="alert_blank_keyphrase">Please enter keyphrase</string>
-    <string name="alert_invalid_keyphrase">Please enter valid keyphrase</string>
-    <string name="set_keyphrase">Set Keyphrase</string>
-    <string name="set_keyphrase_info">Please create keyphrase for you backup file, this will be used to restore the backup file. keyphrase should be of 16 characters</string>
-    <string name="enter_keyphrase">Enter Keyphrase</string>
-    <string name="restore">Restore</string>
-    <string name="keyphrase_restore_info">Please enter keyphrase you get when you backed up</string>
-    <string name="keyphrase_validate_info">Please enter the keyphrase you used to create your backup. We will occasionally show this screen to help you remember it.</string>
-    <string name="custom_generated_keyphrase_info">Do you want to create your own keyphrase for backups or should I generate for you?</string>
 
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
@@ -90,7 +57,6 @@
     <string name="confirm_password_description">Please confirm your password to secure the app</string>
     <string name="incorrect_password">Incorrect Password</string>
     <string name="password_no_match">The password did not match</string>
-    <string name="auto_backup_desc">Your accounts will be backed up whenever account is added or modified</string>
     <string name="change_app_password">Change App Password</string>
     <string name="change_app_hint">Change Hint</string>
     <string name="remove_app_hint">Remove Hint</string>
@@ -118,26 +84,11 @@
     <string name="authentication_error">Authentication Error %s</string>
     <string name="change_password_length">Change password length</string>
     <string name="default_password_length">Default password length</string>
-    <string name="keypass_backup">KeyPass Backup</string>
-    <string name="google_backup">Chrome/Google Password Export</string>
-    <string name="keepass_backup">KeePass CSV Export</string>
-    <string name="keepass_backup_desc">Import passwords from a KeePass CSV file</string>
-    <string name="generate_qr_code">Export</string>
-    <string name="invalid_csv_file">Invalid CSV File</string>
-    <string name="file_not_found">File not found (please try again)</string>
     <string name="enter_password_hint">Enter password hint</string>
-    <string name="validate_keyphrase">Keyphrase Check</string>
     <string name="autofill_service">AutoFill Service</string>
     <string name="autofill_service_enable">Enable AutoFill Service</string>
     <string name="autofill_service_disable">Disable AutoFill Service</string>
     <string name="autofill_not_available">It is only available on android 10 and above</string>
-    <string name="forgot_keyphrase">Forgot Keyphrase</string>
-    <string name="forgot_keyphrase_question">Forgot Keyphrase?</string>
-    <string name="forgot_keyphrase_info">If you can\'t remember your keyphrase, the only way to regain access is to turn off backups and then turn them back on. This will generate a new backup file and a new keyphrase. \nNote: Your old backup will be inaccessible.</string>
-    <string name="valid_keyphrase">Valid Keyphrase</string>
-    <string name="mismatch_keyphrase">Entered Keyphrase does not match with backup keyphrase</string>
-    <string name="validate">Check</string>
-    <string name="got_it">Got it</string>
     <string name="biometric_disabled_due_to_timeout">Please login via password because you haven\'t used password in last 24 hours</string>
     <string name="invalid_package_signature">Invalid package signature</string>
     <string name="auto_lock">Auto Lock on background</string>
@@ -147,5 +98,3 @@
     <string name="choose_default_password_length_desc">This length will be used as default when generating new passwords. Longer passwords provide better security.</string>
 
 </resources>
-
-
