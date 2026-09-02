@@ -49,7 +49,7 @@
 - [x] **T030** Add Kotpass dependency using a pinned stable version.
 - [x] **T031** Create `Credential` application model if not already suitable.
 - [x] **T032** Create explicit KDBX ↔ `Credential` mapper.
-- [ ] **T033** Add mapper unit tests using representative values.
+- [x] **T033** Add mapper unit tests using representative values.
 - [ ] **T034** Implement `VaultRepository` interface.
 - [ ] **T035** Implement `KotpassVaultRepository`.
 - [ ] **T036** Add test fixture KDBX vaults where license-safe.
