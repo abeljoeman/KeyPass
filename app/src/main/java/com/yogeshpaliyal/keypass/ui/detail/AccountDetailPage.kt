@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -37,6 +38,10 @@ fun AccountDetailPage(
     // Set initial object
     LaunchedEffect(key1 = id) {
         viewModel.loadAccount(id)
+    }
+
+    DisposableEffect(viewModel) {
+        onDispose(viewModel::clearSensitiveState)
     }
 
     val goBack: () -> Unit = {

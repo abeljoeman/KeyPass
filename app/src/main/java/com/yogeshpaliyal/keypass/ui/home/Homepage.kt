@@ -13,9 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,7 @@ fun Homepage(
     val sortField = homeState.sortField
     val sortAscendingOrder = homeState.sortAscending
 
-    val listOfAccountsLiveData by mViewModel.mediator.observeAsState()
+    val listOfAccounts by mViewModel.accounts.collectAsState()
 
     val dispatchAction = rememberTypedDispatcher<Action>()
 
@@ -55,8 +56,12 @@ fun Homepage(
         mViewModel.queryUpdated(keyword, tag, sortField, sortAscendingOrder)
     })
 
-    LaunchedEffect(KeyPassRedux, mViewModel) {
+    DisposableEffect(KeyPassRedux, mViewModel) {
         dispatchAction(UpdateViewModalAction(mViewModel))
+        onDispose {
+            mViewModel.clearSensitiveState()
+            dispatchAction(UpdateViewModalAction(null))
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -98,6 +103,6 @@ fun Homepage(
             )
         }
 
-        AccountsList(listOfAccountsLiveData)
+        AccountsList(listOfAccounts)
     }
 }

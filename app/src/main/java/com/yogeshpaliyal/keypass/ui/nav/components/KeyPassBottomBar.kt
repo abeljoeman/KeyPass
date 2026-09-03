@@ -22,11 +22,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultBottomAppBar
+import com.yogeshpaliyal.keypass.ui.home.DashboardViewModel
 import com.yogeshpaliyal.keypass.ui.nav.BottomNavViewModel
 import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
+import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
 import com.yogeshpaliyal.keypass.ui.redux.actions.BottomSheetAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
+import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
@@ -42,6 +45,8 @@ import com.yogeshpaliyal.keypass.ui.redux.selectState
 @Composable
 fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
     val currentScreen: ScreenState by selectState<KeyPassState, ScreenState> { this.currentScreen }
+    val dashboardViewModel: DashboardViewModel? by
+        selectState<KeyPassState, DashboardViewModel?> { this.viewModel }
     val showMainBottomAppBar = currentScreen.showMainBottomAppBar
     val dispatchAction = rememberDispatcher()
     val vaultRepository = LocalVaultRepository.current
@@ -102,8 +107,14 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
         }
 
         IconButton(onClick = {
+            dashboardViewModel?.clearSensitiveState()
             vaultRepository.lock()
-            dispatchAction(NavigationAction(AuthState.Login, true))
+            dispatchAction(
+                BatchActions(
+                    UpdateViewModalAction(null),
+                    NavigationAction(AuthState.Login, true)
+                )
+            )
         }) {
             Icon(
                 painter = rememberVectorPainter(image = Icons.Outlined.Lock),
