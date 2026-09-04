@@ -1,6 +1,7 @@
 package com.yogeshpaliyal.keypass.ui.generate
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ class GeneratePasswordActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
             Mdc3Theme {
                 GeneratePasswordScreen(viewModel)

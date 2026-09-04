@@ -78,10 +78,7 @@ class DashboardComposeActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
-    if (BuildConfig.DEBUG.not()) {
-      window.setFlags(
-          WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
-    }
+    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
 
     setContent {
       val localUserSettings by getUserSettingsFlow().collectAsState(initial = UserSettings())

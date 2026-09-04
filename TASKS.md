@@ -93,7 +93,7 @@
 
 ## Phase 7 — Security Hardening for Prototype
 
-- [ ] **T070** Verify sensitive screens use secure-screen protection.
+- [x] **T070** Verify sensitive screens use secure-screen protection.
 - [ ] **T071** Audit logging statements for username/password/master-password leakage.
 - [ ] **T072** Review clipboard behavior.
 - [ ] **T073** Implement clipboard clearing if practical for target Android versions.
