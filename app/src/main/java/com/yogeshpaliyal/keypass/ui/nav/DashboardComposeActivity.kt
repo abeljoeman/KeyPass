@@ -34,6 +34,7 @@ import com.yogeshpaliyal.keypass.ui.auth.AuthScreen
 import com.yogeshpaliyal.keypass.ui.changeDefaultPasswordLength.ChangeDefaultPasswordLengthScreen
 import com.yogeshpaliyal.keypass.ui.detail.AccountDetailPage
 import com.yogeshpaliyal.keypass.ui.generate.ui.GeneratePasswordScreen
+import com.yogeshpaliyal.keypass.ui.home.DashboardViewModel
 import com.yogeshpaliyal.keypass.ui.home.Homepage
 import com.yogeshpaliyal.keypass.ui.nav.components.DashboardBottomSheet
 import com.yogeshpaliyal.keypass.ui.nav.components.KeyPassBottomBar
@@ -50,6 +51,7 @@ import com.yogeshpaliyal.keypass.ui.redux.states.ChangeDefaultPasswordLengthStat
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import com.yogeshpaliyal.keypass.ui.redux.states.KeyPassState
 import com.yogeshpaliyal.keypass.ui.redux.states.PasswordGeneratorState
+import com.yogeshpaliyal.keypass.ui.redux.states.ScreenState
 import com.yogeshpaliyal.keypass.ui.redux.states.SettingsState
 import com.yogeshpaliyal.keypass.ui.settings.MySettingCompose
 import com.yogeshpaliyal.keypass.ui.style.KeyPassTheme
@@ -111,19 +113,28 @@ class DashboardComposeActivity : AppCompatActivity() {
 @Composable
 fun Dashboard(viewModel: BottomNavViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
   val systemBackPress by selectState<KeyPassState, Boolean> { this.systemBackPress }
+  val currentScreen by selectState<KeyPassState, ScreenState> { this.currentScreen }
+  val dashboardViewModel by
+      selectState<KeyPassState, DashboardViewModel?> { this.viewModel }
 
   val context = LocalContext.current
   val userSettings = LocalUserSettings.current
+  val vaultRepository = LocalVaultRepository.current
   val dispatch = rememberDispatcher()
 
   BackHandler(!systemBackPress) { dispatch(GoBackAction) }
 
   // Call this like any other SideEffect in your composable
   LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
-    if (userSettings.autoLockEnabled == true &&
-        (context.applicationContext as? MyApplication)?.isKnownActivityLaunchTriggered() == false) {
-      dispatch(NavigationAction(AuthState.Login))
-    }
+    handleBackgroundAutoLock(
+        autoLockEnabled = userSettings.autoLockEnabled == true,
+        isUnlockedContext = currentScreen !is AuthState,
+        isKnownActivityLaunch = {
+          (context.applicationContext as? MyApplication)?.isKnownActivityLaunchTriggered() == true
+        },
+        clearDashboardSensitiveState = { dashboardViewModel?.clearSensitiveState() },
+        vaultRepository = vaultRepository,
+        dispatchAction = { action -> dispatch(action) })
   }
 
   LaunchedEffect(

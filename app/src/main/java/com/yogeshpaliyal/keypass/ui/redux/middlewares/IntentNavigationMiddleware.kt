@@ -36,7 +36,6 @@ private fun Store<KeyPassState>.handleAction(action: Any, state: KeyPassState) {
         }
 
         is IntentNavigation.ShareApp -> {
-            (state.context?.applicationContext as? MyApplication)?.knownActivityLaunchTriggered()
             val sendIntent = Intent()
             sendIntent.action = Intent.ACTION_SEND
             sendIntent.putExtra(
