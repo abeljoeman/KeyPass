@@ -6,8 +6,8 @@ import com.yogeshpaliyal.keypass.vault.Credential
 /**
  * Temporary presentation adapter while detail data still comes from the inherited Room model.
  *
- * The detail UI itself depends only on the prototype Credential model. Later CRUD tasks can
- * replace this boundary without changing the credential-detail composable.
+ * The detail and editor UI depend only on the prototype Credential model. Later CRUD tasks can
+ * replace this boundary without changing those composables.
  */
 internal fun AccountModel.toCredentialDetail(): Credential = Credential(
     id = id?.toString().orEmpty(),
@@ -16,4 +16,18 @@ internal fun AccountModel.toCredentialDetail(): Credential = Credential(
     password = password.orEmpty(),
     url = site,
     notes = notes
+)
+
+/**
+ * Copies only prototype credential fields back into the inherited model.
+ *
+ * Legacy metadata such as the Room id, unique id, tags, secret, and account type remain untouched
+ * until the persistence layer is replaced by the KDBX-backed repository.
+ */
+internal fun AccountModel.withCredentialDetail(credential: Credential): AccountModel = copy(
+    title = credential.title,
+    username = credential.username,
+    password = credential.password,
+    site = credential.url,
+    notes = credential.notes
 )

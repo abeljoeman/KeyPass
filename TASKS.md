@@ -74,7 +74,7 @@
 
 - [x] **T050 [P]** Adapt credential-list UI.
 - [x] **T051 [P]** Adapt credential-detail UI.
-- [ ] **T052 [P]** Adapt add/edit credential form.
+- [x] **T052 [P]** Adapt add/edit credential form.
 - [ ] **T053** Connect list UI to `VaultRepository`.
 - [ ] **T054** Implement create credential.
 - [ ] **T055** Implement edit credential.

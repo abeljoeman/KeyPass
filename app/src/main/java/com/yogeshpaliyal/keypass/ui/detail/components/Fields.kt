@@ -19,18 +19,19 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.common.utils.PasswordGenerator
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.commonComponents.KeyPassInputField
 import com.yogeshpaliyal.keypass.ui.commonComponents.PasswordTrailingIcon
 import com.yogeshpaliyal.keypass.ui.nav.LocalUserSettings
+import com.yogeshpaliyal.keypass.vault.Credential
 
 @Composable
 fun Fields(
     modifier: Modifier = Modifier,
-    accountModel: AccountModel,
-    updateAccountModel: (newAccountModel: AccountModel) -> Unit,
+    credential: Credential,
+    isNewCredential: Boolean,
+    updateCredential: (Credential) -> Unit,
     copyToClipboardClicked: (String) -> Unit
 ) {
     val passwordConfig = LocalUserSettings.current.passwordConfig
@@ -45,9 +46,9 @@ fun Fields(
         KeyPassInputField(
             modifier = Modifier.testTag("accountName"),
             placeholder = R.string.account_name,
-            value = accountModel.title,
+            value = credential.title,
             setValue = {
-                updateAccountModel(accountModel.copy(title = it))
+                updateCredential(credential.copy(title = it))
             },
             copyToClipboardClicked = copyToClipboardClicked
         )
@@ -55,9 +56,9 @@ fun Fields(
         KeyPassInputField(
             modifier = Modifier.testTag("username"),
             placeholder = R.string.username_email_phone,
-            value = accountModel.username,
+            value = credential.username,
             setValue = {
-                updateAccountModel(accountModel.copy(username = it))
+                updateCredential(credential.copy(username = it))
             },
             copyToClipboardClicked = copyToClipboardClicked
         )
@@ -71,32 +72,34 @@ fun Fields(
             KeyPassInputField(
                 modifier = Modifier.testTag("password"),
                 placeholder = R.string.password,
-                value = accountModel.password,
+                value = credential.password,
                 setValue = {
-                    updateAccountModel(accountModel.copy(password = it))
+                    updateCredential(credential.copy(password = it))
                 },
                 trailingIcon = {
                     PasswordTrailingIcon(passwordVisible.value) {
                         passwordVisible.value = it
                     }
                 },
-                leadingIcon = if (accountModel.id != null) {
-                    null
-                } else {
-                    (
-                        {
-                            IconButton(
-                                onClick = {
-                                    updateAccountModel(accountModel.copy(password = PasswordGenerator(passwordConfig).generatePassword()))
-                                }
-                            ) {
-                                Icon(
-                                    painter = rememberVectorPainter(image = Icons.Rounded.Refresh),
-                                    contentDescription = ""
+                leadingIcon = if (isNewCredential) {
+                    {
+                        IconButton(
+                            onClick = {
+                                updateCredential(
+                                    credential.copy(
+                                        password = PasswordGenerator(passwordConfig).generatePassword()
+                                    )
                                 )
                             }
+                        ) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Rounded.Refresh),
+                                contentDescription = ""
+                            )
                         }
-                        )
+                    }
+                } else {
+                    null
                 },
                 visualTransformation = visualTransformation,
                 copyToClipboardClicked = copyToClipboardClicked
@@ -104,21 +107,11 @@ fun Fields(
         }
 
         KeyPassInputField(
-            modifier = Modifier.testTag("tags"),
-            placeholder = R.string.tags_comma_separated_optional,
-            value = accountModel.tags,
-            setValue = {
-                updateAccountModel(accountModel.copy(tags = it))
-            },
-            copyToClipboardClicked = copyToClipboardClicked
-        )
-
-        KeyPassInputField(
             modifier = Modifier.testTag("website"),
             placeholder = R.string.website_url_optional,
-            value = accountModel.site,
+            value = credential.url,
             setValue = {
-                updateAccountModel(accountModel.copy(site = it))
+                updateCredential(credential.copy(url = it))
             },
             copyToClipboardClicked = copyToClipboardClicked
         )
@@ -126,9 +119,9 @@ fun Fields(
         KeyPassInputField(
             modifier = Modifier.testTag("notes"),
             placeholder = R.string.notes_optional,
-            value = accountModel.notes,
+            value = credential.notes,
             setValue = {
-                updateAccountModel(accountModel.copy(notes = it))
+                updateCredential(credential.copy(notes = it))
             },
             copyToClipboardClicked = copyToClipboardClicked
         )

@@ -39,7 +39,9 @@ fun AccountDetailPage(
 
     // task value state
     val accountModel = viewModel.accountModel.collectAsState().value
-    var showLegacyEditor by rememberSaveable(id) { mutableStateOf(id == null) }
+    val credential = accountModel.toCredentialDetail()
+    val isNewCredential = id == null
+    var showLegacyEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
 
     // Set initial object
     LaunchedEffect(key1 = id) {
@@ -57,9 +59,9 @@ fun AccountDetailPage(
         dispatchAction(CopyToClipboard(value))
     }
 
-    if (id != null && !showLegacyEditor) {
+    if (!isNewCredential && !showLegacyEditor) {
         CredentialDetail(
-            credential = accountModel.toCredentialDetail(),
+            credential = credential,
             onBack = goBack,
             onEdit = { showLegacyEditor = true },
             onDelete = {
@@ -73,7 +75,7 @@ fun AccountDetailPage(
     Scaffold(
         topBar = {
             BottomBar(
-                accountModel,
+                isNewCredential = isNewCredential,
                 backPressed = goBack,
                 onDeleteAccount = {
                     viewModel.deleteAccount(accountModel, goBack)
@@ -91,9 +93,12 @@ fun AccountDetailPage(
     ) { paddingValues ->
         Surface(modifier = Modifier.padding(paddingValues)) {
             Fields(
-                accountModel = accountModel,
-                updateAccountModel = { newAccountModel ->
-                    viewModel.setAccountModel(newAccountModel)
+                credential = credential,
+                isNewCredential = isNewCredential,
+                updateCredential = { updatedCredential ->
+                    viewModel.setAccountModel(
+                        accountModel.withCredentialDetail(updatedCredential)
+                    )
                 },
                 copyToClipboardClicked = copyToClipboard
             )

@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Done
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -20,13 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.keypass.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BottomBar(
-    accountModel: AccountModel,
+    isNewCredential: Boolean,
     backPressed: () -> Unit,
     onDeleteAccount: () -> Unit,
     openPasswordConfiguration: () -> Unit,
@@ -36,7 +34,7 @@ fun BottomBar(
     LargeFlexibleTopAppBar(
         title = {
             Text(
-                text = stringResource(if (accountModel.id == null) R.string.create_account else R.string.edit_account),
+                text = stringResource(if (isNewCredential) R.string.create_account else R.string.edit_account),
                 color = MaterialTheme.colorScheme.onSurface
             )
         },
@@ -62,7 +60,7 @@ fun BottomBar(
                 )
             }
 
-            if (accountModel.id != null) {
+            if (!isNewCredential) {
                 IconButton(
                     modifier = Modifier.testTag("action_delete"),
                     onClick = { openDialog.value = true }
