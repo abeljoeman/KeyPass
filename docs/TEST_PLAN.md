@@ -72,6 +72,19 @@ For each field type, include normal and long values.
 - [ ] Generated value can be inserted into credential.
 - [ ] Generated value is not visible in normal logs.
 
+### T063 static logging audit
+
+Source audit completed for the password-generation path at checkpoint `e68596f`:
+
+- `GeneratePasswordViewModel` generates into in-memory UI state and contains no logging calls.
+- `GeneratePasswordScreen` passes the generated value only to explicit copy/use callbacks and contains no logging calls.
+- `PasswordGenerator` returns the generated string and contains no logging calls.
+- `CopyTextToClipboard` writes only to the Android clipboard and contains no logging calls.
+
+Result: no application logging path for generated password values was found in the audited generator flow.
+
+This static verification does not replace the runtime Logcat checks in section 12; those remain part of the physical-device release test.
+
 ## 8. Lock Behavior
 
 - [ ] Manual lock works.
