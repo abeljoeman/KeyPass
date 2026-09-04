@@ -78,7 +78,7 @@
 - [x] **T053** Connect list UI to `VaultRepository`.
 - [x] **T054** Implement create credential.
 - [x] **T055** Implement edit credential.
-- [ ] **T056** Implement delete credential.
+- [x] **T056** Implement delete credential.
 - [ ] **T057** Verify every mutation persists after vault reopen.
 - [ ] **T058** Handle cancel/edit navigation without unintended writes.
 

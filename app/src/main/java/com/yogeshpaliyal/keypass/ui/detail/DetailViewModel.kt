@@ -72,6 +72,16 @@ class DetailViewModel internal constructor(
         onExecCompleted()
     }
 
+    fun deleteCredential(
+        id: String,
+        onExecCompleted: () -> Unit
+    ): Job = workScope.launch {
+        require(id.isNotBlank()) { "Credential ID is required for delete." }
+        vaultRepository.deleteCredential(id)
+        _credential.value = null
+        onExecCompleted()
+    }
+
     fun clearSensitiveState() {
         loadGeneration.incrementAndGet()
         loadJob?.cancel()

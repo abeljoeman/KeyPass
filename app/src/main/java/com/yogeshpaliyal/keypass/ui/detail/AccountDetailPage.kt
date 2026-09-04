@@ -66,7 +66,12 @@ fun AccountDetailPage(id: String?) {
             credential = credential,
             onBack = goBack,
             onEdit = { showEditor = true },
-            onDelete = null,
+            onDelete = {
+                viewModel.deleteCredential(
+                    id = credential.id,
+                    onExecCompleted = goBack
+                )
+            },
             onCopyToClipboard = copyToClipboard
         )
         return
@@ -77,7 +82,16 @@ fun AccountDetailPage(id: String?) {
             BottomBar(
                 isNewCredential = isNewCredential,
                 backPressed = goBack,
-                onDeleteAccount = null,
+                onDeleteAccount = if (isNewCredential) {
+                    null
+                } else {
+                    {
+                        viewModel.deleteCredential(
+                            id = credential.id,
+                            onExecCompleted = goBack
+                        )
+                    }
+                },
                 openPasswordConfiguration = {
                     dispatchAction(NavigationAction(PasswordGeneratorState()))
                 }

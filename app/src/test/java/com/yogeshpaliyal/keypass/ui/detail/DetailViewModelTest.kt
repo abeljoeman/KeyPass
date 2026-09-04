@@ -108,6 +108,40 @@ class DetailViewModelTest {
         }
     }
 
+
+    @Test
+    fun deleteCredentialDeletesSameVaultCredentialIdAndClearsState() = runBlocking {
+        var deletedId: String? = null
+        var completionCalled = false
+        val existing = credential(
+            id = "00000000-0000-0000-0000-000000000456",
+            title = "Delete me"
+        )
+        val repository = FakeVaultRepository(
+            listBlock = { listOf(existing) },
+            deleteBlock = { id ->
+                deletedId = id
+            }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+
+        try {
+            viewModel.loadCredential(existing.id).join()
+            assertEquals(existing, viewModel.credential.value)
+
+            viewModel.deleteCredential(existing.id) {
+                completionCalled = true
+            }.join()
+
+            assertEquals(existing.id, deletedId)
+            assertNull(viewModel.credential.value)
+            assertTrue(completionCalled)
+        } finally {
+            scope.cancel()
+        }
+    }
+
     @Test
     fun clearSensitiveStateRejectsInFlightVaultLoadResult() = runBlocking {
         val loadStarted = CountDownLatch(1)
@@ -170,7 +204,8 @@ class DetailViewModelTest {
     private class FakeVaultRepository(
         private val listBlock: suspend () -> List<Credential> = { error("Not used by DetailViewModelTest") },
         private val createBlock: suspend (Credential) -> Unit = { error("Not used by DetailViewModelTest") },
-        private val updateBlock: suspend (Credential) -> Unit = { error("Not used by DetailViewModelTest") }
+        private val updateBlock: suspend (Credential) -> Unit = { error("Not used by DetailViewModelTest") },
+        private val deleteBlock: suspend (String) -> Unit = { error("Not used by DetailViewModelTest") }
     ) : VaultRepository {
         override suspend fun createVault(masterPassword: CharArray) = unused()
         override suspend fun openVault(masterPassword: CharArray) = unused()
@@ -178,7 +213,7 @@ class DetailViewModelTest {
         override suspend fun listCredentials(): List<Credential> = listBlock()
         override suspend fun createCredential(credential: Credential) = createBlock(credential)
         override suspend fun updateCredential(credential: Credential) = updateBlock(credential)
-        override suspend fun deleteCredential(id: String) = unused()
+        override suspend fun deleteCredential(id: String) = deleteBlock(id)
         override suspend fun searchCredentials(query: String): List<Credential> = unused()
 
         private fun unused(): Nothing = error("Not used by DetailViewModelTest")
