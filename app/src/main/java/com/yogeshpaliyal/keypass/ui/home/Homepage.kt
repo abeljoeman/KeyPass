@@ -15,20 +15,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yogeshpaliyal.keypass.ui.home.components.CredentialsList
 import com.yogeshpaliyal.keypass.ui.home.components.SearchBar
+import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.redux.KeyPassRedux
 import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.StateUpdateAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
-import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
@@ -40,26 +41,24 @@ import org.reduxkotlin.compose.rememberTypedDispatcher
 */
 
 @Composable()
-fun Homepage(
-    mViewModel: DashboardViewModel = viewModel(),
-    homeState: HomeState
-) {
+fun Homepage(homeState: HomeState) {
     val tag = homeState.tag
     val keyword = homeState.keyword
     val sortField = homeState.sortField
     val sortAscendingOrder = homeState.sortAscending
 
-    val listOfAccounts by mViewModel.accounts.collectAsState()
-    val legacyAccountIdsByCredentialId = listOfAccounts.associateBy(
-        keySelector = { it.id?.toString().orEmpty() },
-        valueTransform = { it.id }
-    )
+    val vaultRepository = LocalVaultRepository.current
+    val viewModelFactory = remember(vaultRepository) {
+        DashboardViewModel.Factory(vaultRepository)
+    }
+    val mViewModel: DashboardViewModel = viewModel(factory = viewModelFactory)
+    val credentials by mViewModel.credentials.collectAsState()
 
     val dispatchAction = rememberTypedDispatcher<Action>()
 
-    LaunchedEffect(tag, keyword, sortField, sortAscendingOrder, block = {
-        mViewModel.queryUpdated(keyword, tag, sortField, sortAscendingOrder)
-    })
+    LaunchedEffect(sortField, sortAscendingOrder) {
+        mViewModel.loadCredentials(sortField, sortAscendingOrder)
+    }
 
     DisposableEffect(KeyPassRedux, mViewModel) {
         dispatchAction(UpdateViewModalAction(mViewModel))
@@ -108,13 +107,6 @@ fun Homepage(
             )
         }
 
-        CredentialsList(
-            credentials = listOfAccounts.map { it.toCredentialListItem() },
-            onCredentialClick = { credential ->
-                legacyAccountIdsByCredentialId[credential.id]?.let { accountId ->
-                    dispatchAction(NavigationAction(AccountDetailState(accountId)))
-                }
-            }
-        )
+        CredentialsList(credentials = credentials)
     }
 }
