@@ -45,6 +45,76 @@ class KotpassVaultRepositoryTest {
     }
 
     @Test
+    fun createCredential_persistsAfterVaultReopen() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val created = Credential(
+                id = "323e4567-e89b-12d3-a456-426614174002",
+                title = "Persisted Create",
+                username = "created-user",
+                password = "created-password",
+                url = "https://created.example.test",
+                notes = "Created before vault reopen"
+            )
+
+            val repository = openKnownVault(vaultFile)
+            repository.createCredential(created)
+            repository.lock()
+
+            val reopenedRepository = openKnownVault(vaultFile)
+            val persisted = reopenedRepository.listCredentials()
+                .firstOrNull { it.id == created.id }
+
+            assertEquals(created, persisted)
+            reopenedRepository.lock()
+        }
+    }
+
+    @Test
+    fun updateCredential_persistsAfterVaultReopen() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val credentialId = "123e4567-e89b-12d3-a456-426614174000"
+            val repository = openKnownVault(vaultFile)
+            val updated = repository.listCredentials()
+                .first { it.id == credentialId }
+                .copy(
+                    title = "Updated After Reopen",
+                    username = "updated-user",
+                    password = "updated-password",
+                    url = "https://updated.example.test",
+                    notes = "Updated before vault reopen"
+                )
+
+            repository.updateCredential(updated)
+            repository.lock()
+
+            val reopenedRepository = openKnownVault(vaultFile)
+            val persisted = reopenedRepository.listCredentials()
+                .firstOrNull { it.id == credentialId }
+
+            assertEquals(updated, persisted)
+            reopenedRepository.lock()
+        }
+    }
+
+    @Test
+    fun deleteCredential_persistsAfterVaultReopen() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val deletedId = "223e4567-e89b-12d3-a456-426614174001"
+            val repository = openKnownVault(vaultFile)
+
+            repository.deleteCredential(deletedId)
+            repository.lock()
+
+            val reopenedRepository = openKnownVault(vaultFile)
+            val credentials = reopenedRepository.listCredentials()
+
+            assertEquals(1, credentials.size)
+            assertTrue(credentials.none { it.id == deletedId })
+            reopenedRepository.lock()
+        }
+    }
+
+    @Test
     fun openVault_withWrongPassword_failsClosed() = runBlocking {
         withKnownVaultFixture { vaultFile ->
             val repository = KotpassVaultRepository(vaultFile)
@@ -62,6 +132,12 @@ class KotpassVaultRepositoryTest {
                 credentialAccess.exceptionOrNull() is IllegalStateException
             )
         }
+    }
+
+    private suspend fun openKnownVault(vaultFile: File): KotpassVaultRepository {
+        val repository = KotpassVaultRepository(vaultFile)
+        repository.openVault("test-password".toCharArray())
+        return repository
     }
 
     private suspend fun withKnownVaultFixture(block: suspend (File) -> Unit) {
