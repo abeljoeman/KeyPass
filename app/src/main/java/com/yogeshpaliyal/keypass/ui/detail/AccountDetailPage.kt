@@ -1,5 +1,6 @@
 package com.yogeshpaliyal.keypass.ui.detail
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -58,14 +59,25 @@ fun AccountDetailPage(id: String?) {
     val copyToClipboard: (String) -> Unit = { value ->
         dispatchAction(CopyToClipboard(value))
     }
+    val cancelEdit: () -> Unit = {
+        viewModel.cancelEdit()
+        showEditor = false
+    }
 
     val credential = credentialState ?: return
+
+    BackHandler(enabled = !isNewCredential && showEditor) {
+        cancelEdit()
+    }
 
     if (!isNewCredential && !showEditor) {
         CredentialDetail(
             credential = credential,
             onBack = goBack,
-            onEdit = { showEditor = true },
+            onEdit = {
+                viewModel.beginEdit()
+                showEditor = true
+            },
             onDelete = {
                 viewModel.deleteCredential(
                     id = credential.id,
@@ -81,7 +93,7 @@ fun AccountDetailPage(id: String?) {
         topBar = {
             BottomBar(
                 isNewCredential = isNewCredential,
-                backPressed = goBack,
+                backPressed = if (isNewCredential) goBack else cancelEdit,
                 onDeleteAccount = if (isNewCredential) {
                     null
                 } else {

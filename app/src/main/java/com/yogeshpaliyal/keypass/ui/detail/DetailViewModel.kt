@@ -29,6 +29,7 @@ class DetailViewModel internal constructor(
         get() = externalScope ?: viewModelScope
     private val loadGeneration = AtomicLong()
     private var loadJob: Job? = null
+    private var editBaseline: Credential? = null
 
     private val _credential = MutableStateFlow<Credential?>(null)
     val credential: StateFlow<Credential?> = _credential.asStateFlow()
@@ -44,13 +45,27 @@ class DetailViewModel internal constructor(
                     ?: throw NoSuchElementException("Credential does not exist.")
             }
             if (loadGeneration.get() == generation) {
+                editBaseline = null
                 _credential.value = result
             }
         }.also { loadJob = it }
     }
 
+    fun beginEdit() {
+        val current = checkNotNull(_credential.value) { "Credential is not loaded." }
+        require(current.id.isNotBlank()) { "Credential ID is required for edit." }
+        editBaseline = current
+    }
+
     fun setCredential(credential: Credential) {
         _credential.value = credential
+    }
+
+    fun cancelEdit() {
+        editBaseline?.let { baseline ->
+            _credential.value = baseline
+        }
+        editBaseline = null
     }
 
     fun createCredential(
@@ -69,6 +84,7 @@ class DetailViewModel internal constructor(
     ): Job = workScope.launch {
         require(credential.id.isNotBlank()) { "Credential ID is required for update." }
         vaultRepository.updateCredential(credential)
+        editBaseline = null
         onExecCompleted()
     }
 
@@ -78,6 +94,7 @@ class DetailViewModel internal constructor(
     ): Job = workScope.launch {
         require(id.isNotBlank()) { "Credential ID is required for delete." }
         vaultRepository.deleteCredential(id)
+        editBaseline = null
         _credential.value = null
         onExecCompleted()
     }
@@ -86,6 +103,7 @@ class DetailViewModel internal constructor(
         loadGeneration.incrementAndGet()
         loadJob?.cancel()
         loadJob = null
+        editBaseline = null
         _credential.value = null
     }
 

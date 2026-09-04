@@ -80,7 +80,7 @@
 - [x] **T055** Implement edit credential.
 - [x] **T056** Implement delete credential.
 - [x] **T057** Verify every mutation persists after vault reopen.
-- [ ] **T058** Handle cancel/edit navigation without unintended writes.
+- [x] **T058** Handle cancel/edit navigation without unintended writes.
 
 **Checkpoint:** full CRUD persists through KDBX.
 

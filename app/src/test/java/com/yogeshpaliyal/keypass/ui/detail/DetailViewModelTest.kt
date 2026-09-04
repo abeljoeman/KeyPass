@@ -41,6 +41,64 @@ class DetailViewModelTest {
     }
 
     @Test
+    fun cancelEditRestoresLoadedCredentialWithoutVaultMutation() = runBlocking {
+        val original = credential(
+            id = "00000000-0000-0000-0000-000000000111",
+            title = "Original",
+            username = "original-user",
+            password = "original-password"
+        )
+        val repository = FakeVaultRepository(
+            listBlock = { listOf(original) }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+
+        try {
+            viewModel.loadCredential(original.id).join()
+            viewModel.beginEdit()
+            viewModel.setCredential(
+                original.copy(
+                    title = "Unsaved",
+                    username = "unsaved-user",
+                    password = "unsaved-password"
+                )
+            )
+
+            viewModel.cancelEdit()
+
+            assertEquals(original, viewModel.credential.value)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun clearingNewCredentialDraftDoesNotWriteVault() = runBlocking {
+        val repository = FakeVaultRepository()
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+
+        try {
+            viewModel.loadCredential(null).join()
+            viewModel.setCredential(
+                credential(
+                    id = "",
+                    title = "Unsaved new credential",
+                    username = "draft-user",
+                    password = "draft-password"
+                )
+            )
+
+            viewModel.clearSensitiveState()
+
+            assertNull(viewModel.credential.value)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun createCredentialWritesPrototypeCredentialToVault() = runBlocking {
         var createdCredential: Credential? = null
         var completionCalled = false
