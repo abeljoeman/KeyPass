@@ -21,13 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.yogeshpaliyal.keypass.ui.home.components.AccountsList
+import com.yogeshpaliyal.keypass.ui.home.components.CredentialsList
 import com.yogeshpaliyal.keypass.ui.home.components.SearchBar
 import com.yogeshpaliyal.keypass.ui.redux.KeyPassRedux
 import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.StateUpdateAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
+import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
@@ -49,6 +50,10 @@ fun Homepage(
     val sortAscendingOrder = homeState.sortAscending
 
     val listOfAccounts by mViewModel.accounts.collectAsState()
+    val legacyAccountIdsByCredentialId = listOfAccounts.associateBy(
+        keySelector = { it.id?.toString().orEmpty() },
+        valueTransform = { it.id }
+    )
 
     val dispatchAction = rememberTypedDispatcher<Action>()
 
@@ -103,6 +108,13 @@ fun Homepage(
             )
         }
 
-        AccountsList(listOfAccounts)
+        CredentialsList(
+            credentials = listOfAccounts.map { it.toCredentialListItem() },
+            onCredentialClick = { credential ->
+                legacyAccountIdsByCredentialId[credential.id]?.let { accountId ->
+                    dispatchAction(NavigationAction(AccountDetailState(accountId)))
+                }
+            }
+        )
     }
 }

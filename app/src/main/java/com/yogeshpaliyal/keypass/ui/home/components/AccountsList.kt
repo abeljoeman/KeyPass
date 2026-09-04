@@ -18,51 +18,41 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.keypass.R
-import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
-import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
-import org.reduxkotlin.compose.rememberDispatcher
+import com.yogeshpaliyal.keypass.vault.Credential
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
 @Composable
-fun AccountsList(accounts: List<AccountModel>? = null) {
-    val dispatch = rememberDispatcher()
-
-    if (accounts?.isNotEmpty() == true) {
-        AnimatedContent(targetState = accounts) {
+fun CredentialsList(
+    credentials: List<Credential> = emptyList(),
+    onCredentialClick: (Credential) -> Unit = {}
+) {
+    if (credentials.isNotEmpty()) {
+        AnimatedContent(targetState = credentials, label = "credential-list") {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(it) { account ->
-                    Account(
+                items(it, key = Credential::id) { credential ->
+                    CredentialListItem(
                         modifier = Modifier,
-                        account,
-                        onClick = {
-                            dispatch(NavigationAction(AccountDetailState(it.id)))
-                        }
+                        credential = credential,
+                        onClick = onCredentialClick
                     )
                 }
                 item {
@@ -76,17 +66,15 @@ fun AccountsList(accounts: List<AccountModel>? = null) {
 }
 
 @Composable
-fun Account(
+fun CredentialListItem(
     modifier: Modifier,
-    accountModel: AccountModel,
-    onClick: (AccountModel) -> Unit
+    credential: Credential,
+    onClick: (Credential) -> Unit
 ) {
-    val dispatch = rememberDispatcher()
-
     Card(
         modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        onClick = { onClick(accountModel) }
+        onClick = { onClick(credential) }
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
             Box(
@@ -100,7 +88,7 @@ fun Account(
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
-                    text = accountModel.getInitials(),
+                    text = credential.getInitials(),
                     textAlign = TextAlign.Center
                 )
             }
@@ -112,7 +100,7 @@ fun Account(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = accountModel.title ?: "",
+                    text = credential.title,
                     style = MaterialTheme.typography.headlineSmall.merge(
                         TextStyle(
                             fontSize = 16.sp
@@ -120,26 +108,16 @@ fun Account(
                     )
                 )
 
-                RenderUserName(accountModel)
-            }
-
-            IconButton(
-                modifier = Modifier.align(Alignment.CenterVertically),
-                onClick = { dispatch(CopyToClipboard(getPassword(accountModel))) }
-            ) {
-                Icon(
-                    painter = rememberVectorPainter(image = Icons.TwoTone.ContentCopy),
-                    contentDescription = "Copy To Clipboard"
-                )
+                RenderUserName(credential)
             }
         }
     }
 }
 
 @Composable
-fun RenderUserName(accountModel: AccountModel) {
+fun RenderUserName(credential: Credential) {
     Text(
-        text = accountModel.username ?: "",
+        text = credential.username,
         style = MaterialTheme.typography.bodyMedium.merge(
             TextStyle(
                 fontSize = 14.sp
@@ -176,6 +154,4 @@ fun NoDataFound() {
     }
 }
 
-private fun getPassword(model: AccountModel): String {
-    return model.password.orEmpty()
-}
+private fun Credential.getInitials() = (title.firstOrNull() ?: username.firstOrNull() ?: 'K').toString()
