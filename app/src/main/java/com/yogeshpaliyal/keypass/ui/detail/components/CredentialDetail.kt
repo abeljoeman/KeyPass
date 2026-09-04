@@ -43,7 +43,7 @@ fun CredentialDetail(
     credential: Credential,
     onBack: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit,
+    onDelete: (() -> Unit)?,
     onCopyToClipboard: (String) -> Unit
 ) {
     var passwordVisible by rememberSaveable(credential.id) { mutableStateOf(false) }
@@ -76,11 +76,13 @@ fun CredentialDetail(
                             contentDescription = stringResource(R.string.edit_account)
                         )
                     }
-                    IconButton(onClick = { deleteConfirmationVisible = true }) {
-                        Icon(
-                            painter = rememberVectorPainter(image = Icons.Rounded.Delete),
-                            contentDescription = stringResource(R.string.delete)
-                        )
+                    if (onDelete != null) {
+                        IconButton(onClick = { deleteConfirmationVisible = true }) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Rounded.Delete),
+                                contentDescription = stringResource(R.string.delete)
+                            )
+                        }
                     }
                 }
             )
@@ -126,11 +128,13 @@ fun CredentialDetail(
         }
     }
 
-    DeleteConfirmation(
-        openDialog = deleteConfirmationVisible,
-        updateDialogVisibility = { deleteConfirmationVisible = it },
-        onDelete = onDelete
-    )
+    if (onDelete != null) {
+        DeleteConfirmation(
+            openDialog = deleteConfirmationVisible,
+            updateDialogVisibility = { deleteConfirmationVisible = it },
+            onDelete = onDelete
+        )
+    }
 }
 
 @Composable

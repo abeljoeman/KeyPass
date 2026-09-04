@@ -30,6 +30,7 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.StateUpdateAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
+import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
@@ -107,6 +108,11 @@ fun Homepage(homeState: HomeState) {
             )
         }
 
-        CredentialsList(credentials = credentials)
+        CredentialsList(
+            credentials = credentials,
+            onCredentialClick = { credential ->
+                dispatchAction(NavigationAction(AccountDetailState(credential.id)))
+            }
+        )
     }
 }

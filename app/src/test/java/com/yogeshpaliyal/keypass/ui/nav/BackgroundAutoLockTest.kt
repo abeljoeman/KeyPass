@@ -75,7 +75,7 @@ class BackgroundAutoLockTest {
         val store = KeyPassRedux.createStore()
         store.dispatch(NavigationAction(AuthState.Login, clearBackStack = true))
         store.dispatch(NavigationAction(HomeState()))
-        store.dispatch(NavigationAction(AccountDetailState(accountId = 1L)))
+        store.dispatch(NavigationAction(AccountDetailState(accountId = "00000000-0000-0000-0000-000000000001")))
 
         handleBackgroundAutoLock(
             autoLockEnabled = true,

@@ -1,10 +1,7 @@
 package com.yogeshpaliyal.keypass.ui.detail
 
-import com.yogeshpaliyal.common.data.AccountModel
-import com.yogeshpaliyal.common.db.DbDao
 import com.yogeshpaliyal.keypass.vault.Credential
 import com.yogeshpaliyal.keypass.vault.VaultRepository
-import java.lang.reflect.Proxy
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -22,15 +19,39 @@ import org.junit.Test
 class DetailViewModelTest {
 
     @Test
+    fun loadCredentialReadsRequestedVaultCredential() = runBlocking {
+        val expected = credential(id = "credential-2", title = "Second")
+        val repository = FakeVaultRepository(
+            listBlock = {
+                listOf(
+                    credential(id = "credential-1", title = "First"),
+                    expected
+                )
+            }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+
+        try {
+            viewModel.loadCredential(expected.id).join()
+            assertEquals(expected, viewModel.credential.value)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
     fun createCredentialWritesPrototypeCredentialToVault() = runBlocking {
         var createdCredential: Credential? = null
         var completionCalled = false
-        val repository = FakeVaultRepository { credential ->
-            createdCredential = credential
-        }
+        val repository = FakeVaultRepository(
+            createBlock = { credential ->
+                createdCredential = credential
+            }
+        )
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        val viewModel = DetailViewModel(fakeDao { null }, scope)
-        val draft = Credential(
+        val viewModel = DetailViewModel(repository, scope)
+        val draft = credential(
             id = "",
             title = "Example Account",
             username = "alice@example.com",
@@ -40,7 +61,7 @@ class DetailViewModelTest {
         )
 
         try {
-            viewModel.createCredential(repository, draft) {
+            viewModel.createCredential(draft) {
                 completionCalled = true
             }.join()
 
@@ -59,62 +80,104 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun clearSensitiveStateRejectsInFlightLoadResult() = runBlocking {
+    fun updateCredentialWritesSameVaultCredentialId() = runBlocking {
+        var updatedCredential: Credential? = null
+        var completionCalled = false
+        val repository = FakeVaultRepository(
+            updateBlock = { credential ->
+                updatedCredential = credential
+            }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+        val edited = credential(
+            id = "00000000-0000-0000-0000-000000000123",
+            title = "Updated",
+            username = "updated-user"
+        )
+
+        try {
+            viewModel.updateCredential(edited) {
+                completionCalled = true
+            }.join()
+
+            assertEquals(edited, updatedCredential)
+            assertTrue(completionCalled)
+        } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun clearSensitiveStateRejectsInFlightVaultLoadResult() = runBlocking {
         val loadStarted = CountDownLatch(1)
         val releaseLoad = CountDownLatch(1)
-        val sensitiveAccount = AccountModel(id = 1, username = "user", password = "secret")
+        val sensitiveCredential = credential(
+            id = "credential-id",
+            title = "Account",
+            username = "user",
+            password = "secret"
+        )
         var loadCount = 0
-        val dao = fakeDao { methodName ->
-            if (methodName == "getAccount") {
+        val repository = FakeVaultRepository(
+            listBlock = {
                 loadCount++
                 if (loadCount == 2) {
                     loadStarted.countDown()
                     assertTrue(releaseLoad.await(5, TimeUnit.SECONDS))
                 }
-                sensitiveAccount
-            } else {
-                null
+                listOf(sensitiveCredential)
             }
-        }
+        )
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        val viewModel = DetailViewModel(dao, scope)
+        val viewModel = DetailViewModel(repository, scope)
 
         try {
-            viewModel.loadAccount(sensitiveAccount.id).join()
-            assertEquals(sensitiveAccount, viewModel.accountModel.value)
+            viewModel.loadCredential(sensitiveCredential.id).join()
+            assertEquals(sensitiveCredential, viewModel.credential.value)
 
-            val staleLoad = viewModel.loadAccount(sensitiveAccount.id)
+            val staleLoad = viewModel.loadCredential(sensitiveCredential.id)
             assertTrue(loadStarted.await(5, TimeUnit.SECONDS))
 
             viewModel.clearSensitiveState()
-            assertNull(viewModel.accountModel.value.username)
-            assertNull(viewModel.accountModel.value.password)
+            assertNull(viewModel.credential.value)
 
             releaseLoad.countDown()
             staleLoad.join()
-            assertNull(viewModel.accountModel.value.username)
-            assertNull(viewModel.accountModel.value.password)
+            assertNull(viewModel.credential.value)
         } finally {
             releaseLoad.countDown()
             scope.cancel()
         }
     }
 
-    private fun fakeDao(result: (String) -> Any?): DbDao =
-        Proxy.newProxyInstance(
-            DbDao::class.java.classLoader,
-            arrayOf(DbDao::class.java)
-        ) { _, method, _ -> result(method.name) } as DbDao
+    private fun credential(
+        id: String,
+        title: String,
+        username: String = "user",
+        password: String = "password",
+        url: String? = null,
+        notes: String? = null
+    ) = Credential(
+        id = id,
+        title = title,
+        username = username,
+        password = password,
+        url = url,
+        notes = notes
+    )
 
     private class FakeVaultRepository(
-        private val onCreate: suspend (Credential) -> Unit
+        private val listBlock: suspend () -> List<Credential> = { error("Not used by DetailViewModelTest") },
+        private val createBlock: suspend (Credential) -> Unit = { error("Not used by DetailViewModelTest") },
+        private val updateBlock: suspend (Credential) -> Unit = { error("Not used by DetailViewModelTest") }
     ) : VaultRepository {
         override suspend fun createVault(masterPassword: CharArray) = unused()
         override suspend fun openVault(masterPassword: CharArray) = unused()
         override fun lock() = Unit
-        override suspend fun listCredentials(): List<Credential> = unused()
-        override suspend fun createCredential(credential: Credential) = onCreate(credential)
-        override suspend fun updateCredential(credential: Credential) = unused()
+        override suspend fun listCredentials(): List<Credential> = listBlock()
+        override suspend fun createCredential(credential: Credential) = createBlock(credential)
+        override suspend fun updateCredential(credential: Credential) = updateBlock(credential)
         override suspend fun deleteCredential(id: String) = unused()
         override suspend fun searchCredentials(query: String): List<Credential> = unused()
 

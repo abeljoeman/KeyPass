@@ -26,7 +26,7 @@ import com.yogeshpaliyal.keypass.R
 fun BottomBar(
     isNewCredential: Boolean,
     backPressed: () -> Unit,
-    onDeleteAccount: () -> Unit,
+    onDeleteAccount: (() -> Unit)?,
     openPasswordConfiguration: () -> Unit,
 ) {
     val openDialog = remember { mutableStateOf(false) }
@@ -60,7 +60,7 @@ fun BottomBar(
                 )
             }
 
-            if (!isNewCredential) {
+            if (!isNewCredential && onDeleteAccount != null) {
                 IconButton(
                     modifier = Modifier.testTag("action_delete"),
                     onClick = { openDialog.value = true }
@@ -75,13 +75,15 @@ fun BottomBar(
         }
     )
 
-    DeleteConfirmation(
-        openDialog.value,
-        updateDialogVisibility = {
-            openDialog.value = it
-        },
-        onDeleteAccount
-    )
+    if (onDeleteAccount != null) {
+        DeleteConfirmation(
+            openDialog.value,
+            updateDialogVisibility = {
+                openDialog.value = it
+            },
+            onDeleteAccount
+        )
+    }
 }
 
 @Composable

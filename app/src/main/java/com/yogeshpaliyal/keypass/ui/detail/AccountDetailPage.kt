@@ -9,10 +9,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
 import com.yogeshpaliyal.keypass.ui.detail.components.CredentialDetail
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
@@ -32,22 +33,19 @@ import org.reduxkotlin.compose.rememberDispatcher
 */
 
 @Composable
-fun AccountDetailPage(
-    id: Long?,
-    viewModel: DetailViewModel = hiltViewModel()
-) {
+fun AccountDetailPage(id: String?) {
     val dispatchAction = rememberDispatcher()
     val vaultRepository = LocalVaultRepository.current
-
-    // task value state
-    val accountModel = viewModel.accountModel.collectAsState().value
-    val credential = accountModel.toCredentialDetail()
+    val viewModelFactory = remember(vaultRepository) {
+        DetailViewModel.Factory(vaultRepository)
+    }
+    val viewModel: DetailViewModel = viewModel(factory = viewModelFactory)
+    val credentialState by viewModel.credential.collectAsState()
     val isNewCredential = id == null
-    var showLegacyEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
+    var showEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
 
-    // Set initial object
     LaunchedEffect(key1 = id) {
-        viewModel.loadAccount(id)
+        viewModel.loadCredential(id)
     }
 
     DisposableEffect(viewModel) {
@@ -61,14 +59,14 @@ fun AccountDetailPage(
         dispatchAction(CopyToClipboard(value))
     }
 
-    if (!isNewCredential && !showLegacyEditor) {
+    val credential = credentialState ?: return
+
+    if (!isNewCredential && !showEditor) {
         CredentialDetail(
             credential = credential,
             onBack = goBack,
-            onEdit = { showLegacyEditor = true },
-            onDelete = {
-                viewModel.deleteAccount(accountModel, goBack)
-            },
+            onEdit = { showEditor = true },
+            onDelete = null,
             onCopyToClipboard = copyToClipboard
         )
         return
@@ -79,9 +77,7 @@ fun AccountDetailPage(
             BottomBar(
                 isNewCredential = isNewCredential,
                 backPressed = goBack,
-                onDeleteAccount = {
-                    viewModel.deleteAccount(accountModel, goBack)
-                },
+                onDeleteAccount = null,
                 openPasswordConfiguration = {
                     dispatchAction(NavigationAction(PasswordGeneratorState()))
                 }
@@ -91,12 +87,14 @@ fun AccountDetailPage(
             FABAddAccount {
                 if (isNewCredential) {
                     viewModel.createCredential(
-                        vaultRepository = vaultRepository,
                         credential = credential,
                         onExecCompleted = goBack
                     )
                 } else {
-                    viewModel.insertOrUpdate(accountModel, goBack)
+                    viewModel.updateCredential(
+                        credential = credential,
+                        onExecCompleted = goBack
+                    )
                 }
             }
         }
@@ -105,11 +103,7 @@ fun AccountDetailPage(
             Fields(
                 credential = credential,
                 isNewCredential = isNewCredential,
-                updateCredential = { updatedCredential ->
-                    viewModel.setAccountModel(
-                        accountModel.withCredentialDetail(updatedCredential)
-                    )
-                },
+                updateCredential = viewModel::setCredential,
                 copyToClipboardClicked = copyToClipboard
             )
         }
