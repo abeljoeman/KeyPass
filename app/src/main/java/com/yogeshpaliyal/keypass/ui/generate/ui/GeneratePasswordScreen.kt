@@ -2,7 +2,9 @@ package com.yogeshpaliyal.keypass.ui.generate.ui
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -13,7 +15,11 @@ import com.yogeshpaliyal.keypass.ui.generate.GeneratePasswordViewModel
 import com.yogeshpaliyal.keypass.ui.generate.ui.utils.copyTextToClipboard
 
 @Composable
-fun GeneratePasswordScreen(viewModel: GeneratePasswordViewModel = hiltViewModel()) {
+fun GeneratePasswordScreen(
+    viewModel: GeneratePasswordViewModel = hiltViewModel(),
+    onUsePassword: ((String) -> Unit)? = null,
+    onBack: (() -> Unit)? = null
+) {
     val context = LocalContext.current
 
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -22,10 +28,21 @@ fun GeneratePasswordScreen(viewModel: GeneratePasswordViewModel = hiltViewModel(
         viewModel.retrieveSavedPasswordConfig(context)
     }
 
+    DisposableEffect(viewModel) {
+        onDispose(viewModel::clearGeneratedPassword)
+    }
+
+    if (onBack != null) {
+        BackHandler(onBack = onBack)
+    }
+
     GeneratePasswordContent(
         viewState = viewState,
         onGeneratePasswordClick = viewModel::generatePassword,
         onCopyPasswordClick = { onCopyPasswordClick(context, viewState.password) },
+        onUsePasswordClick = onUsePassword?.let { usePassword ->
+            { usePassword(viewState.password) }
+        },
         onPasswordLengthChange = viewModel::onPasswordLengthSliderChange,
         onUppercaseCheckedChange = viewModel::onUppercaseCheckedChange,
         onLowercaseCheckedChange = viewModel::onLowercaseCheckedChange,

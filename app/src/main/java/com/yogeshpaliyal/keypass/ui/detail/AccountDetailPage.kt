@@ -19,11 +19,10 @@ import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
 import com.yogeshpaliyal.keypass.ui.detail.components.CredentialDetail
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
 import com.yogeshpaliyal.keypass.ui.detail.components.Fields
+import com.yogeshpaliyal.keypass.ui.generate.ui.GeneratePasswordScreen
 import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.states.PasswordGeneratorState
 import org.reduxkotlin.compose.rememberDispatcher
 
 /*
@@ -44,6 +43,7 @@ fun AccountDetailPage(id: String?) {
     val credentialState by viewModel.credential.collectAsState()
     val isNewCredential = id == null
     var showEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
+    var showPasswordGenerator by rememberSaveable(id) { mutableStateOf(false) }
 
     LaunchedEffect(key1 = id) {
         viewModel.loadCredential(id)
@@ -65,6 +65,19 @@ fun AccountDetailPage(id: String?) {
     }
 
     val credential = credentialState ?: return
+
+    if (showPasswordGenerator) {
+        GeneratePasswordScreen(
+            onUsePassword = { generatedPassword ->
+                viewModel.setCredential(credential.copy(password = generatedPassword))
+                showPasswordGenerator = false
+            },
+            onBack = {
+                showPasswordGenerator = false
+            }
+        )
+        return
+    }
 
     BackHandler(enabled = !isNewCredential && showEditor) {
         cancelEdit()
@@ -105,7 +118,7 @@ fun AccountDetailPage(id: String?) {
                     }
                 },
                 openPasswordConfiguration = {
-                    dispatchAction(NavigationAction(PasswordGeneratorState()))
+                    showPasswordGenerator = true
                 }
             )
         },

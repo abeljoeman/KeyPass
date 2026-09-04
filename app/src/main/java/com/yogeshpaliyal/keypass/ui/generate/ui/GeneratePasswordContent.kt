@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,6 +38,7 @@ fun GeneratePasswordContent(
     viewState: PasswordConfig,
     onCopyPasswordClick: () -> Unit,
     onGeneratePasswordClick: () -> Unit,
+    onUsePasswordClick: (() -> Unit)? = null,
     onPasswordLengthChange: (Float) -> Unit,
     onUppercaseCheckedChange: (Boolean) -> Unit,
     onLowercaseCheckedChange: (Boolean) -> Unit,
@@ -57,6 +59,7 @@ fun GeneratePasswordContent(
             FormInputCard(
                 viewState = viewState,
                 onCopyPasswordClick = onCopyPasswordClick,
+                onUsePasswordClick = onUsePasswordClick,
                 onPasswordLengthChange = onPasswordLengthChange,
                 onUppercaseCheckedChange = onUppercaseCheckedChange,
                 onLowercaseCheckedChange = onLowercaseCheckedChange,
@@ -86,6 +89,7 @@ private fun GeneratePasswordFab(onGeneratePasswordClick: () -> Unit) {
 private fun FormInputCard(
     viewState: PasswordConfig,
     onCopyPasswordClick: () -> Unit,
+    onUsePasswordClick: (() -> Unit)?,
     onPasswordLengthChange: (Float) -> Unit,
     onUppercaseCheckedChange: (Boolean) -> Unit,
     onLowercaseCheckedChange: (Boolean) -> Unit,
@@ -105,6 +109,16 @@ private fun FormInputCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             PasswordTextField(viewState.password, onCopyPasswordClick)
+
+            if (onUsePasswordClick != null) {
+                Button(
+                    onClick = onUsePasswordClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = viewState.password.isNotBlank()
+                ) {
+                    Text(text = "Use password")
+                }
+            }
 
             // temporary label until we put slider label on the thumb to display current value.
             PasswordLengthInput(viewState.length, onPasswordLengthChange)

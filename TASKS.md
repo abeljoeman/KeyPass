@@ -87,7 +87,7 @@
 ## Phase 6 — Search and Password Generator
 
 - [x] **T060 [P]** Reuse/adapt existing search behavior.
-- [ ] **T061 [P]** Reuse/adapt existing password generator.
+- [x] **T061 [P]** Reuse/adapt existing password generator.
 - [ ] **T062** Add search tests.
 - [ ] **T063** Verify password generator does not log generated values.
 

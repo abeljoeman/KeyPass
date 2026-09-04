@@ -34,7 +34,7 @@ class GeneratePasswordViewModel @Inject constructor(
         viewModelScope.launch {
             val passwordConfig = context.getUserSettings().passwordConfig
             _viewState.update {
-                passwordConfig
+                passwordConfig.copy(password = "")
             }
         }
     }
@@ -49,6 +49,12 @@ class GeneratePasswordViewModel @Inject constructor(
         _viewState.update {
             val newPassword = passwordGenerator.generatePassword()
             it.copy(password = newPassword)
+        }
+    }
+
+    fun clearGeneratedPassword() {
+        _viewState.update {
+            it.copy(password = "")
         }
     }
 
@@ -127,7 +133,7 @@ class GeneratePasswordViewModel @Inject constructor(
             _viewState
                 .debounce(400)
                 .collectLatest { state ->
-                    context.setPasswordConfig(state)
+                    context.setPasswordConfig(state.copy(password = ""))
                 }
         }
     }
