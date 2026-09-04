@@ -5,7 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.yogeshpaliyal.common.AppDatabase
 import com.yogeshpaliyal.common.data.AccountModel
 import com.yogeshpaliyal.common.db.DbDao
+import com.yogeshpaliyal.keypass.vault.Credential
+import com.yogeshpaliyal.keypass.vault.VaultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +61,17 @@ class DetailViewModel private constructor(
 
     fun setAccountModel(accountModel: AccountModel) {
         _accountModel.value = accountModel
+    }
+
+    fun createCredential(
+        vaultRepository: VaultRepository,
+        credential: Credential,
+        onExecCompleted: () -> Unit
+    ): Job = workScope.launch {
+        vaultRepository.createCredential(
+            credential.copy(id = UUID.randomUUID().toString())
+        )
+        onExecCompleted()
     }
 
     fun clearSensitiveState() {

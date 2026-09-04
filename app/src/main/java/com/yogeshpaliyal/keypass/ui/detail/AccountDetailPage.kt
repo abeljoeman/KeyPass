@@ -17,6 +17,7 @@ import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
 import com.yogeshpaliyal.keypass.ui.detail.components.CredentialDetail
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
 import com.yogeshpaliyal.keypass.ui.detail.components.Fields
+import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
@@ -36,6 +37,7 @@ fun AccountDetailPage(
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val dispatchAction = rememberDispatcher()
+    val vaultRepository = LocalVaultRepository.current
 
     // task value state
     val accountModel = viewModel.accountModel.collectAsState().value
@@ -87,7 +89,15 @@ fun AccountDetailPage(
         },
         floatingActionButton = {
             FABAddAccount {
-                viewModel.insertOrUpdate(accountModel, goBack)
+                if (isNewCredential) {
+                    viewModel.createCredential(
+                        vaultRepository = vaultRepository,
+                        credential = credential,
+                        onExecCompleted = goBack
+                    )
+                } else {
+                    viewModel.insertOrUpdate(accountModel, goBack)
+                }
             }
         }
     ) { paddingValues ->

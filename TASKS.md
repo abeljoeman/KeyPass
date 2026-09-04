@@ -76,7 +76,7 @@
 - [x] **T051 [P]** Adapt credential-detail UI.
 - [x] **T052 [P]** Adapt add/edit credential form.
 - [x] **T053** Connect list UI to `VaultRepository`.
-- [ ] **T054** Implement create credential.
+- [x] **T054** Implement create credential.
 - [ ] **T055** Implement edit credential.
 - [ ] **T056** Implement delete credential.
 - [ ] **T057** Verify every mutation persists after vault reopen.
