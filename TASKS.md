@@ -66,7 +66,7 @@
 - [x] **T043** Ensure master password is not persisted in plaintext.
 - [x] **T044** Clear accessible decrypted application state on lock.
 - [x] **T045** Implement simple background/timeout lock behavior.
-- [ ] **T046** Verify vault reopens correctly after process/app restart.
+- [x] **T046** Verify vault reopens correctly after process/app restart.
 
 **Checkpoint:** vault lifecycle works end-to-end.
 
