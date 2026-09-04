@@ -57,8 +57,8 @@ fun Homepage(homeState: HomeState) {
 
     val dispatchAction = rememberTypedDispatcher<Action>()
 
-    LaunchedEffect(sortField, sortAscendingOrder) {
-        mViewModel.loadCredentials(sortField, sortAscendingOrder)
+    LaunchedEffect(keyword, sortField, sortAscendingOrder) {
+        mViewModel.loadCredentials(sortField, sortAscendingOrder, keyword)
     }
 
     DisposableEffect(KeyPassRedux, mViewModel) {

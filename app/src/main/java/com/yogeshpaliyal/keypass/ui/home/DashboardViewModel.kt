@@ -35,12 +35,17 @@ class DashboardViewModel internal constructor(
 
     fun loadCredentials(
         sortField: String?,
-        sortAscending: Boolean = true
+        sortAscending: Boolean = true,
+        keyword: String? = null
     ): Job {
         val generation = queryGeneration.incrementAndGet()
         queryJob?.cancel()
         return workScope.launch {
-            val result = vaultRepository.listCredentials()
+            val result = if (keyword.isNullOrBlank()) {
+                vaultRepository.listCredentials()
+            } else {
+                vaultRepository.searchCredentials(keyword)
+            }
             if (queryGeneration.get() == generation) {
                 _credentials.value = sortCredentials(result, sortField, sortAscending)
             }
