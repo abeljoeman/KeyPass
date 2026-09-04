@@ -88,7 +88,7 @@
 
 - [x] **T060 [P]** Reuse/adapt existing search behavior.
 - [x] **T061 [P]** Reuse/adapt existing password generator.
-- [ ] **T062** Add search tests.
+- [x] **T062** Add search tests.
 - [ ] **T063** Verify password generator does not log generated values.
 
 ## Phase 7 — Security Hardening for Prototype
