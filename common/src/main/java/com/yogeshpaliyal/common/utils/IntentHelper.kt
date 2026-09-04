@@ -43,8 +43,7 @@ fun Context.makeCall(chooserTitle: String, number: String): Boolean {
         intent.data = Uri.parse("tel:$number")
         startActivity(Intent.createChooser(intent, chooserTitle))
         return true
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (_: Exception) {
         return false
     }
 }
@@ -55,8 +54,7 @@ fun Context.sendSMS(chooserTitle: String, number: String, text: String = ""): Bo
         intent.putExtra("sms_body", text)
         startActivity(Intent.createChooser(intent, chooserTitle))
         return true
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (_: Exception) {
         return false
     }
 }
@@ -66,8 +64,7 @@ fun Context.openLink(link: String): Boolean {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("$link?utm_source=KeyPass&utm_medium=app&utm_campaign=KeyPass"))
         startActivity(intent)
         return true
-    } catch (e: Exception) {
-        e.printStackTrace()
+    } catch (_: Exception) {
         return false
     }
 }
@@ -79,8 +76,7 @@ fun Context.share(chooserTitle: String, text: String): Boolean {
         intent.type = "text/plain"
         startActivity(Intent.createChooser(intent, chooserTitle))
         return true
-    } catch (e: ActivityNotFoundException) {
-        e.printStackTrace()
+    } catch (_: ActivityNotFoundException) {
         return false
     }
 }

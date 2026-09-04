@@ -57,10 +57,9 @@ class CrashActivity : AppCompatActivity() {
                 userSettings = getUserSettings()
                 currentAppVersion = userSettings?.currentAppVersion.toString()
                 lastAppVersion = userSettings?.lastAppVersion.toString()
-            } catch (e: Exception) {
-                currentAppVersion = e.message ?: "Not able to fetch"
-                lastAppVersion = e.message ?: "Not able to fetch"
-                e.printStackTrace()
+            } catch (_: Exception) {
+                currentAppVersion = "Not able to fetch"
+                lastAppVersion = "Not able to fetch"
             }
         }
         val installerPackageName = getInstallerPackageName(this, BuildConfig.APPLICATION_ID)
@@ -84,8 +83,8 @@ class CrashActivity : AppCompatActivity() {
             deviceInfo.append("\n")
             deviceInfo.append("Device API Version: " + Build.VERSION.SDK_INT)
             deviceInfo.append("\n")
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
+            // Crash metadata is best-effort; avoid logging exception details.
         }
         return deviceInfo.toString()
     }

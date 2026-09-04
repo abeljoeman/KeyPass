@@ -122,6 +122,18 @@ Run representative flows while monitoring logs:
 - [ ] Generated password absent.
 - [ ] Full decrypted vault payload absent.
 
+### T071 static logging audit
+
+Source audit at checkpoint `d7eab62` reviewed the authentication, vault, credential, password-generator, and crash-handling paths for direct logging of sensitive values.
+
+- No direct logging call was found that intentionally writes username, credential password, master password, generated password, or decrypted vault payload.
+- The generic `LogHelper` API could print arbitrary objects in debug builds. Its public helper signatures are retained for compatibility but now perform no output.
+- Generic `printStackTrace()` calls in `CrashActivity`, legacy database migration, and intent helpers were removed so application code does not emit exception details to Logcat.
+- Crash metadata now uses a generic fallback instead of copying an exception message into the report when user-settings metadata cannot be read.
+- Authentication errors shown to the user are fixed resource strings; the entered master password is not included in exception messages and its temporary `CharArray` is cleared after repository operations.
+
+Runtime Logcat verification remains required before release because Android/framework or dependency logging cannot be proven absent by source inspection alone.
+
 ## 13. Network / Permissions
 
 - [ ] Core prototype works in airplane mode.

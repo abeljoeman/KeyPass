@@ -122,8 +122,8 @@ object AppModule {
             database.rawExecSQL("DETACH DATABASE encrypted")
             database.close()
             oldDb.delete()
-        } catch (e: SQLiteException) {
-            e.printStackTrace()
+        } catch (_: SQLiteException) {
+            // Legacy migration is best-effort; do not emit database exception details to logs.
         }
     }
 
