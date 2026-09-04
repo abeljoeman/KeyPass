@@ -73,7 +73,7 @@
 ## Phase 5 — Credential CRUD
 
 - [x] **T050 [P]** Adapt credential-list UI.
-- [ ] **T051 [P]** Adapt credential-detail UI.
+- [x] **T051 [P]** Adapt credential-detail UI.
 - [ ] **T052 [P]** Adapt add/edit credential form.
 - [ ] **T053** Connect list UI to `VaultRepository`.
 - [ ] **T054** Implement create credential.

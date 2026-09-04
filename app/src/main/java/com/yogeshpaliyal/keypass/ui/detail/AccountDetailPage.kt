@@ -7,9 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
+import com.yogeshpaliyal.keypass.ui.detail.components.CredentialDetail
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
 import com.yogeshpaliyal.keypass.ui.detail.components.Fields
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
@@ -34,6 +39,7 @@ fun AccountDetailPage(
 
     // task value state
     val accountModel = viewModel.accountModel.collectAsState().value
+    var showLegacyEditor by rememberSaveable(id) { mutableStateOf(id == null) }
 
     // Set initial object
     LaunchedEffect(key1 = id) {
@@ -46,6 +52,22 @@ fun AccountDetailPage(
 
     val goBack: () -> Unit = {
         dispatchAction(GoBackAction)
+    }
+    val copyToClipboard: (String) -> Unit = { value ->
+        dispatchAction(CopyToClipboard(value))
+    }
+
+    if (id != null && !showLegacyEditor) {
+        CredentialDetail(
+            credential = accountModel.toCredentialDetail(),
+            onBack = goBack,
+            onEdit = { showLegacyEditor = true },
+            onDelete = {
+                viewModel.deleteAccount(accountModel, goBack)
+            },
+            onCopyToClipboard = copyToClipboard
+        )
+        return
     }
 
     Scaffold(
@@ -73,9 +95,7 @@ fun AccountDetailPage(
                 updateAccountModel = { newAccountModel ->
                     viewModel.setAccountModel(newAccountModel)
                 },
-                copyToClipboardClicked = { value ->
-                    dispatchAction(CopyToClipboard(value))
-                }
+                copyToClipboardClicked = copyToClipboard
             )
         }
     }
