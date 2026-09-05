@@ -98,7 +98,7 @@
 - [x] **T072** Review clipboard behavior.
 - [x] **T073** Implement clipboard clearing if practical for target Android versions.
 - [x] **T074** Verify no unintended plaintext credential files are created.
-- [ ] **T075** Verify no INTERNET permission is present unless explicitly justified.
+- [x] **T075** Verify no INTERNET permission is present unless explicitly justified.
 - [ ] **T076** Verify corrupted vault is not silently overwritten.
 - [ ] **T077** Run threat-model checklist and record findings.
 

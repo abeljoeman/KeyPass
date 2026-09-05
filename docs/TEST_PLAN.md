@@ -173,8 +173,23 @@ Runtime Logcat verification remains required before release because Android/fram
 
 - [ ] Core prototype works in airplane mode.
 - [ ] No backend endpoint is required.
-- [ ] INTERNET permission is absent, or the approved exception is documented.
+- [x] INTERNET permission is absent, or the approved exception is documented.
 - [ ] No analytics/telemetry SDK sends data.
+
+### T075 manifest and permission audit
+
+Verification at checkpoint `21a5802` found:
+
+- `app/src/main/AndroidManifest.xml` does not request `android.permission.INTERNET`.
+- The app manifest explicitly removes `android.permission.ACCESS_NETWORK_STATE` from manifest merging.
+- `common/src/main/AndroidManifest.xml` does not request network permissions.
+- `:app:processFreeDebugMainManifest` completed successfully.
+- A recursive scan of generated merged manifests under `app/build/intermediates` found no `INTERNET`, `ACCESS_NETWORK_STATE`, or `CHANGE_NETWORK_STATE` permission.
+- A source-tree scan excluding build and Gradle output found no `android.permission.INTERNET` declaration.
+
+Result: the verified FreeDebug prototype manifest does not grant Internet/network-state permission, including permissions that could have been introduced transitively through dependency manifest merging.
+
+Airplane-mode behavior and runtime network observation remain part of the Phase 8 physical-device test.
 
 ## 14. Failure and Recovery
 
