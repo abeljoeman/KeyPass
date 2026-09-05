@@ -100,7 +100,7 @@
 - [x] **T074** Verify no unintended plaintext credential files are created.
 - [x] **T075** Verify no INTERNET permission is present unless explicitly justified.
 - [x] **T076** Verify corrupted vault is not silently overwritten.
-- [ ] **T077** Run threat-model checklist and record findings.
+- [x] **T077** Run threat-model checklist and record findings.
 
 ## Phase 8 — Prototype Test Pass
 

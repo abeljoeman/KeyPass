@@ -189,3 +189,28 @@ The prototype does not claim to protect against a fully compromised/rooted opera
 - [ ] Background/timeout lock works.
 - [ ] Clipboard behavior reviewed.
 - [ ] INTERNET permission absent or exception documented.
+
+## 7. T077 Threat-Model Review Record
+
+Review performed at checkpoint `a0df20b` after Phase 7 hardening.
+
+| Threat | Review finding | Remaining verification |
+| --- | --- | --- |
+| T1 — Plaintext credential persistence | Mitigated in the prototype architecture: credential CRUD persists through Kotpass/KDBX, legacy Room runtime consumers were removed, and no active plaintext credential export path was found. | Inspect app-private storage on a physical device in Phase 8. |
+| T2 — Master password persistence | Mitigated in source: unlock uses transient password input and the static storage/logging audits found no intended persistence path. | Re-check app-private files and Logcat during device testing. |
+| T3 — Secret logging | Application logging paths were hardened and static audits found no intentional secret logging. | Run representative flows under Logcat in Phase 8. |
+| T4 — Screenshot / screen-record leakage | `FLAG_SECURE` is enabled on sensitive app activities. | Verify screenshot/screen-record behavior on the target device. |
+| T5 — Clipboard leakage | Copy is explicit-only; shared sensitive clipboard handling is used, with Android 13+ platform expiration and a 60-second best-effort cleanup on older supported Android versions. | Verify clipboard behavior on representative target Android versions. |
+| T6 — Vault remains unlocked in background | Manual lock and prototype background/timeout locking are implemented, and reachable decrypted UI/repository state is cleared on lock. | Exercise background, foreground, process-kill, and timeout transitions on-device. |
+| T7 — Corrupted/tampered vault | Failed decode leaves the repository locked; a unit test verifies corrupted source bytes are not overwritten. | Verify the UI presents a recoverable, non-destructive error on-device. |
+| T8 — Network exfiltration | No backend is required; FreeDebug merged-manifest audit found no `INTERNET` or network-state permissions, and no analytics/telemetry SDK is apparent in current app/common runtime dependencies. | Confirm core flows in airplane mode and observe runtime behavior in Phase 8. |
+| T9 — Recent-app preview leakage | Sensitive activities use the same secure-screen protection as T4. | Verify the recent-app preview on the target device. |
+| T10 — Decrypted state lifetime | Lock clears repository session state and dashboard sensitive state; T074 found no decrypted credential disk cache in the active prototype flow. | Validate lock/process transitions and storage after normal flows on-device. |
+| T11 — Supply-chain dependency risk | Dependencies are explicit and version-pinned in Gradle, including Kotpass `0.13.0`; Phase 2 removed dependencies tied only to removed features. | Continue dependency/license review before release or future upgrades. |
+| T12 — AI-generated insecure implementation | Security work was split into narrow tasks with diff review, unit/build checks, and task-per-commit history; no new crypto mechanism was introduced. | Continue the same review discipline for Phase 8 fixes and later changes. |
+
+### Review conclusion
+
+No new unresolved Critical or High implementation finding was identified during T077. The remaining items are primarily runtime/device verification gates already represented in Phase 8; they must not be treated as passed until those checks are executed.
+
+The Prototype Security Exit Checklist above intentionally remains unchecked at this checkpoint. It is a release-exit checklist, while T077 records the current evidence and residual verification without prematurely claiming the physical-device gates have passed.
