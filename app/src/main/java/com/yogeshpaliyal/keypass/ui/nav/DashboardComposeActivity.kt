@@ -9,8 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -20,6 +27,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -30,6 +38,7 @@ import com.yogeshpaliyal.common.utils.migrateOldDataToNewerDataStore
 import com.yogeshpaliyal.common.utils.setUserSettings
 import com.yogeshpaliyal.keypass.BuildConfig
 import com.yogeshpaliyal.keypass.MyApplication
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.about.AboutScreen
 import com.yogeshpaliyal.keypass.ui.auth.AuthScreen
 import com.yogeshpaliyal.keypass.ui.changeDefaultPasswordLength.ChangeDefaultPasswordLengthScreen
@@ -41,9 +50,11 @@ import com.yogeshpaliyal.keypass.ui.nav.components.DashboardBottomSheet
 import com.yogeshpaliyal.keypass.ui.nav.components.KeyPassBottomBar
 import com.yogeshpaliyal.keypass.ui.passwordHint.PasswordHintScreen
 import com.yogeshpaliyal.keypass.ui.redux.KeyPassRedux
+import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateContextAction
+import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
 import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
 import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
@@ -112,6 +123,7 @@ class DashboardComposeActivity : AppCompatActivity() {
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Dashboard(viewModel: BottomNavViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
   val systemBackPress by selectState<KeyPassState, Boolean> { this.systemBackPress }
@@ -152,8 +164,37 @@ fun Dashboard(viewModel: BottomNavViewModel = androidx.lifecycle.viewmodel.compo
     onDispose { dispatch(UpdateContextAction(null)) }
   }
 
-  Scaffold(bottomBar = { KeyPassBottomBar(viewModel) }, modifier = Modifier.safeDrawingPadding()) {
-      paddingValues ->
+  Scaffold(
+      topBar = {
+        val titleRes =
+            when (currentScreen) {
+              is PasswordGeneratorState -> R.string.password_generator_title
+              is SettingsState -> R.string.nav_settings
+              else -> null
+            }
+
+        if (titleRes != null) {
+          TopAppBar(
+              title = { Text(stringResource(titleRes)) },
+              actions = {
+                IconButton(
+                    onClick = {
+                      dashboardViewModel?.clearSensitiveState()
+                      vaultRepository.lock()
+                      dispatch(
+                          BatchActions(
+                              UpdateViewModalAction(null),
+                              NavigationAction(AuthState.Login, true)))
+                    }) {
+                      Icon(
+                          imageVector = Icons.Outlined.Lock,
+                          contentDescription = stringResource(R.string.lock_vault))
+                    }
+              })
+        }
+      },
+      bottomBar = { KeyPassBottomBar(viewModel) },
+      modifier = Modifier.safeDrawingPadding()) { paddingValues ->
     Surface(modifier = Modifier.padding(paddingValues)) {
       CurrentPage()
 

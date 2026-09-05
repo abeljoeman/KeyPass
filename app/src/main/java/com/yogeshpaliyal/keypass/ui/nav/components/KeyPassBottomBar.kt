@@ -2,134 +2,85 @@ package com.yogeshpaliyal.keypass.ui.nav.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.yogeshpaliyal.keypass.R
-import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultBottomAppBar
-import com.yogeshpaliyal.keypass.ui.home.DashboardViewModel
 import com.yogeshpaliyal.keypass.ui.nav.BottomNavViewModel
-import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
-import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
-import com.yogeshpaliyal.keypass.ui.redux.actions.BottomSheetAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.UpdateViewModalAction
-import com.yogeshpaliyal.keypass.ui.redux.states.AccountDetailState
-import com.yogeshpaliyal.keypass.ui.redux.states.AuthState
+import com.yogeshpaliyal.keypass.ui.redux.selectState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
 import com.yogeshpaliyal.keypass.ui.redux.states.KeyPassState
+import com.yogeshpaliyal.keypass.ui.redux.states.PasswordGeneratorState
 import com.yogeshpaliyal.keypass.ui.redux.states.ScreenState
 import com.yogeshpaliyal.keypass.ui.redux.states.SettingsState
 import org.reduxkotlin.compose.rememberDispatcher
-import com.yogeshpaliyal.keypass.ui.redux.selectState
-
-
-
 
 @Composable
 fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
-    val currentScreen: ScreenState by selectState<KeyPassState, ScreenState> { this.currentScreen }
-    val dashboardViewModel: DashboardViewModel? by
-        selectState<KeyPassState, DashboardViewModel?> { this.viewModel }
-    val showMainBottomAppBar = currentScreen.showMainBottomAppBar
-    val dispatchAction = rememberDispatcher()
-    val vaultRepository = LocalVaultRepository.current
-    val navigationItems by viewModel.navigationList.observeAsState()
+    val currentScreen: ScreenState by
+        selectState<KeyPassState, ScreenState> { this.currentScreen }
 
-    if (!showMainBottomAppBar) {
+    if (!currentScreen.showMainBottomAppBar) {
         return
     }
 
-    DefaultBottomAppBar(showBackButton = false, extraAction = {
+    val dispatchAction = rememberDispatcher()
 
-        IconToggleButton (colors = IconButtonDefaults.iconToggleButtonColors(
-            checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ), checked = currentScreen is HomeState, onCheckedChange = {
-            dispatchAction(NavigationAction(HomeState(), true))
-        }) {
-            Icon(
-                painter = painterResource(R.drawable.ic_vault_shield_lock),
-                contentDescription = stringResource(R.string.a11y_vault),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        IconButton(onClick = {
-            dispatchAction(IntentNavigation.GeneratePassword)
-        }) {
-            Icon(
-                painter = rememberVectorPainter(image = Icons.Default.Password),
-                contentDescription = stringResource(R.string.a11y_password_generator),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        if (navigationItems?.isNotEmpty() == true) {
-            IconButton(onClick = {
-                dispatchAction(BottomSheetAction.HomeNavigationMenu(true))
-            }) {
+    NavigationBar {
+        NavigationBarItem(
+            selected = currentScreen is HomeState,
+            onClick = {
+                if (currentScreen !is HomeState) {
+                    dispatchAction(NavigationAction(HomeState(), true))
+                }
+            },
+            icon = {
                 Icon(
-                    painter = rememberVectorPainter(image = Icons.Outlined.Menu),
-                    contentDescription = stringResource(R.string.a11y_navigation_menu),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    painter = painterResource(R.drawable.ic_vault_shield_lock),
+                    contentDescription = null
                 )
-            }
-        }
+            },
+            label = { Text(stringResource(R.string.nav_vault)) }
+        )
 
-        IconToggleButton(colors = IconButtonDefaults.iconToggleButtonColors(
-            checkedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-            checkedContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ), checked = currentScreen is SettingsState, onCheckedChange = {
-            dispatchAction(NavigationAction(SettingsState))
-        }) {
-            Icon(
-                painter = rememberVectorPainter(image = Icons.Outlined.Settings),
-                contentDescription = stringResource(R.string.a11y_settings),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        IconButton(onClick = {
-            dashboardViewModel?.clearSensitiveState()
-            vaultRepository.lock()
-            dispatchAction(
-                BatchActions(
-                    UpdateViewModalAction(null),
-                    NavigationAction(AuthState.Login, true)
-                )
-            )
-        }) {
-            Icon(
-                painter = rememberVectorPainter(image = Icons.Outlined.Lock),
-                contentDescription = stringResource(R.string.lock_vault),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }, floatingActionButton = {
-            FloatingActionButton(modifier = Modifier.testTag("btnAdd"), onClick = {
-                dispatchAction(NavigationAction(AccountDetailState()))
-            }) {
+        NavigationBarItem(
+            selected = currentScreen is PasswordGeneratorState,
+            onClick = {
+                if (currentScreen !is PasswordGeneratorState) {
+                    dispatchAction(IntentNavigation.GeneratePassword)
+                }
+            },
+            icon = {
                 Icon(
-                    painter = rememberVectorPainter(image = Icons.Rounded.Add),
-                    contentDescription = stringResource(R.string.a11y_add_credential)
+                    imageVector = Icons.Default.Password,
+                    contentDescription = null
                 )
-            }
-        })
+            },
+            label = { Text(stringResource(R.string.nav_generator)) }
+        )
+
+        NavigationBarItem(
+            selected = currentScreen is SettingsState,
+            onClick = {
+                if (currentScreen !is SettingsState) {
+                    dispatchAction(NavigationAction(SettingsState))
+                }
+            },
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null
+                )
+            },
+            label = { Text(stringResource(R.string.nav_settings)) }
+        )
+    }
 }

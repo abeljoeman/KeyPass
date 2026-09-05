@@ -51,6 +51,16 @@
     <string name="feedback_to_keypass">Feedback to KeyPass</string>
     <string name="share_keypass">Share KeyPass</string>
     <string name="message_no_accounts">No Accounts found, please add from below button</string>
+    <string name="your_vault">Your Vault</string>
+    <string name="search_credentials">Search credentials</string>
+    <string name="add_credential">Add credential</string>
+    <string name="vault_empty_title">Your vault is empty</string>
+    <string name="vault_empty_description">Add your first credential to get started.</string>
+    <string name="no_credentials_found">No credentials found</string>
+    <string name="nav_vault">Vault</string>
+    <string name="nav_generator">Generator</string>
+    <string name="nav_settings">Settings</string>
+    <string name="password_generator_title">Password Generator</string>
     <string name="yes">Yes</string>
     <string name="create_account">Create Account</string>
     <string name="edit_account">Edit Account</string>

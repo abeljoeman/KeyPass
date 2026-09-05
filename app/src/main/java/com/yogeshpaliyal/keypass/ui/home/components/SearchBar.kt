@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Sort
+import androidx.compose.material.icons.automirrored.rounded.Sort
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -32,18 +32,17 @@ fun SearchBar(
 
     OutlinedTextField(
         modifier = Modifier
-            .fillMaxWidth(1f)
-            .padding(16.dp),
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         value = keyword ?: "",
+        singleLine = true,
         placeholder = {
-            Text(text = "Search Account")
+            Text(text = stringResource(R.string.search_credentials))
         },
-        onValueChange = { newValue ->
-            updateKeyword(newValue)
-        },
+        onValueChange = updateKeyword,
         trailingIcon = {
             Row {
-                AnimatedVisibility(keyword.isNullOrBlank().not()) {
+                AnimatedVisibility(!keyword.isNullOrBlank()) {
                     IconButton(onClick = { updateKeyword("") }) {
                         Icon(
                             painter = rememberVectorPainter(image = Icons.Rounded.Close),
@@ -52,11 +51,9 @@ fun SearchBar(
                     }
                 }
 
-                IconButton(onClick = {
-                    setMenuVisible(!isMenuVisible)
-                }) {
+                IconButton(onClick = { setMenuVisible(!isMenuVisible) }) {
                     Icon(
-                        painter = rememberVectorPainter(image = Icons.Rounded.Sort),
+                        painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.Sort),
                         contentDescription = stringResource(R.string.a11y_sort_credentials)
                     )
                 }
