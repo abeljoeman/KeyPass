@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material3.Mdc3Theme
@@ -146,6 +147,7 @@ private fun PasswordTextField(
         onValueChange = {},
         modifier = Modifier.fillMaxWidth(),
         readOnly = true,
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
         trailingIcon = {
             IconButton(
                 onClick = onCopyPasswordClick
