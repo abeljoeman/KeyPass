@@ -2,6 +2,7 @@ package com.yogeshpaliyal.keypass.vault
 
 import java.io.File
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -131,6 +132,37 @@ class KotpassVaultRepositoryTest {
                 "Repository must be locked after a failed open.",
                 credentialAccess.exceptionOrNull() is IllegalStateException
             )
+        }
+    }
+
+    @Test
+    fun openVault_withCorruptedFile_doesNotOverwriteSource() = runBlocking {
+        val vaultFile = File.createTempFile("corrupted-vault-", ".kdbx")
+        try {
+            val originalBytes = "not-a-valid-kdbx-vault".toByteArray()
+            vaultFile.writeBytes(originalBytes)
+
+            val repository = KotpassVaultRepository(vaultFile)
+            val openResult = runCatching {
+                repository.openVault("test-password".toCharArray())
+            }
+
+            assertTrue("Corrupted-vault open must fail.", openResult.isFailure)
+            assertArrayEquals(
+                "Failed decode must leave the source vault unchanged.",
+                originalBytes,
+                vaultFile.readBytes()
+            )
+
+            val credentialAccess = runCatching { repository.listCredentials() }
+            assertTrue(
+                "Repository must remain locked after a corrupted-vault open.",
+                credentialAccess.exceptionOrNull() is IllegalStateException
+            )
+        } finally {
+            if (vaultFile.exists() && !vaultFile.delete()) {
+                vaultFile.deleteOnExit()
+            }
         }
     }
 

@@ -194,8 +194,20 @@ Airplane-mode behavior and runtime network observation remain part of the Phase 
 ## 14. Failure and Recovery
 
 - [ ] App handles storage-write failure without silently claiming success.
-- [ ] Decode failure does not overwrite source vault.
+- [x] Decode failure does not overwrite source vault.
 - [ ] App can return to unlock/create flow after recoverable failure.
+
+### T076 corrupted-vault overwrite audit
+
+Verification at checkpoint `b0b5523` found:
+
+- `KotpassVaultRepository.openVault()` opens the existing vault with `FileInputStream` and passes it to Kotpass `decode(...)`; the open path does not call `persistDatabase()` or any file-output API.
+- A repository unit test now writes known invalid KDBX bytes, attempts to open the corrupted vault, asserts that the open fails, and compares the file bytes before and after the failed decode.
+- The same test verifies that credential access remains locked after the failed corrupted-vault open.
+
+Result: a decode failure does not silently replace, recreate, truncate, or otherwise modify the source vault through the repository open path.
+
+Physical-device verification remains in Phase 8 to confirm the UI surfaces the failure as a recoverable, non-destructive error.
 
 ## 15. Exit Decision
 
