@@ -1,33 +1,32 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.KeyPass" parent="Theme.Material3.Light.NoActionBar">
+    <!-- Fixed dark application theme. -->
+    <style name="Theme.KeyPass" parent="Theme.Material3.Dark.NoActionBar">
         <!--Color-->
-        <item name="colorPrimary">@color/keypass_blue_700</item>
-        <item name="colorPrimaryContainer">@color/keypass_orange_500</item>
-        <item name="colorTertiaryContainer">@color/blue_800</item>
-        <item name="colorPrimaryVariant">@color/keypass_blue_800</item>
-        <item name="colorSecondary">@color/keypass_orange_500</item>
-        <item name="colorSecondaryVariant">@color/keypass_orange_400</item>
+        <item name="colorPrimary">@color/keypass_primary</item>
+        <item name="colorPrimaryVariant">@color/keypass_primary_container</item>
+        <item name="colorPrimaryContainer">@color/keypass_primary_container</item>
+        <item name="colorSecondary">@color/keypass_secondary</item>
+        <item name="colorSecondaryVariant">@color/keypass_secondary_container</item>
+        <item name="colorTertiaryContainer">@color/keypass_brand_accent_container</item>
 
-        <item name="colorOnPrimarySurface">@color/keypass_blue_100</item>
+        <item name="colorOnPrimarySurface">@color/keypass_on_surface</item>
 
+        <item name="android:colorBackground">@color/keypass_background</item>
+        <item name="colorSurface">@color/keypass_surface</item>
+        <item name="colorPrimarySurfaceVariant">@color/keypass_surface_container</item>
+        <item name="colorError">@color/keypass_error</item>
 
-        <item name="android:colorBackground">@color/keypass_blue_50</item>
-        <item name="colorSurface">@color/keypass_white_50</item>
-        <item name="colorPrimarySurfaceVariant">?attr/colorPrimaryVariant</item>
-        <item name="colorError">@color/keypass_red_400</item>
+        <item name="colorOnPrimary">@color/keypass_on_primary</item>
+        <item name="colorOnSecondary">@color/keypass_on_secondary</item>
+        <item name="colorOnBackground">@color/keypass_on_surface</item>
+        <item name="colorOnSurface">@color/keypass_on_surface</item>
+        <item name="colorOnError">@color/keypass_on_error</item>
 
-        <item name="colorOnPrimary">@color/keypass_white_50</item>
-        <item name="colorOnSecondary">@color/keypass_black_900</item>
-        <item name="colorOnBackground">@color/keypass_black_900</item>
-        <item name="colorOnSurface">@color/keypass_black_900</item>
-        <item name="colorOnError">@color/keypass_black_900</item>
+        <item name="scrimBackground">@color/keypass_scrim</item>
+        <item name="android:statusBarColor">@color/keypass_background</item>
+        <item name="android:navigationBarColor">@color/keypass_background</item>
 
-        <item name="scrimBackground">@color/keypass_white_50_alpha_060</item>
-        <item name="android:statusBarColor">@color/keypass_blue_50_alpha_060</item>
-        <item name="android:navigationBarColor">@color/nav_bar</item>
-
-        <!--Typography-->
+        <!--Typography: intentionally unchanged until T101.-->
         <item name="textAppearanceDisplayLarge">@style/TextAppearance.KeyPass.DisplayLarge</item>
         <item name="textAppearanceDisplayMedium">@style/TextAppearance.KeyPass.DisplayMedium</item>
         <item name="textAppearanceDisplaySmall">@style/TextAppearance.KeyPass.DisplaySmall</item>
@@ -46,12 +45,11 @@
 
         <!--Styles-->
         <item name="bottomSheetStyle">@style/Widget.MaterialComponents.BottomSheet.Modal</item>
+        <item name="elevationOverlayEnabled">true</item>
 
         <!--System/Platform attributes-->
-        <item name="android:windowBackground">?android:colorBackground</item>
-        <item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
-        <!-- Customize your theme here. -->
-
+        <item name="android:windowBackground">@color/keypass_background</item>
+        <item name="android:windowLightStatusBar" tools:ignore="NewApi">false</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
     </style>
-
 </resources>

@@ -5,8 +5,8 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.yogeshpaliyal.keypass.ui.generate.ui.GeneratePasswordScreen
+import com.yogeshpaliyal.keypass.ui.style.KeyPassTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -17,7 +17,7 @@ class GeneratePasswordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         setContent {
-            Mdc3Theme {
+            KeyPassTheme {
                 GeneratePasswordScreen(viewModel)
             }
         }

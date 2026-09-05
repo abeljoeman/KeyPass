@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Next-build dark Material 3 semantic palette. -->
+    <color name="keypass_background">#0F1115</color>
+    <color name="keypass_surface">#15181E</color>
+    <color name="keypass_surface_container">#20252D</color>
+    <color name="keypass_surface_container_high">#282E38</color>
+    <color name="keypass_surface_container_highest">#303742</color>
+
+    <color name="keypass_primary">#A9C7FF</color>
+    <color name="keypass_on_primary">#0B3052</color>
+    <color name="keypass_primary_container">#284A76</color>
+    <color name="keypass_on_primary_container">#D7E3FF</color>
+    <color name="keypass_inverse_primary">#365D8B</color>
+
+    <color name="keypass_secondary">#BBC7DB</color>
+    <color name="keypass_on_secondary">#253141</color>
+    <color name="keypass_secondary_container">#3B485A</color>
+    <color name="keypass_on_secondary_container">#D7E3F7</color>
+
+    <!-- Reserved for restrained identity moments; not a replacement for semantic colors. -->
+    <color name="keypass_brand_accent">#D8B56B</color>
+    <color name="keypass_on_brand_accent">#3B2F12</color>
+    <color name="keypass_brand_accent_container">#544414</color>
+    <color name="keypass_on_brand_accent_container">#F5DFA8</color>
+
+    <color name="keypass_on_surface">#E3E2E8</color>
+    <color name="keypass_on_surface_variant">#C5C6D0</color>
+    <color name="keypass_outline">#8E9099</color>
+    <color name="keypass_outline_variant">#44474F</color>
+    <color name="keypass_inverse_surface">#E3E2E8</color>
+    <color name="keypass_inverse_on_surface">#303136</color>
+
+    <color name="keypass_error">#FFB4AB</color>
+    <color name="keypass_on_error">#690005</color>
+    <color name="keypass_error_container">#93000A</color>
+    <color name="keypass_on_error_container">#FFDAD6</color>
+    <color name="keypass_scrim">#B3000000</color>
+
+    <!-- Legacy colors retained for existing components during incremental rollout. -->
     <color name="keypass_white_50">#ffffff</color>
 
     <color name="keypass_black_800">#121212</color>
