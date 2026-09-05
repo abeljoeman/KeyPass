@@ -134,14 +134,14 @@ Prototype is done only when:
 - [x] **T090** Complete screen-by-screen UX-flow review for the retained prototype capability set.
 - [x] **T091** Complete component mapping for Vault, Credential Detail, Create/Edit, Auth, Generator, and Settings.
 - [x] **T092** Define dark-only visual direction, icon rules, loading/error conventions, accessibility baseline, and replaceable brand layer.
-- [ ] **T093** Apply and review the consolidated source-of-truth documentation patch.
-- [ ] **T094** Confirm the implementation task sequence below before starting UI code changes.
+- [x] **T093** Apply and review the consolidated source-of-truth documentation patch.
+- [x] **T094** Confirm the implementation task sequence below before starting UI code changes.
 
 **Checkpoint:** UI implementation does not begin until the consolidated documentation is accepted in the repository.
 
 ## Phase 10 — UI Foundation
 
-- [ ] **T100** Implement fixed dark Material 3 theme and dark startup/window treatment without changing product architecture.
+- [x] **T100** Implement fixed dark Material 3 theme and dark startup/window treatment without changing product architecture.
 - [ ] **T101** Replace global Roboto Mono UI typography with Material/platform sans-serif roles; retain monospace only where useful for secrets.
 - [ ] **T102** Establish the small Material Symbols icon set and localized accessibility descriptions without adding a mega icon dependency.
 - [ ] **T103** Add only justified reusable application-specific UI components needed by multiple approved screens.
