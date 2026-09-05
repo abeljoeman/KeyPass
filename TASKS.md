@@ -117,14 +117,14 @@
 
 Prototype is done only when:
 
-- [ ] Vault creation works.
-- [ ] Vault unlock works.
-- [ ] Wrong password fails safely.
-- [ ] Credential CRUD persists.
-- [ ] Search works.
-- [ ] Password generator works.
-- [ ] Manual lock works.
-- [ ] Basic background/timeout lock works.
-- [ ] Sensitive data is not found in normal logs during test flows.
-- [ ] Prototype runs without a backend.
-- [ ] Physical-device test checklist passes or failures are explicitly documented.
+- [x] Vault creation works.
+- [x] Vault unlock works.
+- [x] Wrong password fails safely.
+- [x] Credential CRUD persists.
+- [x] Search works.
+- [x] Password generator works.
+- [x] Manual lock works.
+- [x] Basic background/timeout lock works.
+- [x] Sensitive data is not found in normal logs during test flows.
+- [x] Prototype runs without a backend.
+- [x] Physical-device test checklist passes or failures are explicitly documented.

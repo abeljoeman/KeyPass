@@ -1,6 +1,6 @@
 # Prototype Physical Test Results — v0.1
 
-**Status:** Test execution complete; release tag blocked pending fixes
+**Status:** Release regression complete; ready to tag `v0.1-prototype`
 **Date:** 2026-09-05
 **Test plan:** `docs/TEST_PLAN.md`
 
@@ -11,10 +11,11 @@
 - API level: 31
 - Build type: `freeDebug`
 - App package: `com.yogeshpaliyal.keypass.staging`
-- Test checkpoint: `312035b` (`docs: record threat model review`)
+- Initial test checkpoint: `312035b` (`docs: record threat model review`)
+- Final regression checkpoint: `f7fe324` (`fix: prevent duplicate credential saves`)
 - Execution method: physical-device manual testing with `adb` inspection where appropriate
 
-No application code was changed during this test pass.
+The initial physical test pass identified three release blockers. Each blocker was fixed in a separate commit, covered by targeted unit tests, and repeated on the physical device before the final smoke regression.
 
 ## Result Summary
 
@@ -23,16 +24,16 @@ No application code was changed during this test pass.
 | Build and installation | PASS | Clean build/install/launch, force-stop relaunch, and device-reboot launch verified. |
 | Vault creation | PASS | Create, empty-password rejection, cancel, and restart persistence verified. |
 | Vault unlock | PASS with UX limitation | Correct/wrong password behavior is fail-closed. Corrupted vault is non-destructive but is surfaced as an incorrect-password error. |
-| Credential CRUD | PASS with findings | 20 credentials tested, including long values. Create/edit/cancel/delete/reopen/restart persistence verified. Double-tap Save can create duplicates. |
-| Search | PASS | Title, username, no-result, and query-clear behavior verified. |
+| Credential CRUD | PASS | 20+ credentials tested, including long values. Create/edit/cancel/delete/reopen/restart persistence verified. Rapid repeated Save no longer creates duplicates. |
+| Search | PASS | Title, username, no-result, query-clear, and search/background regression behavior verified. |
 | Password generator | PASS | Length/categories/use-in-editor verified; generated value was not observed in normal logs. |
-| Lock behavior | PASS with crash finding | Manual lock, background lock, and process-kill recovery pass their functional checks. A separate lock/load race can crash the app. |
-| Clipboard | PARTIAL | Explicit copy works and foreground 60-second cleanup works. Background cleanup failed on Android 12/API 31. |
+| Lock behavior | PASS | Manual lock, background lock, process-kill recovery, and the prior lock/load race regression all pass without a fatal exception. |
+| Clipboard | PASS with accepted platform limitation | Explicit copy and foreground 60-second cleanup pass. Background cleanup can fail on Android 12/API 31 and is accepted/documented for this prototype. |
 | Screen privacy | PASS | ADB screenshot hides credentials and Recent Apps preview hides credential content. |
 | Storage inspection | PASS | KDBX signature verified; no tested credential markers found in plaintext app storage or temporary files. |
 | Logging inspection | PASS | Tested credential values, generated password, and decrypted payload markers were not observed in Logcat. |
 | Network / permissions | PASS | Core flows work in airplane mode and `INTERNET` permission is absent. |
-| Failure and recovery | PARTIAL | Corrupt/decode failure is non-destructive. Simulated storage-write failure preserves vault integrity but crashes the app. |
+| Failure and recovery | PASS | Corrupt/decode failure remains non-destructive. Simulated storage-write failure now surfaces an error without crashing and preserves vault integrity. |
 
 ## Phase 8 Task Coverage
 
@@ -42,71 +43,86 @@ No application code was changed during this test pass.
 - **T083:** App restart and vault reopen verified with persisted credential data.
 - **T084:** Manual/background/foreground lock behavior verified.
 - **T085:** Process kill returns to the unlock flow instead of decrypted credential state.
-- **T086:** Known limitations and release blockers are captured below.
-- **T087:** Not complete. Do not tag `v0.1-prototype` until release blockers are fixed and relevant physical tests are repeated.
+- **T086:** Known limitations and release results are captured below.
+- **T087:** Ready to execute after this release-evidence update is committed and pushed.
 
-## Confirmed Release Blockers
+## Resolved Release Blockers
 
-### 1. Lock/load race can crash the application
+### 1. Lock/load race crash — resolved
 
-**Severity:** High
-**Status:** Confirmed on physical device
+**Severity:** High  
+**Fix commit:** `5eeffc7` (`fix: avoid credential load crash after vault lock`)  
+**Status:** FIXED and physically regression-tested
 
-Observed exception:
+The prior failure raised `java.lang.IllegalStateException: Vault is locked.` when a credential load raced with a lock transition. The fix gives the locked state a dedicated exception path and ignores that expected lifecycle race in the credential-loading ViewModel without swallowing unrelated repository failures.
 
-```text
-java.lang.IllegalStateException: Vault is locked.
-```
+Physical regression:
 
-Observed path:
+- auto-lock/reopen repeated 5 times: PASS;
+- search + immediate background/reopen race: PASS;
+- credentials intact after re-unlock: PASS;
+- KeyPass fatal exception in Logcat: NO.
 
-```text
-DashboardViewModel.loadCredentials()
- -> VaultRepository.listCredentials()
- -> KotpassVaultRepository.unlockedDatabase()
-```
+### 2. Storage-write failure crash — resolved
 
-The repository can become locked while credential loading is still running or is triggered during the UI transition to the authentication screen. The exception is not handled and terminates the application.
+**Severity:** High  
+**Fix commit:** `94d94ce` (`fix: handle vault write failures without crashing`)  
+**Status:** FIXED and physically regression-tested
 
-**Expected:** A lock transition cancels/ignores stale credential loads and returns to authentication without crashing.
+A controlled non-writable `files` directory previously caused an unhandled `java.io.IOException: Permission denied`. The save flow now reports a generic vault-write failure, keeps the editor/draft available, and does not invoke the success/navigation callback.
 
-### 2. Storage-write failure crashes the application
+Physical regression:
 
-**Severity:** High
-**Status:** Confirmed on physical device
+- failed write does not crash: PASS;
+- error message displayed: PASS;
+- editor/draft preserved: PASS;
+- `vault.kdbx` SHA-256 unchanged after failed write: PASS;
+- retry succeeds after write permission is restored: PASS;
+- successful retry persists after reopen: PASS;
+- KeyPass fatal exception in Logcat: NO.
 
-A controlled test made the app's `files` directory temporarily non-writable, then attempted to save an edited credential. The app crashed with:
+### 3. Double-tap Save duplicate creation — resolved
 
-```text
-java.io.IOException: Permission denied
-```
+**Severity:** Medium  
+**Fix commit:** `f7fe324` (`fix: prevent duplicate credential saves`)  
+**Status:** FIXED and physically regression-tested
 
-The failure originated while `persistDatabase()` attempted to create its temporary file.
+Save is now single-flight. The ViewModel rejects a second concurrent save request, and the UI disables the Save action while persistence is running.
 
-Security/integrity behavior during this failure was good:
+Physical regression:
 
-- the pre-test and post-crash SHA-256 of `vault.kdbx` were identical;
-- the vault reopened normally;
-- the credential remained present;
-- the failed edit was not persisted.
+- rapid Save test 01: PASS;
+- rapid Save test 02: PASS;
+- rapid Save test 03: PASS;
+- exactly one credential per create: PASS;
+- KeyPass fatal exception in Logcat: NO.
 
-**Expected:** The save failure is surfaced to the UI without crashing, while retaining the same vault-integrity behavior.
+## Final Smoke Regression
 
-### 3. Double-tap Save can create duplicate credentials
+Final smoke regression was run on the Galaxy A11 from commit `f7fe324`.
 
-**Severity:** Medium
-**Status:** Confirmed on the slower physical device
+- Launch/unlock: PASS.
+- Create exactly once: PASS.
+- Edit + persistence: PASS.
+- Search: PASS.
+- Password generator + save: PASS.
+- Manual lock/re-unlock: PASS.
+- Background lock/re-unlock: PASS.
+- Search + background race: PASS.
+- Force-stop recovery: PASS.
+- Wrong password followed by correct password: PASS.
+- Delete + persistence: PASS.
+- KeyPass fatal exception in Logcat: NO.
 
-Rapidly tapping Save twice during credential creation produced two identical credentials.
+The full `testFreeDebugUnitTest` suite also completed successfully before the final push of `f7fe324`.
 
-**Expected:** Save is single-flight. The UI disables Save while persistence is running and the ViewModel/repository-facing action ignores a second concurrent save request.
-
-## Known Security / Platform Limitation
+## Accepted Security / Platform Limitation
 
 ### Clipboard auto-clear can fail while KeyPass is backgrounded on Android 12
 
-**Severity:** Medium
-**Device:** Samsung Galaxy A11, Android 12 / API 31
+**Severity:** Medium  
+**Device:** Samsung Galaxy A11, Android 12 / API 31  
+**Release decision:** Accepted and documented for `v0.1-prototype`
 
 Observed:
 
@@ -116,7 +132,7 @@ Observed:
 
 The implementation performs an ownership check before clearing. On Android versions that restrict clipboard reads when an app lacks focus, that ownership check may be unavailable, so cleanup is skipped rather than risking deletion of clipboard content written by another application.
 
-Android 13+ has platform clipboard expiration, but this device does not provide that fallback.
+Android 13+ provides platform clipboard expiration. No additional clipboard behavior change is being introduced immediately before the prototype release.
 
 ## Lower-Severity UX Findings
 
@@ -130,7 +146,7 @@ Android 13+ has platform clipboard expiration, but this device does not provide 
 - Wrong master password does not open the vault.
 - Repeated wrong-password attempts do not expose credential data.
 - Corrupted-vault decode failure does not overwrite the source vault.
-- Storage-write failure did not alter the existing KDBX file in the controlled test.
+- Storage-write failure does not alter the existing KDBX file in the controlled regression test.
 - Persisted vault starts with the expected KDBX signature `03 d9 a2 9a 67 fb 4b b5`.
 - Tested credential markers were not found in plaintext app-private storage.
 - Tested credential values and decrypted payload markers were not observed in normal Logcat inspection.
@@ -140,15 +156,6 @@ Android 13+ has platform clipboard expiration, but this device does not provide 
 
 ## Release Gate
 
-`v0.1-prototype` should **not** be tagged from this checkpoint.
+All previously confirmed release blockers are resolved and physically regression-tested. The remaining Android 12 background clipboard behavior and lower-severity UX findings are explicitly accepted/documented prototype limitations.
 
-Before T087:
-
-1. Fix the lock/load race crash.
-2. Handle storage-write failures without crashing.
-3. Prevent duplicate creation from repeated Save actions.
-4. Repeat the affected unit/integration checks.
-5. Repeat focused physical-device regression tests on the Galaxy A11.
-6. Decide whether the Android 12 background clipboard limitation is accepted/documented or requires additional mitigation.
-
-T080–T086 are considered complete because the required physical testing was executed and the observed failures/limitations are explicitly documented. T087 remains open until the release blockers are resolved.
+The release evidence is ready for T087. After this documentation update is committed and pushed, tag the resulting commit as `v0.1-prototype`.
