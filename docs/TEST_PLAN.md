@@ -136,6 +136,18 @@ Using permitted development/debug tooling:
 - [ ] Persisted vault is KDBX.
 - [ ] Temporary files do not contain obvious plaintext credentials after normal close/lock.
 
+### T074 static storage audit
+
+Source audit at checkpoint `d40f6d9` found:
+
+- The prototype vault is created at `filesDir/vault.kdbx` and credential CRUD persists through `KotpassVaultRepository`.
+- Repository mutation writes first to a temporary file in the same directory, but the temporary content is produced by Kotpass `encode(...)`; backup files are also KDBX data rather than plaintext credential exports.
+- No active credential export/write path to JSON, CSV, text, SQLite, cache, or another plaintext file was found.
+- Two Hilt ViewModels still requested the legacy Room `AppDatabase`; `BottomNavViewModel` used it only for legacy tag navigation and `MySettingsViewModel` did not use it. Those runtime dependencies were removed so normal prototype navigation/settings no longer cause the secondary Room/SQLCipher database to be provisioned.
+- Legacy Room/SQLCipher classes remain in `common` for now but have no application-side consumer in the prototype runtime credential flow.
+
+Physical-device storage inspection remains required in Phase 8 to confirm runtime files and temporary-file cleanup behavior on-device.
+
 ## 12. Logging Inspection
 
 Run representative flows while monitoring logs:

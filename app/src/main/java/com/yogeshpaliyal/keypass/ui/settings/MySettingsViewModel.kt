@@ -7,6 +7,5 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MySettingsViewModel @Inject constructor(
-    application: Application,
-    val appDb: com.yogeshpaliyal.common.AppDatabase
+    application: Application
 ) : AndroidViewModel(application)
