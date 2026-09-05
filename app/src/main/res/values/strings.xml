@@ -59,6 +59,7 @@
     <string name="incorrect_password">Incorrect Password</string>
     <string name="password_no_match">The password did not match</string>
     <string name="vault_creation_failed">Could not create vault</string>
+    <string name="vault_write_failed">Could not update vault. Please try again.</string>
     <string name="change_app_password">Change App Password</string>
     <string name="change_app_hint">Change Hint</string>
     <string name="remove_app_hint">Remove Hint</string>

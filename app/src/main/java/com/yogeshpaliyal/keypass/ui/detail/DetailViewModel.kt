@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yogeshpaliyal.keypass.vault.Credential
 import com.yogeshpaliyal.keypass.vault.VaultRepository
+import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +14,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+internal enum class DetailOperationError {
+    VaultWriteFailed
+}
 
 /*
 * @author Yogesh Paliyal
@@ -33,6 +38,9 @@ class DetailViewModel internal constructor(
 
     private val _credential = MutableStateFlow<Credential?>(null)
     val credential: StateFlow<Credential?> = _credential.asStateFlow()
+
+    private val _operationError = MutableStateFlow<DetailOperationError?>(null)
+    internal val operationError: StateFlow<DetailOperationError?> = _operationError.asStateFlow()
 
     fun loadCredential(id: String?): Job {
         val generation = loadGeneration.incrementAndGet()
@@ -72,9 +80,13 @@ class DetailViewModel internal constructor(
         credential: Credential,
         onExecCompleted: () -> Unit
     ): Job = workScope.launch {
-        vaultRepository.createCredential(
-            credential.copy(id = UUID.randomUUID().toString())
-        )
+        _operationError.value = null
+        val saved = runVaultMutation {
+            vaultRepository.createCredential(
+                credential.copy(id = UUID.randomUUID().toString())
+            )
+        }
+        if (!saved) return@launch
         onExecCompleted()
     }
 
@@ -83,7 +95,11 @@ class DetailViewModel internal constructor(
         onExecCompleted: () -> Unit
     ): Job = workScope.launch {
         require(credential.id.isNotBlank()) { "Credential ID is required for update." }
-        vaultRepository.updateCredential(credential)
+        _operationError.value = null
+        val saved = runVaultMutation {
+            vaultRepository.updateCredential(credential)
+        }
+        if (!saved) return@launch
         editBaseline = null
         onExecCompleted()
     }
@@ -93,10 +109,18 @@ class DetailViewModel internal constructor(
         onExecCompleted: () -> Unit
     ): Job = workScope.launch {
         require(id.isNotBlank()) { "Credential ID is required for delete." }
-        vaultRepository.deleteCredential(id)
+        _operationError.value = null
+        val saved = runVaultMutation {
+            vaultRepository.deleteCredential(id)
+        }
+        if (!saved) return@launch
         editBaseline = null
         _credential.value = null
         onExecCompleted()
+    }
+
+    fun clearOperationError() {
+        _operationError.value = null
     }
 
     fun clearSensitiveState() {
@@ -105,6 +129,7 @@ class DetailViewModel internal constructor(
         loadJob = null
         editBaseline = null
         _credential.value = null
+        _operationError.value = null
     }
 
     override fun onCleared() {
@@ -123,6 +148,15 @@ class DetailViewModel internal constructor(
             throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }
+
+    private suspend fun runVaultMutation(block: suspend () -> Unit): Boolean =
+        try {
+            block()
+            true
+        } catch (_: IOException) {
+            _operationError.value = DetailOperationError.VaultWriteFailed
+            false
+        }
 
     private fun emptyCredential() = Credential(
         id = "",

@@ -3,6 +3,8 @@ package com.yogeshpaliyal.keypass.ui.detail
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -14,7 +16,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.detail.components.BottomBar
 import com.yogeshpaliyal.keypass.ui.detail.components.CredentialDetail
 import com.yogeshpaliyal.keypass.ui.detail.components.FABAddAccount
@@ -41,9 +45,19 @@ fun AccountDetailPage(id: String?) {
     }
     val viewModel: DetailViewModel = viewModel(factory = viewModelFactory)
     val credentialState by viewModel.credential.collectAsState()
+    val operationError by viewModel.operationError.collectAsState()
     val isNewCredential = id == null
     var showEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
     var showPasswordGenerator by rememberSaveable(id) { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val vaultWriteFailedMessage = stringResource(R.string.vault_write_failed)
+
+    LaunchedEffect(operationError) {
+        if (operationError == DetailOperationError.VaultWriteFailed) {
+            snackbarHostState.showSnackbar(vaultWriteFailedMessage)
+            viewModel.clearOperationError()
+        }
+    }
 
     LaunchedEffect(key1 = id) {
         viewModel.loadCredential(id)
@@ -122,6 +136,7 @@ fun AccountDetailPage(id: String?) {
                 }
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FABAddAccount {
                 if (isNewCredential) {
