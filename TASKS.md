@@ -149,7 +149,7 @@ Prototype is done only when:
 
 ## Phase 11 — Approved Screen Rollout
 
-- [ ] **T110** Refine Auth/Create/Confirm/Unlock using existing `AuthState` and repository operations; add explicit button loading states.
+- [x] **T110** Refine Auth/Create/Confirm/Unlock using existing `AuthState` and repository operations; add explicit button loading states.
 - [ ] **T111** Refine Vault/Dashboard, including top-app-bar lock, search/sort, list rows, empty state, Extended FAB, and 3-item bottom navigation.
 - [ ] **T112** Refine Credential Detail into a read-first presentation with safe copy/reveal and low-prominence delete flow.
 - [ ] **T113** Refine Create/Edit form, contextual generator access, validation, saving feedback, and lightweight unsaved-change confirmation.
