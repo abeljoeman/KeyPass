@@ -1,6 +1,7 @@
 package com.yogeshpaliyal.keypass.ui.home
 
 import com.yogeshpaliyal.keypass.vault.Credential
+import com.yogeshpaliyal.keypass.vault.VaultLockedException
 import com.yogeshpaliyal.keypass.vault.VaultRepository
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -10,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -213,6 +215,25 @@ class DashboardViewModelTest {
             assertTrue(viewModel.credentials.value.isEmpty())
         } finally {
             releaseQuery.countDown()
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun loadCredentialsWhenVaultIsLockedCompletesWithoutPublishingData() = runBlocking {
+        val repository = FakeVaultRepository(
+            listBlock = { throw VaultLockedException() }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DashboardViewModel(repository, scope)
+
+        try {
+            val loadJob = viewModel.loadCredentials(null)
+            loadJob.join()
+
+            assertFalse(loadJob.isCancelled)
+            assertTrue(viewModel.credentials.value.isEmpty())
+        } finally {
             scope.cancel()
         }
     }

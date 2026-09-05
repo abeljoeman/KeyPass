@@ -130,7 +130,7 @@ class KotpassVaultRepositoryTest {
             val credentialAccess = runCatching { repository.listCredentials() }
             assertTrue(
                 "Repository must be locked after a failed open.",
-                credentialAccess.exceptionOrNull() is IllegalStateException
+                credentialAccess.exceptionOrNull() is VaultLockedException
             )
         }
     }
@@ -157,7 +157,7 @@ class KotpassVaultRepositoryTest {
             val credentialAccess = runCatching { repository.listCredentials() }
             assertTrue(
                 "Repository must remain locked after a corrupted-vault open.",
-                credentialAccess.exceptionOrNull() is IllegalStateException
+                credentialAccess.exceptionOrNull() is VaultLockedException
             )
         } finally {
             if (vaultFile.exists() && !vaultFile.delete()) {

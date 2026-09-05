@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.yogeshpaliyal.keypass.vault.Credential
+import com.yogeshpaliyal.keypass.vault.VaultLockedException
 import com.yogeshpaliyal.keypass.vault.VaultRepository
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicLong
@@ -41,10 +42,14 @@ class DashboardViewModel internal constructor(
         val generation = queryGeneration.incrementAndGet()
         queryJob?.cancel()
         return workScope.launch {
-            val result = if (keyword.isNullOrBlank()) {
-                vaultRepository.listCredentials()
-            } else {
-                vaultRepository.searchCredentials(keyword)
+            val result = try {
+                if (keyword.isNullOrBlank()) {
+                    vaultRepository.listCredentials()
+                } else {
+                    vaultRepository.searchCredentials(keyword)
+                }
+            } catch (_: VaultLockedException) {
+                return@launch
             }
             if (queryGeneration.get() == generation) {
                 _credentials.value = sortCredentials(result, sortField, sortAscending)

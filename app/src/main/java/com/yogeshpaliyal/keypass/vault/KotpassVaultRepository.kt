@@ -161,11 +161,12 @@ class KotpassVaultRepository(
     }
 
     private fun unlockedDatabase(): KeePassDatabase = synchronized(stateLock) {
-        checkNotNull(database) { "Vault is locked." }
+        database ?: throw VaultLockedException()
     }
 
     private fun unlockedSession(): Pair<KeePassDatabase, Long> = synchronized(stateLock) {
-        checkNotNull(database) { "Vault is locked." } to sessionVersion
+        val unlocked = database ?: throw VaultLockedException()
+        unlocked to sessionVersion
     }
 
     private fun completeMutation(

@@ -1,5 +1,7 @@
 package com.yogeshpaliyal.keypass.vault
 
+class VaultLockedException : IllegalStateException("Vault is locked.")
+
 interface VaultRepository {
     suspend fun createVault(masterPassword: CharArray)
 
