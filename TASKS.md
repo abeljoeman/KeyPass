@@ -111,7 +111,7 @@
 - [x] **T084** Test background/foreground lock behavior.
 - [x] **T085** Test process kill and recovery.
 - [x] **T086** Capture known limitations in `docs/TEST_RESULTS.md`.
-- [ ] **T087** Tag prototype release `v0.1-prototype`.
+- [x] **T087** Tag prototype release `v0.1-prototype`.
 
 ## Definition of Done for v0.1
 
