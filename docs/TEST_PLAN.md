@@ -99,6 +99,18 @@ This static verification does not replace the runtime Logcat checks in section 1
 - [ ] Copy requires explicit user action.
 - [ ] Clipboard clearing behavior matches implementation/documentation.
 
+### T072 clipboard review
+
+Source review at checkpoint `4f77d84` found two clipboard paths:
+
+- Credential fields dispatch `CopyToClipboard` only from visible copy buttons. The shared input component exposes copy only for non-blank values, and credential detail provides explicit copy buttons for username and password.
+- Credential editor fields can copy title, username, password, URL, and notes when non-blank.
+- The credential clipboard middleware writes plaintext with the generic label `KeyPass`.
+- Generated passwords use a separate clipboard helper with label `random_password`, also only from an explicit Copy action.
+- No automatic clipboard write was found during vault open, credential load/save, password generation, or navigation.
+
+Current limitation: copied values remain in the system clipboard until replaced or cleared. Automatic clearing and any sensitive-clipboard metadata improvements are deferred to T073.
+
 ## 10. Screen Privacy
 
 - [ ] Screenshot of sensitive screen is blocked or blank where supported.
