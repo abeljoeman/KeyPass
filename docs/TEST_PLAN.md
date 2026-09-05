@@ -109,7 +109,18 @@ Source review at checkpoint `4f77d84` found two clipboard paths:
 - Generated passwords use a separate clipboard helper with label `random_password`, also only from an explicit Copy action.
 - No automatic clipboard write was found during vault open, credential load/save, password generation, or navigation.
 
-Current limitation: copied values remain in the system clipboard until replaced or cleared. Automatic clearing and any sensitive-clipboard metadata improvements are deferred to T073.
+Current limitation at T072: copied values remain in the system clipboard until replaced or cleared. Automatic clearing and sensitive-clipboard metadata improvements are addressed in T073.
+
+### T073 clipboard hardening
+
+- All KeyPass clipboard writes now use one shared helper and set `ClipDescription.EXTRA_IS_SENSITIVE`.
+- Android 13+ relies on the platform's automatic clipboard expiration.
+- Android 12L and lower schedule a KeyPass cleanup after 60 seconds.
+- API 28+ uses `clearPrimaryClip()`; API 23-27 replaces the owned clip with an empty clip.
+- Each KeyPass copy receives a unique non-secret ownership label. Delayed cleanup only clears when that exact label is still current, so a later clipboard value is not intentionally overwritten.
+- If Android prevents KeyPass from inspecting the current clipboard while the app lacks focus, cleanup is skipped rather than risking deletion of a newer clipboard value.
+
+Physical-device verification remains part of the Phase 8 clipboard checklist.
 
 ## 10. Screen Privacy
 

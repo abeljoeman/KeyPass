@@ -1,15 +1,13 @@
 package com.yogeshpaliyal.keypass.ui.redux.middlewares
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastActionStr
 import com.yogeshpaliyal.keypass.ui.redux.actions.UtilityAction
 import com.yogeshpaliyal.keypass.ui.redux.states.KeyPassState
+import com.yogeshpaliyal.keypass.utils.copySensitiveTextToClipboard
 import org.reduxkotlin.Store
 import org.reduxkotlin.middleware
 
@@ -45,12 +43,11 @@ private fun Store<KeyPassState>.handleAction(action: Any, state: KeyPassState) {
 
             is CopyToClipboard -> {
                 state.context?.let {
-                    val clipboard = ContextCompat.getSystemService(
-                        it,
-                        ClipboardManager::class.java
+                    copySensitiveTextToClipboard(
+                        context = it,
+                        text = action.password,
+                        label = "KeyPass"
                     )
-                    val clip = ClipData.newPlainText("KeyPass", action.password)
-                    clipboard?.setPrimaryClip(clip)
                     dispatch(ToastAction(action.successMessage))
                 }
             }
