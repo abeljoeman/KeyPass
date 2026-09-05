@@ -104,13 +104,13 @@
 
 ## Phase 8 — Prototype Test Pass
 
-- [ ] **T080** Execute `docs/TEST_PLAN.md` on a physical device.
-- [ ] **T081** Test with at least 20 credentials.
-- [ ] **T082** Test wrong master password.
-- [ ] **T083** Test app restart and vault reopen.
-- [ ] **T084** Test background/foreground lock behavior.
-- [ ] **T085** Test process kill and recovery.
-- [ ] **T086** Capture known limitations.
+- [x] **T080** Execute `docs/TEST_PLAN.md` on a physical device.
+- [x] **T081** Test with at least 20 credentials.
+- [x] **T082** Test wrong master password.
+- [x] **T083** Test app restart and vault reopen.
+- [x] **T084** Test background/foreground lock behavior.
+- [x] **T085** Test process kill and recovery.
+- [x] **T086** Capture known limitations in `docs/TEST_RESULTS.md`.
 - [ ] **T087** Tag prototype release `v0.1-prototype`.
 
 ## Definition of Done for v0.1

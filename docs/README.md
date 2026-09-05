@@ -39,6 +39,10 @@ Security assets, threats, trust boundaries, and mitigations.
 
 Physical-device and prototype release checklist.
 
+### `docs/TEST_RESULTS.md`
+
+Recorded physical-device results, known limitations, and release-gate findings for the current prototype test pass.
+
 ### `docs/adr/`
 
 Small Architecture Decision Records for choices that should not be repeatedly re-litigated.
