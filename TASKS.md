@@ -128,3 +128,53 @@ Prototype is done only when:
 - [x] Sensitive data is not found in normal logs during test flows.
 - [x] Prototype runs without a backend.
 - [x] Physical-device test checklist passes or failures are explicitly documented.
+
+## Phase 9 — UI/UX Source of Truth
+
+- [x] **T090** Complete screen-by-screen UX-flow review for the retained prototype capability set.
+- [x] **T091** Complete component mapping for Vault, Credential Detail, Create/Edit, Auth, Generator, and Settings.
+- [x] **T092** Define dark-only visual direction, icon rules, loading/error conventions, accessibility baseline, and replaceable brand layer.
+- [ ] **T093** Apply and review the consolidated source-of-truth documentation patch.
+- [ ] **T094** Confirm the implementation task sequence below before starting UI code changes.
+
+**Checkpoint:** UI implementation does not begin until the consolidated documentation is accepted in the repository.
+
+## Phase 10 — UI Foundation
+
+- [ ] **T100** Implement fixed dark Material 3 theme and dark startup/window treatment without changing product architecture.
+- [ ] **T101** Replace global Roboto Mono UI typography with Material/platform sans-serif roles; retain monospace only where useful for secrets.
+- [ ] **T102** Establish the small Material Symbols icon set and localized accessibility descriptions without adding a mega icon dependency.
+- [ ] **T103** Add only justified reusable application-specific UI components needed by multiple approved screens.
+- [ ] **T104** Verify the foundation on emulator and Samsung Galaxy A11 before broad rollout.
+
+## Phase 11 — Approved Screen Rollout
+
+- [ ] **T110** Refine Auth/Create/Confirm/Unlock using existing `AuthState` and repository operations; add explicit button loading states.
+- [ ] **T111** Refine Vault/Dashboard, including top-app-bar lock, search/sort, list rows, empty state, Extended FAB, and 3-item bottom navigation.
+- [ ] **T112** Refine Credential Detail into a read-first presentation with safe copy/reveal and low-prominence delete flow.
+- [ ] **T113** Refine Create/Edit form, contextual generator access, validation, saving feedback, and lightweight unsaved-change confirmation.
+- [ ] **T114** Refine Standalone Generator using the existing engine/config, automatic fresh generation, simplified options, and secure copy behavior.
+- [ ] **T115** Refine Settings into simple sections/list rows; preserve Password Hint/Auto-lock/Help/About and do not promote biometric UI.
+- [ ] **T116** Ensure global Back/lock/navigation state follows `docs/UX_UI_BASELINE.md`.
+
+## Phase 12 — UX Feedback, Accessibility, and Regression
+
+- [ ] **T120** Standardize Snackbar, inline error, AlertDialog, and operation-loading behavior.
+- [ ] **T121** Add static credential placeholders only where device testing shows perceptible content loading; do not add shimmer.
+- [ ] **T122** Validate touch targets, localized icon semantics, font scaling, and a basic TalkBack pass.
+- [ ] **T123** Validate long-title, no-results, dirty-form, wrong-password, save/delete failure, and lock-during-transient-state flows.
+- [ ] **T124** Run relevant unit tests and full regression build/test pass.
+- [ ] **T125** Run physical-device UX validation on Samsung Galaxy A11 and record findings.
+
+## Brand Decision Gate — Required Before Public Release Preparation
+
+Do not proceed from UX validation into public/store release preparation until all items below are resolved:
+
+- [ ] **B001** Select the final product name; `KeyPass` remains the working development name until then.
+- [ ] **B002** Perform appropriate trademark/name clearance for intended markets.
+- [ ] **B003** Finalize app icon/logo and brand assets.
+- [ ] **B004** Finalize Android `applicationId` / package identity strategy.
+- [ ] **B005** Finalize signing/store identity and store-facing product name.
+- [ ] **B006** Confirm upstream/open-source attribution and third-party license presentation.
+
+**Hard gate:** stop and explicitly review branding here before public release work.

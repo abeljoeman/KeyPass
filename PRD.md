@@ -1,7 +1,8 @@
 # Product Requirements Document — Android Password Manager Prototype
 
-**Status:** Draft  
+**Status:** Approved prototype baseline; UI/UX refinement planned
 **Created:** 2026-08-24  
+**Updated:** 2026-09-05
 **Target:** Android prototype  
 **Primary goal:** Validate the core password-manager experience with the smallest reasonable implementation and without creating security-critical infrastructure from scratch.
 
@@ -15,7 +16,7 @@ The prototype must prove that the core UX is useful and that an existing encrypt
 
 Build a functional Android prototype that allows a user to:
 
-1. Create or open a local encrypted vault.
+1. Create the app-private encrypted vault on first launch when no vault exists.
 2. Unlock the vault using a master password.
 3. View stored credentials.
 4. Add, edit, and delete credentials.
@@ -43,6 +44,11 @@ The following are explicitly out of scope for the prototype unless separately ap
 - Analytics or telemetry
 - Advertising
 - Custom cryptographic algorithms or custom encrypted-vault formats
+- External vault picker/import/export flows
+- Biometric unlock expansion during the next UI/UX refinement
+- OCR/camera capture
+- Theme selector or light theme
+- Rebranding implementation before the Brand Decision Gate
 
 ## 4. Product Principles
 
@@ -55,15 +61,17 @@ The following are explicitly out of scope for the prototype unless separately ap
 
 ## 5. User Stories
 
-### US1 — Create or Open Vault (P1)
+### US1 — Create or Unlock Local Vault (P1)
 
-As a user, I want to create or open an encrypted vault so that my credentials are stored locally.
+As a user, I want the app to create my encrypted local vault on first launch and unlock that same vault on later launches.
 
 **Acceptance scenarios**
 
-1. Given no vault exists, when the user creates a vault with a master password, then an encrypted vault file is created.
-2. Given an existing vault, when the correct master password is entered, then the vault opens.
-3. Given an existing vault, when an incorrect master password is entered, then access is denied and vault contents are not exposed.
+1. Given the app-private `vault.kdbx` does not exist, when the app launches, then the user enters the create-master-password flow.
+2. Given the app-private `vault.kdbx` exists, when the app launches, then the user enters the unlock flow.
+3. Given an existing vault, when the correct master password is entered, then the vault opens.
+4. Given an existing vault, when an incorrect master password is entered, then access is denied and vault contents are not exposed.
+5. The current prototype does not offer an external KDBX picker or an "Open Existing Vault" choice.
 
 ### US2 — View Credentials (P1)
 
@@ -151,12 +159,16 @@ As a user, I want the vault to lock when I leave it or explicitly lock it.
 - **FR-009:** Sensitive screens SHOULD prevent screenshots/screen recording where supported.
 - **FR-010:** The prototype SHOULD run without Android INTERNET permission unless a dependency makes it strictly necessary and the exception is documented.
 - **FR-011:** The prototype MUST fail closed when vault decryption/opening fails.
+- **FR-012:** The prototype MUST use the app-private `vault.kdbx` as its current single persisted vault and MUST NOT silently create/overwrite it after an open/decode failure.
+- **FR-013:** The next UI/UX refinement MUST preserve the current architecture and feature scope unless a separate requirement explicitly changes them.
+- **FR-014:** The next UI/UX refinement MUST follow `docs/UX_UI_BASELINE.md`.
+- **FR-015:** The product MUST NOT proceed from UX validation into public/store release preparation until the Brand Decision Gate is completed.
 
 ## 7. Key Entities
 
 ### Vault
 
-Represents one local encrypted credential store.
+Represents the current single app-private encrypted credential store (`vault.kdbx`).
 
 ### Credential
 
@@ -206,3 +218,23 @@ Prototype is considered successful when:
 - Existing open-source Android password-manager code is reused where practical.
 - Existing KDBX support is preferred over inventing a new encrypted database format.
 - Physical-device testing is available.
+
+## 11. Next UI/UX Refinement
+
+The approved next-build UX/UI contract is `docs/UX_UI_BASELINE.md`.
+
+The refinement is successful when:
+
+- Approved flows are implemented without architecture expansion.
+- Dark-only presentation is consistent from launch through operational screens.
+- Loading/error feedback is clear on the physical test device.
+- Core CRUD, search, generator, clipboard, and lock behavior remain regression-safe.
+- Accessibility basics are validated, including touch targets, localized icon semantics, font scaling, and a basic TalkBack pass.
+
+Working product name:
+
+```text
+KeyPass
+```
+
+Final public branding remains undecided. The team MUST stop at the Brand Decision Gate before public/store release preparation to decide the final name, trademark clearance, app icon/logo, final `applicationId`/package identity strategy, signing/store identity, and attribution presentation.

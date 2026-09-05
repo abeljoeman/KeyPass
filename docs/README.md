@@ -23,6 +23,26 @@ Defines what the prototype must do and what is out of scope.
 
 Defines how the prototype is implemented.
 
+### `docs/UX_UI_BASELINE.md`
+
+Defines the approved next-build UX flows, component mapping, visual direction, interaction states, accessibility baseline, and UI-specific scope guardrails. It is required input for UI/UX tasks and remains subordinate to `ENGINEERING_PRINCIPLES.md`, `PRD.md`, and `TSD.md`.
+
+### `docs/FEATURES.md`
+
+Feature inventory using `[CURRENT]`, `[PROPOSED]`, `[FUTURE]`, and `[IDEA]` labels.
+
+### `docs/ROADMAP.md`
+
+Sequencing and release gates. Roadmap items are not promises.
+
+### `docs/NEXT_BUILD_NOTES.md`
+
+Implementation-facing notes and targeted follow-ups for the next UI/UX build.
+
+### `CHANGELOG.md`
+
+Records completed/released work and planning artifacts that actually land in version control.
+
 ### `TASKS.md`
 
 Executable implementation backlog for humans and AI coding agents.
@@ -92,13 +112,15 @@ Read and obey:
 1. ENGINEERING_PRINCIPLES.md
 2. PRD.md
 3. TSD.md
-4. relevant docs/adr files
+4. docs/UX_UI_BASELINE.md when the task affects UI/UX
+5. relevant docs/adr files
 
 Constraints:
 - Do not implement adjacent tasks.
 - Reuse existing code before creating new code.
 - Do not introduce a new dependency without justification.
 - Do not invent cryptographic behavior.
+- Do not expand product scope as a side effect of UI work.
 - Run the relevant build/tests before finishing.
 - Summarize changed files and remaining risks.
 ```
