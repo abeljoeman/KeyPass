@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
+import com.yogeshpaliyal.keypass.R
 
 @Composable
 fun KeyPassInputField(
@@ -52,7 +53,7 @@ fun KeyPassInputField(
                         ) {
                             Icon(
                                 painter = rememberVectorPainter(image = Icons.Rounded.ContentCopy),
-                                contentDescription = "Copy To Clipboard"
+                                contentDescription = stringResource(R.string.a11y_copy_to_clipboard)
                             )
                         }
                     }

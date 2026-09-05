@@ -1,8 +1,8 @@
 package com.yogeshpaliyal.keypass.ui.detail.components
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -44,8 +44,8 @@ fun BottomBar(
         navigationIcon = {
             IconButton(onClick = backPressed) {
                 Icon(
-                    painter = rememberVectorPainter(image = Icons.Rounded.ArrowBackIosNew),
-                    contentDescription = "Go Back",
+                    painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.ArrowBack),
+                    contentDescription = stringResource(R.string.back),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -58,7 +58,7 @@ fun BottomBar(
             ) {
                 Icon(
                     painter = rememberVectorPainter(image = Icons.Default.Password),
-                    contentDescription = "Open Password Configuration",
+                    contentDescription = stringResource(R.string.a11y_password_options),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -70,7 +70,7 @@ fun BottomBar(
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Icons.Rounded.Delete),
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -113,7 +113,7 @@ fun FABAddAccount(
     ) {
         Icon(
             painter = rememberVectorPainter(image = Icons.Rounded.Done),
-            contentDescription = "Save Changes"
+            contentDescription = stringResource(R.string.a11y_save_changes)
         )
     }
 }

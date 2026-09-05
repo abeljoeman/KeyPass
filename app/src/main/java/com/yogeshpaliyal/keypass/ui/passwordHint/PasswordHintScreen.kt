@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
-import androidx.compose.material.icons.rounded.HelpOutline
+import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -95,8 +94,8 @@ fun PasswordHintScreen() {
                             modifier = Modifier.align(Alignment.End)
                         ) {
                             Icon(
-                                imageVector = Icons.Rounded.HelpOutline,
-                                contentDescription = "Help",
+                                imageVector = Icons.AutoMirrored.Rounded.HelpOutline,
+                                contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(

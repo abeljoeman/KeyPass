@@ -149,7 +149,7 @@ fun NoDataFound() {
         }
         Image(
             painter = painterResource(R.drawable.ic_undraw_empty_street_sfxm),
-            contentDescription = ""
+            contentDescription = null
         )
     }
 }

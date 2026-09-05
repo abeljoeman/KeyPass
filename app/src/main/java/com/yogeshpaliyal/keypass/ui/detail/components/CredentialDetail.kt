@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
@@ -63,8 +63,8 @@ fun CredentialDetail(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            painter = rememberVectorPainter(image = Icons.Rounded.ArrowBackIosNew),
-                            contentDescription = "Go Back",
+                            painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.ArrowBack),
+                            contentDescription = stringResource(R.string.back),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -172,7 +172,7 @@ private fun CredentialDetailField(
                         IconButton(onClick = onCopy) {
                             Icon(
                                 painter = rememberVectorPainter(image = Icons.Rounded.ContentCopy),
-                                contentDescription = "Copy To Clipboard"
+                                contentDescription = stringResource(R.string.a11y_copy_to_clipboard)
                             )
                         }
                     }

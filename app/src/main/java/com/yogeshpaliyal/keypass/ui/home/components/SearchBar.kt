@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.home.SortingField
 import com.yogeshpaliyal.keypass.ui.home.SortingOrder
 
@@ -45,7 +47,7 @@ fun SearchBar(
                     IconButton(onClick = { updateKeyword("") }) {
                         Icon(
                             painter = rememberVectorPainter(image = Icons.Rounded.Close),
-                            contentDescription = ""
+                            contentDescription = stringResource(R.string.a11y_clear_search)
                         )
                     }
                 }
@@ -55,7 +57,7 @@ fun SearchBar(
                 }) {
                     Icon(
                         painter = rememberVectorPainter(image = Icons.Rounded.Sort),
-                        contentDescription = ""
+                        contentDescription = stringResource(R.string.a11y_sort_credentials)
                     )
                 }
             }

@@ -1,11 +1,10 @@
 package com.yogeshpaliyal.keypass.ui.nav.components
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.VpnKey
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -19,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultBottomAppBar
@@ -65,8 +65,8 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             dispatchAction(NavigationAction(HomeState(), true))
         }) {
             Icon(
-                painter = rememberVectorPainter(image = Icons.Outlined.Home),
-                contentDescription = "Home",
+                painter = painterResource(R.drawable.ic_vault_shield_lock),
+                contentDescription = stringResource(R.string.a11y_vault),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -75,8 +75,8 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             dispatchAction(IntentNavigation.GeneratePassword)
         }) {
             Icon(
-                painter = rememberVectorPainter(image = Icons.Outlined.VpnKey),
-                contentDescription = "Generate Password",
+                painter = rememberVectorPainter(image = Icons.Default.Password),
+                contentDescription = stringResource(R.string.a11y_password_generator),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -87,7 +87,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             }) {
                 Icon(
                     painter = rememberVectorPainter(image = Icons.Outlined.Menu),
-                    contentDescription = "Menu",
+                    contentDescription = stringResource(R.string.a11y_navigation_menu),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -101,7 +101,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
         }) {
             Icon(
                 painter = rememberVectorPainter(image = Icons.Outlined.Settings),
-                contentDescription = "Settings",
+                contentDescription = stringResource(R.string.a11y_settings),
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -128,7 +128,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             }) {
                 Icon(
                     painter = rememberVectorPainter(image = Icons.Rounded.Add),
-                    contentDescription = "Add"
+                    contentDescription = stringResource(R.string.a11y_add_credential)
                 )
             }
         })

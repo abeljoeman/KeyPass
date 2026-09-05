@@ -30,7 +30,7 @@ fun NavItem(item: NavigationModelItem.NavMenuItem, onClick: () -> Unit) {
         ) {
             Icon(
                 painter = painterResource(id = item.icon),
-                contentDescription = ""
+                contentDescription = null
             )
             Spacer(modifier = Modifier.width(32.dp))
             Text(

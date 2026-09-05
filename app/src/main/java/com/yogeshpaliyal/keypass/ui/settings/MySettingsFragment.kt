@@ -41,6 +41,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
 import com.yogeshpaliyal.common.utils.email
@@ -242,7 +243,7 @@ fun MySettingCompose() {
       onValueChange = { searchQuery = it },
       modifier = Modifier.fillMaxWidth().padding(16.dp),
       placeholder = { Text(text = "Search settings...") },
-      leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+      leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
       singleLine = true,
       shape = MaterialTheme.shapes.medium
     )
@@ -265,7 +266,9 @@ fun MySettingCompose() {
         IconButton(onClick = { isSecurityExpanded = !isSecurityExpanded }) {
           Icon(
             imageVector = if (isSecurityExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-            contentDescription = if (isSecurityExpanded) "Collapse" else "Expand"
+            contentDescription = stringResource(
+              if (isSecurityExpanded) R.string.a11y_collapse_section else R.string.a11y_expand_section
+            )
           )
         }
       }
@@ -365,7 +368,9 @@ fun MySettingCompose() {
         IconButton(onClick = { isHelpExpanded = !isHelpExpanded }) {
           Icon(
             imageVector = if (isHelpExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-            contentDescription = if (isHelpExpanded) "Collapse" else "Expand"
+            contentDescription = stringResource(
+              if (isHelpExpanded) R.string.a11y_collapse_section else R.string.a11y_expand_section
+            )
           )
         }
       }

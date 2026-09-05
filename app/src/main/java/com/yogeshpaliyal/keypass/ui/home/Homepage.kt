@@ -20,8 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.home.components.CredentialsList
 import com.yogeshpaliyal.keypass.ui.home.components.SearchBar
 import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
@@ -99,7 +101,7 @@ fun Homepage(homeState: HomeState) {
                                 }) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Icons.Rounded.Close),
-                                        contentDescription = ""
+                                        contentDescription = stringResource(R.string.a11y_clear_tag_filter)
                                     )
                                 }
                             })

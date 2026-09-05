@@ -26,10 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.yogeshpaliyal.common.data.PasswordConfig
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.common.utils.PasswordGenerator
 import com.yogeshpaliyal.keypass.ui.generate.ui.components.CheckboxWithLabel
 import com.yogeshpaliyal.keypass.ui.generate.ui.components.PasswordLengthInput
@@ -81,7 +83,7 @@ private fun GeneratePasswordFab(onGeneratePasswordClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.Refresh,
-            contentDescription = ""
+            contentDescription = stringResource(R.string.a11y_regenerate_password)
         )
     }
 }
@@ -154,7 +156,7 @@ private fun PasswordTextField(
             ) {
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "Copy password"
+                    contentDescription = stringResource(R.string.a11y_copy_to_clipboard)
                 )
             }
         },

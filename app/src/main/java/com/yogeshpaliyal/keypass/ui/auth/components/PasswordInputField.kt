@@ -62,8 +62,9 @@ fun PasswordInputField(
                 Icons.Rounded.Visibility
             } else Icons.Rounded.VisibilityOff
 
-            // Please provide localized description for accessibility services
-            val description = if (passwordVisible) "Hide password" else "Show password"
+            val description = stringResource(
+                if (passwordVisible) R.string.a11y_hide_password else R.string.a11y_show_password
+            )
             Row {
                 IconButton(onClick = { setPasswordVisible(!passwordVisible) }) {
                     Icon(imageVector = image, description)
@@ -72,7 +73,10 @@ fun PasswordInputField(
                     IconButton(onClick = {
                         dispatchAction(ToastActionStr(hint))
                     }) {
-                        Icon(imageVector = Icons.Outlined.Info, "Hint")
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(R.string.a11y_password_hint)
+                        )
                     }
                 }
             }

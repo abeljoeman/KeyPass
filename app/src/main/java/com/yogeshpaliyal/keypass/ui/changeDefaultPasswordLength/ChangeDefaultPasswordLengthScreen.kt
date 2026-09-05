@@ -208,7 +208,7 @@ private fun FloatingActionButton(
     ) {
         Icon(
             painter = rememberVectorPainter(image = Icons.Rounded.Done),
-            contentDescription = "Save Changes",
+            contentDescription = stringResource(R.string.a11y_save_changes),
             tint = MaterialTheme.colorScheme.onPrimaryContainer
         )
     }

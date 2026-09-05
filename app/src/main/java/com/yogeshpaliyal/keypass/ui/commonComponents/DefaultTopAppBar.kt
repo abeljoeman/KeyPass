@@ -2,7 +2,7 @@ package com.yogeshpaliyal.keypass.ui.commonComponents
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
 import org.reduxkotlin.compose.rememberTypedDispatcher
@@ -51,8 +52,8 @@ fun DefaultTopAppBar(
                 dispatchAction(GoBackAction)
             }) {
                 Icon(
-                    painter = rememberVectorPainter(image = Icons.Rounded.ArrowBackIosNew),
-                    contentDescription = "Go Back",
+                    painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.ArrowBack),
+                    contentDescription = stringResource(R.string.back),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }

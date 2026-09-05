@@ -44,9 +44,9 @@ fun PreferenceItem(
         if (!removeIconSpace) {
             Box(modifier = Modifier.width(56.dp), Alignment.CenterStart) {
                 if (painter != null) {
-                    Icon(painter = painter, contentDescription = "")
+                    Icon(painter = painter, contentDescription = null)
                 } else if (icon != null) {
-                    Icon(painter = rememberVectorPainter(image = icon), contentDescription = "")
+                    Icon(painter = rememberVectorPainter(image = icon), contentDescription = null)
                 }
             }
         }
