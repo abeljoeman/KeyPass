@@ -144,7 +144,7 @@ Prototype is done only when:
 - [x] **T100** Implement fixed dark Material 3 theme and dark startup/window treatment without changing product architecture.
 - [x] **T101** Replace global Roboto Mono UI typography with Material/platform sans-serif roles; retain monospace only where useful for secrets.
 - [x] **T102** Establish the small Material Symbols icon set and localized accessibility descriptions without adding a mega icon dependency.
-- [ ] **T103** Add only justified reusable application-specific UI components needed by multiple approved screens.
+- [x] **T103** Add only justified reusable application-specific UI components needed by multiple approved screens.
 - [ ] **T104** Verify the foundation on emulator and Samsung Galaxy A11 before broad rollout.
 
 ## Phase 11 — Approved Screen Rollout
