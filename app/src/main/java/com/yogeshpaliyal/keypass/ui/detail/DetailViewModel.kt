@@ -7,6 +7,7 @@ import com.yogeshpaliyal.keypass.vault.Credential
 import com.yogeshpaliyal.keypass.vault.VaultRepository
 import java.io.IOException
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -33,6 +34,7 @@ class DetailViewModel internal constructor(
     private val workScope: CoroutineScope
         get() = externalScope ?: viewModelScope
     private val loadGeneration = AtomicLong()
+    private val saveInProgress = AtomicBoolean(false)
     private var loadJob: Job? = null
     private var editBaseline: Credential? = null
 
@@ -41,6 +43,9 @@ class DetailViewModel internal constructor(
 
     private val _operationError = MutableStateFlow<DetailOperationError?>(null)
     internal val operationError: StateFlow<DetailOperationError?> = _operationError.asStateFlow()
+
+    private val _isSaving = MutableStateFlow(false)
+    internal val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
 
     fun loadCredential(id: String?): Job {
         val generation = loadGeneration.incrementAndGet()
@@ -79,29 +84,29 @@ class DetailViewModel internal constructor(
     fun createCredential(
         credential: Credential,
         onExecCompleted: () -> Unit
-    ): Job = workScope.launch {
-        _operationError.value = null
-        val saved = runVaultMutation {
+    ): Job = launchSave(
+        mutation = {
             vaultRepository.createCredential(
                 credential.copy(id = UUID.randomUUID().toString())
             )
-        }
-        if (!saved) return@launch
-        onExecCompleted()
-    }
+        },
+        onSuccess = onExecCompleted
+    )
 
     fun updateCredential(
         credential: Credential,
         onExecCompleted: () -> Unit
-    ): Job = workScope.launch {
+    ): Job {
         require(credential.id.isNotBlank()) { "Credential ID is required for update." }
-        _operationError.value = null
-        val saved = runVaultMutation {
-            vaultRepository.updateCredential(credential)
-        }
-        if (!saved) return@launch
-        editBaseline = null
-        onExecCompleted()
+        return launchSave(
+            mutation = {
+                vaultRepository.updateCredential(credential)
+            },
+            onSuccess = {
+                editBaseline = null
+                onExecCompleted()
+            }
+        )
     }
 
     fun deleteCredential(
@@ -146,6 +151,28 @@ class DetailViewModel internal constructor(
                 return DetailViewModel(vaultRepository) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+        }
+    }
+
+    private fun launchSave(
+        mutation: suspend () -> Unit,
+        onSuccess: () -> Unit
+    ): Job {
+        if (!saveInProgress.compareAndSet(false, true)) {
+            return workScope.launch { }
+        }
+
+        _operationError.value = null
+        _isSaving.value = true
+        return workScope.launch {
+            try {
+                if (runVaultMutation(mutation)) {
+                    onSuccess()
+                }
+            } finally {
+                saveInProgress.set(false)
+                _isSaving.value = false
+            }
         }
     }
 

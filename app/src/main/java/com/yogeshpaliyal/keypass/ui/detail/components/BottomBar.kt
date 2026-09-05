@@ -16,9 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import com.yogeshpaliyal.keypass.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -87,8 +90,27 @@ fun BottomBar(
 }
 
 @Composable
-fun FABAddAccount(onSaveClicked: () -> Unit) {
-    FloatingActionButton(modifier = Modifier.testTag("save"), onClick = onSaveClicked) {
+fun FABAddAccount(
+    enabled: Boolean,
+    onSaveClicked: () -> Unit
+) {
+    val modifier = Modifier
+        .testTag("save")
+        .alpha(if (enabled) 1f else 0.5f)
+        .semantics {
+            if (!enabled) {
+                disabled()
+            }
+        }
+
+    FloatingActionButton(
+        modifier = modifier,
+        onClick = {
+            if (enabled) {
+                onSaveClicked()
+            }
+        }
+    ) {
         Icon(
             painter = rememberVectorPainter(image = Icons.Rounded.Done),
             contentDescription = "Save Changes"

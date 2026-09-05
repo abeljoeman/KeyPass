@@ -11,6 +11,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -133,6 +134,53 @@ class DetailViewModelTest {
             assertEquals(draft.notes, created.notes)
             assertTrue(completionCalled)
         } finally {
+            scope.cancel()
+        }
+    }
+
+    @Test
+    fun duplicateCreateWhileSaveIsInProgressIsIgnored() = runBlocking {
+        val createStarted = CountDownLatch(1)
+        val releaseCreate = CountDownLatch(1)
+        var createCalls = 0
+        var completionCalls = 0
+        val repository = FakeVaultRepository(
+            createBlock = {
+                createCalls++
+                createStarted.countDown()
+                assertTrue(releaseCreate.await(5, TimeUnit.SECONDS))
+            }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+        val draft = credential(
+            id = "",
+            title = "Double tap test"
+        )
+
+        try {
+            val firstSave = viewModel.createCredential(draft) {
+                completionCalls++
+            }
+            assertTrue(createStarted.await(5, TimeUnit.SECONDS))
+            assertTrue(viewModel.isSaving.value)
+
+            val duplicateSave = viewModel.createCredential(draft) {
+                completionCalls++
+            }
+            duplicateSave.join()
+
+            assertEquals(1, createCalls)
+            assertEquals(0, completionCalls)
+
+            releaseCreate.countDown()
+            firstSave.join()
+
+            assertEquals(1, createCalls)
+            assertEquals(1, completionCalls)
+            assertFalse(viewModel.isSaving.value)
+        } finally {
+            releaseCreate.countDown()
             scope.cancel()
         }
     }

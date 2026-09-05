@@ -46,6 +46,7 @@ fun AccountDetailPage(id: String?) {
     val viewModel: DetailViewModel = viewModel(factory = viewModelFactory)
     val credentialState by viewModel.credential.collectAsState()
     val operationError by viewModel.operationError.collectAsState()
+    val isSaving by viewModel.isSaving.collectAsState()
     val isNewCredential = id == null
     var showEditor by rememberSaveable(id) { mutableStateOf(isNewCredential) }
     var showPasswordGenerator by rememberSaveable(id) { mutableStateOf(false) }
@@ -138,7 +139,7 @@ fun AccountDetailPage(id: String?) {
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FABAddAccount {
+            FABAddAccount(enabled = !isSaving) {
                 if (isNewCredential) {
                     viewModel.createCredential(
                         credential = credential,

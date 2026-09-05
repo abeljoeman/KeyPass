@@ -41,6 +41,7 @@ class DetailWriteFailureTest {
             saveJob.join()
 
             assertFalse(saveJob.isCancelled)
+            assertFalse(viewModel.isSaving.value)
             assertFalse(completionCalled)
             assertEquals(edited, viewModel.credential.value)
             assertEquals(
