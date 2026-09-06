@@ -7,8 +7,11 @@ import com.yogeshpaliyal.common.data.PasswordConfig
 import com.yogeshpaliyal.common.utils.PasswordGenerator
 import com.yogeshpaliyal.common.utils.getUserSettings
 import com.yogeshpaliyal.common.utils.setPasswordConfig
+import com.yogeshpaliyal.keypass.ui.generate.ui.components.MAX_GENERATED_PASSWORD_LENGTH
+import com.yogeshpaliyal.keypass.ui.generate.ui.components.MIN_GENERATED_PASSWORD_LENGTH
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlin.math.roundToInt
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,23 +36,17 @@ class GeneratePasswordViewModel @Inject constructor(
     fun retrieveSavedPasswordConfig(context: Context) {
         viewModelScope.launch {
             val passwordConfig = context.getUserSettings().passwordConfig
-            _viewState.update {
-                passwordConfig.copy(password = "")
-            }
+            _viewState.value = passwordConfig.sanitizedForGenerator()
+            generatePassword()
         }
     }
 
     fun generatePassword() {
-        val currentViewState = _viewState.value
-
-        val passwordGenerator = PasswordGenerator(
-            currentViewState
+        val currentViewState = _viewState.value.sanitizedForGenerator(
+            preservePassword = true
         )
-
-        _viewState.update {
-            val newPassword = passwordGenerator.generatePassword()
-            it.copy(password = newPassword)
-        }
+        val newPassword = PasswordGenerator(currentViewState).generatePassword()
+        _viewState.value = currentViewState.copy(password = newPassword)
     }
 
     fun clearGeneratedPassword() {
@@ -91,50 +88,127 @@ class GeneratePasswordViewModel @Inject constructor(
     }
 
     fun onPasswordLengthSliderChange(value: Float) {
-        _viewState.update {
-            it.copy(length = value)
+        val normalizedValue = value
+            .roundToInt()
+            .toFloat()
+            .coerceIn(
+                MIN_GENERATED_PASSWORD_LENGTH,
+                MAX_GENERATED_PASSWORD_LENGTH
+            )
+        updateAndGenerate {
+            it.copy(length = normalizedValue)
         }
     }
 
     fun onUppercaseCheckedChange(checked: Boolean) {
-        _viewState.update {
+        updateCategoryAndGenerate(
+            checked = checked,
+            currentlyEnabled = _viewState.value.includeUppercaseLetters
+        ) {
             it.copy(includeUppercaseLetters = checked)
         }
     }
 
     fun onLowercaseCheckedChange(checked: Boolean) {
-        _viewState.update {
+        updateCategoryAndGenerate(
+            checked = checked,
+            currentlyEnabled = _viewState.value.includeLowercaseLetters
+        ) {
             it.copy(includeLowercaseLetters = checked)
         }
     }
 
     fun onNumbersCheckedChange(checked: Boolean) {
-        _viewState.update {
+        updateCategoryAndGenerate(
+            checked = checked,
+            currentlyEnabled = _viewState.value.includeNumbers
+        ) {
             it.copy(includeNumbers = checked)
         }
     }
 
     fun onSymbolsCheckedChange(checked: Boolean) {
-        _viewState.update {
+        updateCategoryAndGenerate(
+            checked = checked,
+            currentlyEnabled = _viewState.value.includeSymbols
+        ) {
             it.copy(includeSymbols = checked)
         }
     }
 
     fun onBlankSpacesCheckedChange(checked: Boolean) {
+        if (checked) return
         _viewState.update {
-            it.copy(includeBlankSpaces = checked)
+            it.copy(includeBlankSpaces = false)
         }
     }
 
     @OptIn(FlowPreview::class)
     private fun observeState(context: Context) {
         viewModelScope.launch {
-            // Save every changed value from password length with a delay
             _viewState
                 .debounce(400)
                 .collectLatest { state ->
-                    context.setPasswordConfig(state.copy(password = ""))
+                    context.setPasswordConfig(
+                        state.copy(
+                            includeBlankSpaces = false,
+                            password = ""
+                        )
+                    )
                 }
         }
+    }
+
+    private fun updateAndGenerate(
+        transform: (PasswordConfig) -> PasswordConfig
+    ) {
+        _viewState.update(transform)
+        generatePassword()
+    }
+
+    private fun updateCategoryAndGenerate(
+        checked: Boolean,
+        currentlyEnabled: Boolean,
+        transform: (PasswordConfig) -> PasswordConfig
+    ) {
+        if (
+            currentlyEnabled &&
+            !checked &&
+            _viewState.value.enabledCategoryCount() <= 1
+        ) {
+            return
+        }
+        updateAndGenerate(transform)
+    }
+
+    private fun PasswordConfig.enabledCategoryCount(): Int = listOf(
+        includeUppercaseLetters,
+        includeLowercaseLetters,
+        includeNumbers,
+        includeSymbols
+    ).count { it }
+
+    private fun PasswordConfig.sanitizedForGenerator(
+        preservePassword: Boolean = false
+    ): PasswordConfig {
+        val normalizedLength = length
+            .roundToInt()
+            .toFloat()
+            .coerceIn(
+                MIN_GENERATED_PASSWORD_LENGTH,
+                MAX_GENERATED_PASSWORD_LENGTH
+            )
+        val hasEnabledCategory = enabledCategoryCount() > 0
+
+        return copy(
+            length = normalizedLength,
+            includeLowercaseLetters = if (hasEnabledCategory) {
+                includeLowercaseLetters
+            } else {
+                true
+            },
+            includeBlankSpaces = false,
+            password = if (preservePassword) password else ""
+        )
     }
 }

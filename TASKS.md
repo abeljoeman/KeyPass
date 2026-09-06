@@ -153,7 +153,7 @@ Prototype is done only when:
 - [x] **T111** Refine Vault/Dashboard, including top-app-bar lock, search/sort, list rows, empty state, Extended FAB, and 3-item bottom navigation.
 - [x] **T112** Refine Credential Detail into a read-first presentation with safe copy/reveal and low-prominence delete flow.
 - [x] **T113** Refine Create/Edit form, contextual generator access, validation, saving feedback, and lightweight unsaved-change confirmation.
-- [ ] **T114** Refine Standalone Generator using the existing engine/config, automatic fresh generation, simplified options, and secure copy behavior.
+- [x] **T114** Refine Standalone Generator using the existing engine/config, automatic fresh generation, simplified options, and secure copy behavior.
 - [ ] **T115** Refine Settings into simple sections/list rows; preserve Password Hint/Auto-lock/Help/About and do not promote biometric UI.
 - [ ] **T116** Ensure global Back/lock/navigation state follows `docs/UX_UI_BASELINE.md`.
 

@@ -1,18 +1,26 @@
 package com.yogeshpaliyal.keypass.ui.generate.ui
 
-import android.content.Context
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.generate.GeneratePasswordViewModel
-import com.yogeshpaliyal.keypass.ui.generate.ui.utils.copyTextToClipboard
+import com.yogeshpaliyal.keypass.utils.copySensitiveTextToClipboard
+import kotlinx.coroutines.launch
 
 @Composable
 fun GeneratePasswordScreen(
@@ -21,8 +29,11 @@ fun GeneratePasswordScreen(
     onBack: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
-
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val copiedMessage = stringResource(R.string.copied_to_clipboard)
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val isStandalone = onUsePassword == null
 
     LaunchedEffect(Unit) {
         viewModel.retrieveSavedPasswordConfig(context)
@@ -36,26 +47,37 @@ fun GeneratePasswordScreen(
         BackHandler(onBack = onBack)
     }
 
-    GeneratePasswordContent(
-        viewState = viewState,
-        onGeneratePasswordClick = viewModel::generatePassword,
-        onCopyPasswordClick = { onCopyPasswordClick(context, viewState.password) },
-        onUsePasswordClick = onUsePassword?.let { usePassword ->
-            { usePassword(viewState.password) }
-        },
-        onPasswordLengthChange = viewModel::onPasswordLengthSliderChange,
-        onUppercaseCheckedChange = viewModel::onUppercaseCheckedChange,
-        onLowercaseCheckedChange = viewModel::onLowercaseCheckedChange,
-        onNumbersCheckedChange = viewModel::onNumbersCheckedChange,
-        onSymbolsCheckedChange = viewModel::onSymbolsCheckedChange,
-        selectSymbolForPassword = viewModel::selectSymbolForPassword,
-        onBlankSpacesCheckedChange = viewModel::onBlankSpacesCheckedChange
-    )
-}
+    Box(modifier = Modifier.fillMaxSize()) {
+        GeneratePasswordContent(
+            viewState = viewState,
+            onGeneratePasswordClick = viewModel::generatePassword,
+            onCopyPasswordClick = if (isStandalone) {
+                {
+                    copySensitiveTextToClipboard(
+                        context = context,
+                        text = viewState.password,
+                        label = "KeyPass"
+                    )
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(copiedMessage)
+                    }
+                }
+            } else {
+                null
+            },
+            onUsePasswordClick = onUsePassword?.let { usePassword ->
+                { usePassword(viewState.password) }
+            },
+            onPasswordLengthChange = viewModel::onPasswordLengthSliderChange,
+            onUppercaseCheckedChange = viewModel::onUppercaseCheckedChange,
+            onLowercaseCheckedChange = viewModel::onLowercaseCheckedChange,
+            onNumbersCheckedChange = viewModel::onNumbersCheckedChange,
+            onSymbolsCheckedChange = viewModel::onSymbolsCheckedChange
+        )
 
-private fun onCopyPasswordClick(context: Context, text: String) {
-    copyTextToClipboard(context = context, text = text, label = "random_password")
-    Toast
-        .makeText(context, context.getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT)
-        .show()
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
 }

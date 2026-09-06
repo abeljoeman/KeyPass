@@ -13,7 +13,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.nav.BottomNavViewModel
-import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.selectState
 import com.yogeshpaliyal.keypass.ui.redux.states.HomeState
@@ -55,7 +54,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             selected = currentScreen is PasswordGeneratorState,
             onClick = {
                 if (currentScreen !is PasswordGeneratorState) {
-                    dispatchAction(IntentNavigation.GeneratePassword)
+                    dispatchAction(NavigationAction(PasswordGeneratorState()))
                 }
             },
             icon = {
