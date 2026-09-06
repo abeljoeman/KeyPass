@@ -40,6 +40,7 @@ private const val PASSWORD_MASK = "••••••••"
 @Composable
 fun CredentialDetail(
     credential: Credential,
+    isSaving: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
     onDelete: (() -> Unit)?,
@@ -65,7 +66,10 @@ fun CredentialDetail(
                     }
                 },
                 actions = {
-                    TextButton(onClick = onEdit) {
+                    TextButton(
+                        enabled = !isSaving,
+                        onClick = onEdit
+                    ) {
                         Text(text = stringResource(R.string.credential_detail_edit))
                     }
                 }
@@ -154,6 +158,7 @@ fun CredentialDetail(
 
             if (onDelete != null) {
                 TextButton(
+                    enabled = !isSaving,
                     onClick = { deleteConfirmationVisible = true },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
@@ -168,6 +173,7 @@ fun CredentialDetail(
     if (onDelete != null) {
         DeleteConfirmation(
             openDialog = deleteConfirmationVisible,
+            isDeleting = isSaving,
             updateDialogVisibility = { deleteConfirmationVisible = it },
             onDelete = onDelete
         )

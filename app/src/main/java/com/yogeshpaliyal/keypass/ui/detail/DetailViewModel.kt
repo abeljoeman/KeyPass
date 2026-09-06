@@ -127,16 +127,18 @@ class DetailViewModel internal constructor(
     fun deleteCredential(
         id: String,
         onExecCompleted: () -> Unit
-    ): Job = workScope.launch {
+    ): Job {
         require(id.isNotBlank()) { "Credential ID is required for delete." }
-        _operationError.value = null
-        val saved = runVaultMutation {
-            vaultRepository.deleteCredential(id)
-        }
-        if (!saved) return@launch
-        editBaseline = null
-        _credential.value = null
-        onExecCompleted()
+        return launchSave(
+            mutation = {
+                vaultRepository.deleteCredential(id)
+            },
+            onSuccess = {
+                editBaseline = null
+                _credential.value = null
+                onExecCompleted()
+            }
+        )
     }
 
     fun clearOperationError() {

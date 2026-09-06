@@ -56,8 +56,51 @@ class DetailWriteFailureTest {
         }
     }
 
+    @Test
+    fun deleteWriteFailureReportsErrorWithoutCompletingOrClearingCredential() = runBlocking {
+        val existing = Credential(
+            id = "00000000-0000-0000-0000-000000000456",
+            title = "Delete me",
+            username = "user",
+            password = "password",
+            url = null,
+            notes = null
+        )
+        var completionCalled = false
+        val repository = FakeVaultRepository(
+            deleteBlock = { throw IOException("Permission denied") }
+        )
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        val viewModel = DetailViewModel(repository, scope)
+
+        try {
+            viewModel.setCredential(existing)
+
+            val deleteJob = viewModel.deleteCredential(existing.id) {
+                completionCalled = true
+            }
+            deleteJob.join()
+
+            assertFalse(deleteJob.isCancelled)
+            assertFalse(viewModel.isSaving.value)
+            assertFalse(completionCalled)
+            assertEquals(existing, viewModel.credential.value)
+            assertEquals(
+                DetailOperationError.VaultWriteFailed,
+                viewModel.operationError.value
+            )
+        } finally {
+            scope.cancel()
+        }
+    }
+
     private class FakeVaultRepository(
-        private val updateBlock: suspend (Credential) -> Unit
+        private val updateBlock: suspend (Credential) -> Unit = {
+            error("Not used by DetailWriteFailureTest")
+        },
+        private val deleteBlock: suspend (String) -> Unit = {
+            error("Not used by DetailWriteFailureTest")
+        }
     ) : VaultRepository {
         override suspend fun createVault(masterPassword: CharArray) = unused()
         override suspend fun openVault(masterPassword: CharArray) = unused()
@@ -65,7 +108,7 @@ class DetailWriteFailureTest {
         override suspend fun listCredentials(): List<Credential> = unused()
         override suspend fun createCredential(credential: Credential) = unused()
         override suspend fun updateCredential(credential: Credential) = updateBlock(credential)
-        override suspend fun deleteCredential(id: String) = unused()
+        override suspend fun deleteCredential(id: String) = deleteBlock(id)
         override suspend fun searchCredentials(query: String): List<Credential> = unused()
 
         private fun unused(): Nothing = error("Not used by DetailWriteFailureTest")

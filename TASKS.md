@@ -159,7 +159,7 @@ Prototype is done only when:
 
 ## Phase 12 — UX Feedback, Accessibility, and Regression
 
-- [ ] **T120** Standardize Snackbar, inline error, AlertDialog, and operation-loading behavior.
+- [x] **T120** Standardize Snackbar, inline error, AlertDialog, and operation-loading behavior.
 - [ ] **T121** Add static credential placeholders only where device testing shows perceptible content loading; do not add shimmer.
 - [ ] **T122** Validate touch targets, localized icon semantics, font scaling, and a basic TalkBack pass.
 - [ ] **T123** Validate long-title, no-results, dirty-form, wrong-password, save/delete failure, and lock-during-transient-state flows.

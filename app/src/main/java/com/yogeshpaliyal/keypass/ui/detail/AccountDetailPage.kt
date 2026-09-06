@@ -1,6 +1,8 @@
 package com.yogeshpaliyal.keypass.ui.detail
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ModalBottomSheet
@@ -20,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -101,25 +104,35 @@ fun AccountDetailPage(id: String?) {
     }
 
     BackHandler(enabled = showEditor && !showPasswordOptions) {
-        requestEditorExit()
+        if (!isSaving) {
+            requestEditorExit()
+        }
     }
 
     if (!isNewCredential && !showEditor) {
-        CredentialDetail(
-            credential = credential,
-            onBack = goBack,
-            onEdit = {
-                viewModel.beginEdit()
-                showEditor = true
-            },
-            onDelete = {
-                viewModel.deleteCredential(
-                    id = credential.id,
-                    onExecCompleted = goBack
-                )
-            },
-            onCopyToClipboard = copyToClipboard
-        )
+        BackHandler(enabled = isSaving) { }
+        Box(modifier = Modifier.fillMaxSize()) {
+            CredentialDetail(
+                credential = credential,
+                isSaving = isSaving,
+                onBack = goBack,
+                onEdit = {
+                    viewModel.beginEdit()
+                    showEditor = true
+                },
+                onDelete = {
+                    viewModel.deleteCredential(
+                        id = credential.id,
+                        onExecCompleted = goBack
+                    )
+                },
+                onCopyToClipboard = copyToClipboard
+            )
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
         return
     }
 
