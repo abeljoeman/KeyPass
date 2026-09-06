@@ -5,7 +5,7 @@
 Status taxonomy:
 
 - `[CURRENT]` implemented and part of the `v0.2-prototype` baseline.
-- `[PLANNING]` candidate under product/security discussion; not approved for implementation.
+- `[PLANNING]` under product/security discussion; not approved for implementation.
 - `[PARKED]` intentionally deferred workstream.
 
 ## Vault and Security
@@ -18,10 +18,20 @@ Status taxonomy:
 - `[CURRENT]` Reviewed secure clipboard behavior.
 - `[CURRENT]` Corrupted-vault overwrite protection.
 - `[CURRENT]` Storage-write failure handling and lock/load race protection.
-- `[PLANNING]` Master-password change semantics.
-- `[PLANNING]` Forgotten-master-password / recovery policy.
-- `[PLANNING]` Biometric quick-unlock after dedicated security design/review.
+- `[PLANNING]` Master-password change semantics — high-priority planning.
+- `[PLANNING]` Forgotten-master-password / recovery policy — high-priority planning.
 - `[PLANNING]` Lock/session policy refinements.
+- `[PLANNING]` Biometric quick-unlock after dedicated security design/review.
+
+## Data Safety / Backup / Restore
+
+- `[PLANNING]` Internal last-known-good and/or versioned recovery copies to reduce the impact of local corruption/write failures.
+- `[PLANNING]` Manual external encrypted KDBX backup through Android user-selected document/storage providers.
+- `[PLANNING]` Provider-neutral backup destination support, including Google Drive when exposed through the Android system document provider, without a direct Google/cloud API integration by default.
+- `[PLANNING]` Versioned backup/restore points rather than silently overwriting a single backup artifact.
+- `[PLANNING]` Safe restore validation: validate/decrypt candidate first, preserve current vault until replacement is proven safe, and fail closed on errors.
+- `[PLANNING]` Backup/restore does not constitute forgotten-master-password recovery.
+- `[PLANNING]` Retention, naming, manual-vs-automatic behavior, restore UX, and replace/merge rules remain undecided.
 
 ## Credentials
 
@@ -60,7 +70,6 @@ Status taxonomy:
 
 - `[CURRENT]` Core application requires no backend and no Android `INTERNET` permission.
 - `[PLANNING]` Android Autofill.
-- `[PLANNING]` Safe KDBX backup/export/import strategy.
 - `[PLANNING]` Cloud sync only if separately approved in the future; it is not part of current planning by default.
 
 ## Branding and Release

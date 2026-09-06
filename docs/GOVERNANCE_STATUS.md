@@ -28,7 +28,19 @@ EXECUTION_STATUS: PLANNING_FREEZE
 ACTIVE_TASK: NONE
 ```
 
-Phase 13 has not yet been authored. Master-password management, recovery policy, biometric quick-unlock, Autofill, backup/export, and other expansion items are planning candidates only until approved through the documentation process.
+Current approved roadmap direction prioritizes planning in this order:
+
+1. Access, master-password, and recovery policy.
+2. Data safety, backup, and restore policy.
+3. Session and lock policy.
+4. Biometric quick-unlock design.
+5. Backup/restore implementation planning after policy approval; it may be implemented before biometric if final risk/priority review supports that.
+6. Android Autofill.
+7. Lower-risk productivity expansion.
+
+The Data Safety direction includes evaluating internal last-known-good/versioned recovery copies plus manual external encrypted KDBX backup/restore through Android user-selected document/storage providers. Provider-neutral Android integration is preferred over a direct Google/cloud API by default. These are roadmap/planning decisions, not approved implementation requirements.
+
+Phase 13 implementation has not yet been authored. No planning candidate becomes executable until PRD/TSD/ADR/Threat Model changes are approved and `TASKS.md` activates exactly one Txxx.
 
 ## Public release status
 
