@@ -1,409 +1,159 @@
 package com.yogeshpaliyal.keypass.ui.settings
 
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.rounded.Feedback
-import androidx.compose.material.icons.rounded.Fingerprint
-import androidx.compose.material.icons.rounded.LockReset
-import androidx.compose.material.icons.rounded.Share
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.yogeshpaliyal.common.utils.email
-import com.yogeshpaliyal.common.utils.setBiometricEnable
-import com.yogeshpaliyal.common.utils.setBiometricLoginTimeoutEnable
 import com.yogeshpaliyal.common.utils.setUserSettings
 import com.yogeshpaliyal.keypass.BuildConfig
 import com.yogeshpaliyal.keypass.R
-import com.yogeshpaliyal.keypass.ui.commonComponents.PreferenceItem
-import com.yogeshpaliyal.keypass.ui.generate.ui.components.DEFAULT_PASSWORD_LENGTH
 import com.yogeshpaliyal.keypass.ui.nav.LocalUserSettings
 import com.yogeshpaliyal.keypass.ui.redux.actions.Action
 import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
-import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppHintState
-import com.yogeshpaliyal.keypass.ui.redux.states.ChangeDefaultPasswordLengthState
 import kotlinx.coroutines.launch
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
-/**
- * Represents a setting category with its preferences
- */
-data class SettingsCategory(
-    val titleRes: Int,
-    val preferences: List<SettingsPreference>
-)
+@Composable
+fun MySettingCompose() {
+    val dispatchAction = rememberTypedDispatcher<Action>()
+    val context = LocalContext.current
+    val userSettings = LocalUserSettings.current
+    val coroutineScope = rememberCoroutineScope()
+    val autoLockEnabled = userSettings.autoLockEnabled == true
 
-/**
- * Represents a single preference item
- */
-data class SettingsPreference(
-    val type: PreferenceType,
-    val titleRes: Int,
-    val summaryRes: Int? = null,
-    val iconRes: Any? = null,
-    val onClick: (() -> Unit)? = null,
-    val isVisible: Boolean = true,
-    val summaryStr: String? = null
-)
+    fun setAutoLockEnabled(enabled: Boolean) {
+        coroutineScope.launch {
+            context.setUserSettings(
+                userSettings.copy(autoLockEnabled = enabled)
+            )
+        }
+    }
 
-enum class PreferenceType {
-    NORMAL, BIOMETRIC, AUTO_LOCK, AUTO_DISABLE_BIOMETRIC
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(vertical = 8.dp)
+    ) {
+        SettingsSectionHeader(stringResource(R.string.settings_security))
+
+        SettingsNavigationRow(
+            title = stringResource(R.string.settings_password_hint),
+            onClick = {
+                dispatchAction(NavigationAction(ChangeAppHintState))
+            }
+        )
+
+        ListItem(
+            modifier = Modifier.clickable {
+                setAutoLockEnabled(!autoLockEnabled)
+            },
+            headlineContent = {
+                Text(stringResource(R.string.settings_auto_lock))
+            },
+            trailingContent = {
+                Switch(
+                    checked = autoLockEnabled,
+                    onCheckedChange = ::setAutoLockEnabled
+                )
+            }
+        )
+
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+
+        SettingsSectionHeader(stringResource(R.string.settings_help_about))
+
+        SettingsNavigationRow(
+            title = stringResource(R.string.send_feedback),
+            onClick = {
+                context.email(
+                    context.getString(R.string.feedback_to_keypass),
+                    "yogeshpaliyal.foss@gmail.com"
+                )
+            }
+        )
+
+        SettingsNavigationRow(
+            title = stringResource(R.string.settings_share_keypass),
+            onClick = {
+                dispatchAction(IntentNavigation.ShareApp)
+            }
+        )
+
+        SettingsNavigationRow(
+            title = stringResource(R.string.settings_about),
+            onClick = {
+                dispatchAction(NavigationAction(AboutState()))
+            }
+        )
+
+        Text(
+            text = stringResource(
+                R.string.settings_version,
+                BuildConfig.VERSION_NAME
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 24.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }
 
 @Composable
-fun MySettingCompose() {
-  val dispatchAction = rememberTypedDispatcher<Action>()
-  val context = LocalContext.current
-  val userSettings = LocalUserSettings.current
-  val coroutineScope = rememberCoroutineScope()
-
-  // Search functionality
-  var searchQuery by remember { mutableStateOf("") }
-
-  // Expandable sections
-  var isSecurityExpanded by remember { mutableStateOf(true) }
-  var isHelpExpanded by remember { mutableStateOf(true) }
-
-  // Retrieving saved password length
-  var savedPasswordLength by remember { mutableStateOf(DEFAULT_PASSWORD_LENGTH) }
-  LaunchedEffect(key1 = Unit) {
-    userSettings.passwordConfig.length.let { value -> savedPasswordLength = value }
-  }
-
-
-  // Biometrics related states
-  var canAuthenticate by remember { mutableStateOf(BiometricManager.BIOMETRIC_STATUS_UNKNOWN) }
-  var isBiometricEnable by remember { mutableStateOf(false) }
-  var biometricSubtitle by remember { mutableStateOf<Int?>(null) }
-
-  LaunchedEffect(key1 = context) { 
-    isBiometricEnable = userSettings.isBiometricEnable 
-    val biometricManager = BiometricManager.from(context)
-    canAuthenticate = biometricManager.canAuthenticate(BIOMETRIC_STRONG)
-  }
-
-  LaunchedEffect(key1 = canAuthenticate, isBiometricEnable) {
-    biometricSubtitle = when (canAuthenticate) {
-      BiometricManager.BIOMETRIC_SUCCESS ->
-          if (isBiometricEnable) R.string.enabled else R.string.disabled
-      BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE ->
-          R.string.biometric_error_no_hardware
-      BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->
-          R.string.biometric_error_hw_unavailable
-      BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->
-          R.string.biometric_error_none_enrolled
-      else -> null
-    }
-  }
-
-  // Create settings categories
-  val securitySettings = SettingsCategory(
-    titleRes = R.string.security,
-    preferences = listOf(
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.app_password_hint,
-        summaryRes = if (userSettings.passwordHint != null) R.string.change_app_password_hint else R.string.set_app_password_hint,
-        iconRes = Icons.Outlined.Info,
-        onClick = { dispatchAction(NavigationAction(ChangeAppHintState)) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.change_password_length,
-        summaryStr = "${context.getString(R.string.default_password_length)}: ${savedPasswordLength.toInt()}",
-        onClick = { dispatchAction(NavigationAction(ChangeDefaultPasswordLengthState())) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.BIOMETRIC,
-        titleRes = R.string.unlock_with_biometric,
-        summaryRes = biometricSubtitle,
-        iconRes = Icons.Rounded.Fingerprint
-      ),
-      SettingsPreference(
-        type = PreferenceType.AUTO_DISABLE_BIOMETRIC,
-        titleRes = R.string.biometric_login_timeout,
-        summaryRes = if (userSettings.biometricLoginTimeoutEnable == true) R.string.enabled else R.string.disabled,
-        iconRes = Icons.Rounded.LockReset,
-        isVisible = userSettings.isBiometricEnable
-      ),
-      SettingsPreference(
-        type = PreferenceType.AUTO_LOCK,
-        titleRes = R.string.auto_lock,
-        summaryRes = if (userSettings.autoLockEnabled == true) R.string.enabled else R.string.disabled,
-        iconRes = Icons.Rounded.LockReset
-      )
+private fun SettingsSectionHeader(title: String) {
+    Text(
+        text = title,
+        modifier = Modifier.padding(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 8.dp
+        ),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary
     )
-  )
-
-  val helpSettings = SettingsCategory(
-    titleRes = R.string.help,
-    preferences = listOf(
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.send_feedback,
-        summaryRes = R.string.send_feedback_desc,
-        iconRes = Icons.Rounded.Feedback,
-        onClick = { context.email(context.getString(R.string.feedback_to_keypass), "yogeshpaliyal.foss@gmail.com") }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.share,
-        summaryRes = R.string.share_desc,
-        iconRes = Icons.Rounded.Share,
-        onClick = { dispatchAction(IntentNavigation.ShareApp) }
-      ),
-      SettingsPreference(
-        type = PreferenceType.NORMAL,
-        titleRes = R.string.about_us,
-        summaryRes = R.string.about_us,
-        iconRes = Icons.Outlined.Info,
-        onClick = { dispatchAction(NavigationAction(AboutState())) }
-      )
-    )
-  )
-
-  // Filter preferences based on search
-  val filteredSecuritySettings = remember(searchQuery, securitySettings) {
-    derivedStateOf {
-      if (searchQuery.isEmpty()) {
-        securitySettings.preferences
-      } else {
-        securitySettings.preferences.filter { preference ->
-          val titleMatches = context.getString(preference.titleRes).contains(searchQuery, ignoreCase = true)
-          val summaryMatches = preference.summaryRes?.let { 
-            context.getString(it).contains(searchQuery, ignoreCase = true) 
-          } ?: false
-          val summaryStrMatches = preference.summaryStr?.contains(searchQuery, ignoreCase = true) ?: false
-          
-          titleMatches || summaryMatches || summaryStrMatches
-        }
-      }
-    }
-  }
-
-  val filteredHelpSettings = remember(searchQuery, helpSettings) {
-    derivedStateOf {
-      if (searchQuery.isEmpty()) {
-        helpSettings.preferences
-      } else {
-        helpSettings.preferences.filter { preference ->
-          val titleMatches = context.getString(preference.titleRes).contains(searchQuery, ignoreCase = true)
-          val summaryMatches = preference.summaryRes?.let { 
-            context.getString(it).contains(searchQuery, ignoreCase = true) 
-          } ?: false
-          
-          titleMatches || summaryMatches
-        }
-      }
-    }
-  }
-
-  Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-    // Search bar
-    OutlinedTextField(
-      value = searchQuery,
-      onValueChange = { searchQuery = it },
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      placeholder = { Text(text = "Search settings...") },
-      leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-      singleLine = true,
-      shape = MaterialTheme.shapes.medium
-    )
-
-    // Security section
-    Card(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        Text(
-          text = context.getString(R.string.security),
-          style = MaterialTheme.typography.titleMedium,
-          color = MaterialTheme.colorScheme.primary
-        )
-        IconButton(onClick = { isSecurityExpanded = !isSecurityExpanded }) {
-          Icon(
-            imageVector = if (isSecurityExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-            contentDescription = stringResource(
-              if (isSecurityExpanded) R.string.a11y_collapse_section else R.string.a11y_expand_section
-            )
-          )
-        }
-      }
-      
-      if (isSecurityExpanded) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-          filteredSecuritySettings.value.forEach { preference ->
-            when (preference.type) {
-              PreferenceType.NORMAL -> {
-                PreferenceItem(
-                  painter = preference.iconRes as? androidx.compose.ui.graphics.painter.Painter,
-                  icon = preference.iconRes as? androidx.compose.ui.graphics.vector.ImageVector,
-                  title = preference.titleRes,
-                  summary = preference.summaryRes,
-                  summaryStr = preference.summaryStr,
-                  onClickItem = preference.onClick
-                )
-              }
-              PreferenceType.BIOMETRIC -> {
-                PreferenceItem(
-                  title = preference.titleRes,
-                  summary = preference.summaryRes,
-                  icon = preference.iconRes as? androidx.compose.ui.graphics.vector.ImageVector
-                ) {
-                  when (canAuthenticate) {
-                    BiometricManager.BIOMETRIC_SUCCESS -> {
-                      coroutineScope.launch {
-                        context.setBiometricEnable(!isBiometricEnable)
-                        isBiometricEnable = !isBiometricEnable
-                      }
-                    }
-                    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                          putExtra(
-                            Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                          )
-                        }
-                        context.startActivity(enrollIntent)
-                      } else {
-                        dispatchAction(ToastAction(R.string.password_set_from_settings))
-                      }
-                    }
-                  }
-                }
-              }
-              PreferenceType.AUTO_LOCK -> {
-                PreferenceItem(
-                  title = preference.titleRes,
-                  summary = preference.summaryRes,
-                  icon = preference.iconRes as? androidx.compose.ui.graphics.vector.ImageVector
-                ) {
-                  coroutineScope.launch {
-                    context.setUserSettings(
-                      userSettings.copy(autoLockEnabled = userSettings.autoLockEnabled == false)
-                    )
-                  }
-                }
-              }
-              PreferenceType.AUTO_DISABLE_BIOMETRIC -> {
-                if (preference.isVisible) {
-                  PreferenceItem(
-                    title = preference.titleRes,
-                    summary = preference.summaryRes,
-                    icon = preference.iconRes as? androidx.compose.ui.graphics.vector.ImageVector
-                  ) {
-                    coroutineScope.launch {
-                      context.setBiometricLoginTimeoutEnable(
-                        userSettings.biometricLoginTimeoutEnable != true
-                      )
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Help section
-    Card(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-    ) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        Text(
-          text = context.getString(R.string.help),
-          style = MaterialTheme.typography.titleMedium,
-          color = MaterialTheme.colorScheme.primary
-        )
-        IconButton(onClick = { isHelpExpanded = !isHelpExpanded }) {
-          Icon(
-            imageVector = if (isHelpExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-            contentDescription = stringResource(
-              if (isHelpExpanded) R.string.a11y_collapse_section else R.string.a11y_expand_section
-            )
-          )
-        }
-      }
-      
-      if (isHelpExpanded) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-          filteredHelpSettings.value.forEach { preference ->
-            PreferenceItem(
-              painter = preference.iconRes as? androidx.compose.ui.graphics.painter.Painter,
-              icon = preference.iconRes as? androidx.compose.ui.graphics.vector.ImageVector,
-              title = preference.titleRes,
-              summary = preference.summaryRes,
-              onClickItem = preference.onClick
-            )
-          }
-        }
-      }
-    }
-
-    // App version
-    Card(
-      modifier = Modifier.fillMaxWidth().padding(16.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-      Text(
-        text = "App Version ${BuildConfig.VERSION_NAME}",
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(16.dp)
-      )
-    }
-  }
 }
 
-// The existing helper functions (BiometricsOption, AutoLockPreferenceItem, AutoDisableBiometric)
-// are no longer needed as their functionality has been integrated into the main composable
+@Composable
+private fun SettingsNavigationRow(
+    title: String,
+    onClick: () -> Unit
+) {
+    ListItem(
+        modifier = Modifier.clickable(onClick = onClick),
+        headlineContent = {
+            Text(title)
+        },
+        trailingContent = {
+            Text(
+                text = "\u203A",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    )
+}
