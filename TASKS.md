@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), and ADR 0010 (safe KDBX restore validation/promotion/finalization) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), ADR 0010 (safe KDBX restore validation/promotion/finalization), and ADR 0011 (password generator SecureRandom + combined alphabet) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,25 +23,30 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; ADR 0011 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
 ## T126 — Harden Password Generator randomness
 
-**Objective:** Replace non-cryptographic/default Kotlin randomness in secret generation with `java.security.SecureRandom` and select from the combined allowed-character alphabet without changing generator UX.
+**Planning status:** Architecture approved via accepted ADR 0011; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-001..004; `TSD.md` §8; Threat Model T1/T3/T11.
+**Objective:** Replace non-cryptographic/default Kotlin randomness in secret generation with direct `java.security.SecureRandom` bounded selection from one combined allowed-character alphabet, without changing generator UX or adding dependencies.
+
+**References:** `PRD.md` P13-FR-001..004; `TSD.md` §8; accepted ADR 0011; Threat Model T1/T3/T11.
 
 **Acceptance:**
-- Production password generation uses CSPRNG-backed bounded selection.
-- Existing length/category configuration and generator entry points remain working.
-- No passphrase or new complexity policy is added.
-- Unit tests cover allowed alphabet/length/category behavior.
+- Production password generation uses `java.security.SecureRandom` for CSPRNG-backed bounded index selection.
+- The allowed alphabet is built directly from the existing enabled character categories and each output character is selected from that combined alphabet.
+- Category-first random selection is removed for generated secret characters.
+- No new requirement guarantees at least one character from every enabled category; enabled categories define the allowed alphabet only.
+- Existing requested length, category configuration, configuration persistence, and generator entry points remain working.
+- No passphrase, new complexity policy, strength UI, dependency, or generic crypto/random framework is added.
+- Unit tests cover requested length, allowed alphabet/category combinations, and existing generator behavior without relying on deterministic production output.
 
 **Validation:** targeted unit tests + `:app:assembleFreeDebug` smoke build.
 
-**Out of scope:** generator redesign, password-strength UI here, passphrase.
+**Out of scope:** generator redesign, password-strength UI here, passphrase, mandatory category-presence policy, third-party randomness dependency.
 
 **Reuse:** Java `SecureRandom`; existing generator/config code.
 
