@@ -107,6 +107,10 @@
     <string name="incorrect_password">Incorrect Password</string>
     <string name="password_no_match">The password did not match</string>
     <string name="vault_creation_failed">Could not create vault</string>
+    <string name="create_vault_recovery_warning">Master Password tidak dapat dipulihkan. Jika Anda lupa Master Password, RAHSA tidak dapat membuka atau memulihkan data di vault ini. Pastikan Anda dapat mengingat Master Password Anda.</string>
+    <string name="recovery_acknowledgment_swipe">Geser untuk memahami dan melanjutkan</string>
+    <string name="recovery_acknowledgment_required">Belum dipahami</string>
+    <string name="recovery_acknowledgment_complete">Sudah dipahami</string>
     <string name="vault_write_failed">Could not update vault. Please try again.</string>
     <string name="change_app_password">Change App Password</string>
     <string name="change_app_hint">Change Hint</string>

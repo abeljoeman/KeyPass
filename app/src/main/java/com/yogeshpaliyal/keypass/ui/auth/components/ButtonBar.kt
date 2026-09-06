@@ -29,6 +29,7 @@ fun ButtonBar(
     state: AuthState,
     password: String,
     vaultRepository: VaultRepository,
+    recoveryWarningAcknowledged: Boolean = false,
     authenticationInProgress: Boolean,
     setAuthenticationInProgress: (Boolean) -> Unit,
     setPasswordError: (Int?) -> Unit,
@@ -39,7 +40,12 @@ fun ButtonBar(
 
     Button(
         modifier = Modifier.fillMaxWidth(),
-        enabled = !authenticationInProgress,
+        enabled = isAuthActionEnabled(
+            state = state,
+            password = password,
+            recoveryWarningAcknowledged = recoveryWarningAcknowledged,
+            authenticationInProgress = authenticationInProgress
+        ),
         onClick = {
             setActionError(null)
             when (state) {
@@ -130,4 +136,17 @@ fun ButtonBar(
             )
         }
     }
+}
+
+internal fun isAuthActionEnabled(
+    state: AuthState,
+    password: String,
+    recoveryWarningAcknowledged: Boolean,
+    authenticationInProgress: Boolean
+): Boolean = when (state) {
+    is AuthState.ConfirmPassword ->
+        !authenticationInProgress &&
+            state.password == password &&
+            recoveryWarningAcknowledged
+    else -> !authenticationInProgress
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.auth.components.ButtonBar
 import com.yogeshpaliyal.keypass.ui.auth.components.PasswordInputField
+import com.yogeshpaliyal.keypass.ui.auth.components.RecoveryAcknowledgment
 import com.yogeshpaliyal.keypass.ui.nav.LocalVaultFile
 import com.yogeshpaliyal.keypass.ui.nav.LocalVaultRepository
 import com.yogeshpaliyal.keypass.ui.nav.LocalUserSettings
@@ -61,6 +62,7 @@ fun AuthScreen(state: AuthState) {
     val passwordError = rememberSaveable { mutableStateOf<Int?>(null) }
     val actionError = rememberSaveable { mutableStateOf<Int?>(null) }
     val authenticationInProgress = remember(state) { mutableStateOf(false) }
+    val recoveryWarningAcknowledged = remember(state) { mutableStateOf(false) }
 
     BackHandler(
         enabled = state is AuthState.ConfirmPassword && !authenticationInProgress.value
@@ -170,6 +172,15 @@ fun AuthScreen(state: AuthState) {
             enabled = !authenticationInProgress.value
         )
 
+        if (state is AuthState.ConfirmPassword) {
+            Spacer(modifier = Modifier.height(24.dp))
+            RecoveryAcknowledgment(
+                acknowledged = recoveryWarningAcknowledged.value,
+                enabled = !authenticationInProgress.value,
+                onAcknowledged = { recoveryWarningAcknowledged.value = true }
+            )
+        }
+
         if (passwordHint != null) {
             TextButton(
                 modifier = Modifier.align(Alignment.Start),
@@ -188,6 +199,7 @@ fun AuthScreen(state: AuthState) {
             state = state,
             password = password.value,
             vaultRepository = vaultRepository,
+            recoveryWarningAcknowledged = recoveryWarningAcknowledged.value,
             authenticationInProgress = authenticationInProgress.value,
             setAuthenticationInProgress = { authenticationInProgress.value = it },
             setPasswordError = { passwordError.value = it },
