@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture) and ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), and ADR 0008 (resumable destructive reset) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -120,23 +120,30 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T130 — Add Forgot Master Password and destructive reset
 
-**Objective:** Add honest forgotten-password guidance, hint display, and typed-`DELETE` destructive reset scoped to RAHSA-managed local vault state.
+**Planning status:** Architecture approved via accepted ADR 0008; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-030..045; `TSD.md` §12; Threat Model T23.
+**Objective:** Add honest forgotten-password guidance, hint display, typed-`DELETE` destructive reset, and resumable crash-consistent cleanup scoped to RAHSA-managed local vault/security state.
+
+**References:** `PRD.md` P13-FR-030..045; `TSD.md` §12; accepted ADR 0008; Threat Model T23.
 
 **Acceptance:**
 - Forgot flow shows hint when present and says RAHSA cannot recover/decrypt without correct Master Password.
 - Backup and biometric are not presented as recovery.
 - Exact `DELETE` is required to enable reset.
-- Reset deletes active, LKG, RAHSA temp/recovery files, hint, and biometric state/alias.
+- Before the final Reset action starts, Back/navigation away, Home/background, process death, force-close, or recreation performs no deletion; typed confirmation is not required to persist.
+- Once Reset starts, Back/Home/navigation is not a transaction cancel; the operation converges to the fully reset state.
+- A minimal app-private non-secret `RESET_IN_PROGRESS` marker (or equivalent) is persisted before destructive cleanup and contains no Master Password, credential data, decrypted vault data, or other secret material.
+- Reset cleanup is idempotent and deletes active KDBX, LKG, RAHSA-owned temp/candidate/recovery files, password hint, biometric wrapped state, and related Keystore alias when present.
+- On startup with a pending reset marker, RAHSA completes cleanup before normal vault routing, then clears the marker and returns to Create New Vault.
+- Missing/already-deleted reset artifacts are treated as already-cleaned where safe; reset does not attempt rollback or reconstruction.
 - UI preferences remain.
 - External user-managed backups are untouched.
-- Success returns to Create New Vault flow.
+- No secure-wipe framework or generic transaction/workflow framework is introduced.
 - Operation is single-flight.
 
-**Validation:** unit/UI tests + filesystem/state assertions + physical smoke.
+**Validation:** unit/UI tests + filesystem/state assertions + failure injection + Back/Home/recreation/process-death/force-close tests before and after reset start + idempotent restart cleanup tests + physical smoke.
 
-**Out of scope:** secure-wipe framework, account/server recovery, recovery key.
+**Out of scope:** secure-wipe framework, account/server recovery, recovery key, rollback of a started destructive reset, generic transaction framework.
 
 ## T131 — Add manual external KDBX backup via SAF
 
