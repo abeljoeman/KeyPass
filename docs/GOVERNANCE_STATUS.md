@@ -19,11 +19,11 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — Access & Data Safety Foundation planning.**
+**Phase 13 — Access & Data Safety Foundation final technical consolidation review.**
 
-Owner product review is complete and the Phase 13 PRD amendment is approved. The TSD, ADR 0005/0006, Threat Model extension, and T126–T133 definitions are currently a technical/task planning package for owner review.
+Owner product review is complete and the Phase 13 PRD amendment is approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. `TSD.md` and `docs/THREAT_MODEL.md` have been consolidated against those accepted decisions and are now pending **final owner approval of the technical package as a whole**.
 
-There is **no active implementation task**. `TASKS.md` must show:
+There is **no active implementation task**. `TASKS.md` must remain:
 
 ```text
 EXECUTION_STATUS: PLANNING_FREEZE
@@ -37,18 +37,31 @@ No application code may be modified under this gate.
 
 Phase 13 includes:
 
-1. Password Generator CSPRNG hardening (small security-hygiene task; no UX expansion).
-2. Mandatory Create Vault unrecoverability warning and swipe acknowledgment using existing Material/platform components.
+1. Password Generator CSPRNG hardening with direct combined-alphabet `SecureRandom` selection and no dependency/UX expansion.
+2. Mandatory Create Vault unrecoverability warning with ephemeral swipe acknowledgment, explicit Create action, and accessibility equivalent.
 3. Exactly one internal encrypted LKG plus validate-before-promote storage behavior.
-4. Real KDBX Master Password re-key with current-password reauthentication, advisory strength, hint consistency, and fail-safe promotion.
-5. Forgot Master Password guidance plus typed-`DELETE` destructive reset.
-6. Manual provider-neutral external KDBX backup via Android SAF.
-7. Safe full-replacement restore via SAF with candidate password validation and LKG preservation.
+4. Real KDBX Master Password re-key with current-password reauthentication, advisory strength, mandatory consequence acknowledgment, safe promotion, explicit commit boundary, and crash-consistent non-secret finalization.
+5. Forgot Master Password guidance plus typed-`DELETE` destructive reset using a resumable non-secret reset marker.
+6. Manual provider-neutral external KDBX backup via Android SAF as direct encrypted-KDBX copy, with no internal backup recovery marker.
+7. Safe full-replacement restore via SAF with candidate validation before confirmation, LKG preservation, explicit commit point, and non-secret post-commit restore finalization.
 8. Truthful subtle Material 3 progress/status UX for backup/restore.
-9. Secure opt-in Biometric Quick Unlock using Android Keystore/BiometricPrompt and a real vault-open transition.
+9. Secure opt-in Biometric Quick Unlock using Android Keystore/BiometricPrompt, real vault-open transition, fail-closed enable/disable lifecycle, and no biometric-specific recovery marker.
 10. Single-execution protection for critical operations.
 
 Existing Session/Auto-Lock behavior is closed/no-change.
+
+## Accepted Phase 13 ADRs
+
+- `0005` — one-LKG safe promotion + provider-neutral SAF backup/restore architecture.
+- `0006` — fail-closed Biometric Quick Unlock with Android Keystore/BiometricPrompt.
+- `0007` — real Master Password re-key, consequence acknowledgment, and crash consistency.
+- `0008` — resumable destructive reset.
+- `0009` — manual direct encrypted-KDBX backup via SAF without internal recovery marker.
+- `0010` — safe KDBX restore validation/promotion/post-commit finalization.
+- `0011` — password generator `SecureRandom` combined-alphabet selection.
+- `0012` — Create Vault ephemeral unrecoverability acknowledgment before explicit creation.
+
+All are **Accepted — owner-approved Phase 13 architecture**.
 
 ## Parked / closed decisions
 
@@ -67,9 +80,7 @@ Existing Session/Auto-Lock behavior is closed/no-change.
 - Typed Items.
 - Session/Auto-Lock redesign.
 
-## Phase 13 technical planning package
-
-Current draft task sequence:
+## Phase 13 task sequence
 
 ```text
 T126 Password Generator Security Hardening
@@ -82,7 +93,7 @@ T132 Safe KDBX Restore via SAF
 T133 Secure Biometric Quick Unlock
 ```
 
-These are draft task definitions, not active tasks. Owner technical/task approval is required before preparation/activation of T126.
+Each task architecture is owner-approved, but all implementation tasks remain **NOT ACTIVE**. Final consolidated TSD/Threat Model/package approval is required before JIT preparation/activation of T126.
 
 ## Standard planning-to-execution workflow
 
@@ -130,13 +141,19 @@ Execution/status documents and kits never override higher-level product/security
 - `ENGINEERING_PRINCIPLES.md`
 - `AGENTS.md`
 - `PRD.md` — v0.2 baseline + approved Phase 13 product amendment.
-- `TSD.md` — v0.2 baseline + Phase 13 technical draft.
-- `docs/adr/0005-data-safety-kdbx-lkg-saf.md` — proposed.
-- `docs/adr/0006-biometric-quick-unlock-keystore.md` — proposed.
-- `docs/THREAT_MODEL.md` — baseline + Phase 13 draft extension.
+- `TSD.md` — consolidated Phase 13 technical design; final owner approval pending.
+- `docs/adr/0005-data-safety-kdbx-lkg-saf.md` — accepted.
+- `docs/adr/0006-biometric-quick-unlock-keystore.md` — accepted.
+- `docs/adr/0007-master-password-change-crash-consistency.md` — accepted.
+- `docs/adr/0008-resumable-destructive-reset.md` — accepted.
+- `docs/adr/0009-manual-kdbx-backup-via-saf.md` — accepted.
+- `docs/adr/0010-safe-kdbx-restore-finalization.md` — accepted.
+- `docs/adr/0011-password-generator-secure-random.md` — accepted.
+- `docs/adr/0012-create-vault-recovery-acknowledgment.md` — accepted.
+- `docs/THREAT_MODEL.md` — consolidated Phase 13 threat extension; final owner approval pending.
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
-- `TASKS.md` — T126–T133 draft; execution frozen.
+- `TASKS.md` — T126–T133 defined; execution frozen.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -154,7 +171,7 @@ For new capability design and implementation, evaluate in order:
 
 Phase 13 verified reuse findings include Kotpass `0.13.0` `modifyCredentials()` for KDBX credential changes, Android SAF for provider-neutral document I/O, AndroidX Biometric + Android Keystore for quick unlock, Material 3 for swipe/progress/animation UX, and `java.security.SecureRandom` for generator hardening.
 
-Security-critical assumptions must be rechecked during the relevant JIT kit/task.
+Security-critical assumptions and optional new dependencies must be rechecked during the relevant JIT kit/task.
 
 ## Public release status
 
