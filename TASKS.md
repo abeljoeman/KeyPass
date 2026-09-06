@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), and ADR 0009 (manual external KDBX backup via provider-neutral SAF) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), and ADR 0010 (safe KDBX restore validation/promotion/finalization) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -172,24 +172,35 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T132 — Add safe KDBX restore via SAF
 
-**Objective:** Restore a selected external KDBX only after password-based decode/validation and explicit confirmation, preserving current active as LKG before verified replacement.
+**Planning status:** Architecture approved via accepted ADR 0010; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-070..084, P13-FR-090..092; `TSD.md` §14/§15/§16; ADR 0005; Threat Model T16/T18/T22.
+**Objective:** Restore a selected external KDBX only after app-private copy, password-based decode/validation, and explicit confirmation, then use accepted one-LKG safe promotion plus minimal non-secret post-commit finalization.
+
+**References:** `PRD.md` P13-FR-070..084, P13-FR-090..092; `TSD.md` §14/§15/§16; accepted ADR 0005; accepted ADR 0010; Threat Model T16/T18/T22.
 
 **Acceptance:**
-- Restore available from Settings and initial setup.
-- External URI is copied to app-private candidate; external file is never active vault.
-- Wrong password/invalid/unsupported/corrupt input does not mutate active/LKG.
+- Restore is available from Settings and initial setup.
+- External URI is copied to an app-private candidate; the external file is transport/input only and never the active vault.
+- The selected backup password is requested and the copied candidate is decoded/validated before replacement confirmation is shown.
+- Wrong password, copy failure, invalid/unsupported/corrupt KDBX, decode failure, or validation failure leaves active/LKG unchanged.
 - Confirmation occurs only after successful candidate validation.
-- Current active becomes LKG before verified candidate promotion when an active vault exists.
-- Restore is full replacement; restored password becomes effective.
-- Prior biometric state is invalidated/disabled and user informed when applicable.
-- Truthful subtle progress/status UX; no fake percentage.
+- Before the final Restore action starts, Back/navigation away, Home/background, cancellation, process death, force-close, or recreation performs no authoritative vault mutation; candidate/password UI state need not persist.
+- After the final Restore action starts, Back/Home/navigation is not treated as a transaction cancel.
+- When an active vault exists, the current verified active becomes the single LKG before the already-validated candidate is promoted using accepted ADR 0005 semantics.
+- During initial setup there is no old active vault to preserve as LKG; the validated candidate is promoted with the same verification discipline.
+- Candidate promotion is the commit point: before commit the old active vault is authoritative; after commit the restored active vault and restored Master Password are authoritative.
+- RAHSA does not roll back the restored vault merely because process death/crash or UI interruption occurs after commit.
+- A minimal app-private non-secret restore-finalization marker may be used after commit; it contains no Master Password, external URI, credential data, decrypted vault data, or other secrets.
+- Post-commit finalization is idempotent and, when applicable, invalidates prior biometric quick-unlock/Keystore state, cleans candidate/temp artifacts, reconciles session/routing, and clears the marker.
+- On startup with pending restore finalization, the restored KDBX remains authoritative while required non-secret cleanup completes before normal use.
+- Restore is full replacement; the restored password becomes effective; no merge/dedupe/conflict resolution/partial import is added.
+- If prior biometric state existed, successful restore invalidates/disables it and informs the user that it must be manually enabled again.
+- Truthful subtle progress/status UX uses existing Material 3 primitives; determinate only for measurable copy progress and indeterminate for validation/decrypt/promotion stages without accurate percentage.
 - Operation is single-flight.
 
-**Validation:** valid/wrong-password/corrupt/unsupported cases + failure injection + initial-setup path + physical SAF smoke + reopen restored vault.
+**Validation:** valid/wrong-password/corrupt/unsupported/copy-failure cases + failure injection + Settings and initial-setup paths + Back/Home/recreation/process-death/force-close tests across pre-commit/post-commit boundaries + idempotent finalization tests + physical SAF smoke + reopen restored vault.
 
-**Out of scope:** merge/dedupe/conflicts/partial import.
+**Out of scope:** merge/dedupe/conflicts/partial import, using external KDBX as live vault, generic transaction/workflow framework, persisting backup password/URI in recovery state.
 
 ## T133 — Implement secure Biometric Quick Unlock
 
