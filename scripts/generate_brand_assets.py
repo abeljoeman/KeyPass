@@ -20,6 +20,12 @@ DENSITIES = {
     "xxxhdpi": (192, 432),
 }
 
+# Android launchers may enlarge adaptive foreground layers. Keep extra breathing
+# room around the shield so it does not crowd the launcher mask on physical
+# devices, while retaining a legible mark at every density.
+LEGACY_LAUNCHER_OCCUPANCY = 0.78
+ADAPTIVE_FOREGROUND_OCCUPANCY = 0.52
+
 
 def load_clean_logo() -> Image.Image:
     logo = Image.open(SOURCE).convert("RGBA")
@@ -84,15 +90,23 @@ def main() -> None:
             directory = ROOT / "app" / "src" / build_type / "res" / f"mipmap-{density}"
             for legacy_name in ("ic_launcher", "ic_launcher_round"):
                 write_webp(
-                    fit_on_square(logo, legacy_size, occupancy=0.86),
+                    fit_on_square(logo, legacy_size, occupancy=LEGACY_LAUNCHER_OCCUPANCY),
                     directory / f"{legacy_name}.webp",
                 )
             write_webp(
-                fit_on_square(logo, foreground_size, occupancy=0.66),
+                fit_on_square(
+                    logo,
+                    foreground_size,
+                    occupancy=ADAPTIVE_FOREGROUND_OCCUPANCY,
+                ),
                 directory / "ic_launcher_foreground.webp",
             )
             write_webp(
-                fit_on_square(monochrome, foreground_size, occupancy=0.66),
+                fit_on_square(
+                    monochrome,
+                    foreground_size,
+                    occupancy=ADAPTIVE_FOREGROUND_OCCUPANCY,
+                ),
                 directory / "ic_launcher_monochrome.webp",
             )
 
