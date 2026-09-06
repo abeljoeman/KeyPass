@@ -1,10 +1,10 @@
-# Technical Design — RAHSA v0.2 Baseline + Phase 13 Draft
+# Technical Design — RAHSA v0.2 Baseline + Phase 13 Consolidated Review
 
-**Status:** v0.2 baseline approved; Phase 13 technical design **DRAFT — owner review required**  
+**Status:** v0.2 baseline approved; Phase 13 technical design **CONSOLIDATED — final owner approval required**  
 **Updated:** 2026-09-06  
-**Related:** `PRD.md`, `ENGINEERING_PRINCIPLES.md`, `docs/THREAT_MODEL.md`, `docs/adr/0005-data-safety-kdbx-lkg-saf.md`, `docs/adr/0006-biometric-quick-unlock-keystore.md`
+**Related:** `PRD.md`, `ENGINEERING_PRINCIPLES.md`, `docs/THREAT_MODEL.md`, accepted ADRs `0005`–`0012`
 
-This TSD preserves the technical baseline at `v0.2-prototype` and proposes the implementation architecture for the owner-approved Phase 13 requirements. It does not activate implementation.
+This TSD preserves the technical baseline at `v0.2-prototype` and consolidates the owner-approved task architectures for Phase 13. It does **not** activate implementation. All Phase 13 task architectures T126–T133 are owner-approved through accepted ADRs; this consolidated document and the aligned Threat Model still require final owner approval before a JIT Implementation Kit may be prepared.
 
 ## 1. Technical context
 
@@ -94,7 +94,7 @@ Compose flows
   └─ Biometric Quick Unlock
           |
           v
-ViewModels / operation state
+ViewModels / local operation state
           |
           v
 VaultRepository (+ narrow Phase 13 APIs)
@@ -110,73 +110,104 @@ Kotpass / KDBX           Android platform
 app-private storage
   ├─ vault.kdbx          (active)
   ├─ vault.lkg.kdbx      (exactly one encrypted LKG; exact filename implementation-defined)
-  └─ short-lived candidate/temp files
+  ├─ short-lived candidate/temp files
+  └─ narrow non-secret operation markers only where explicitly approved
 ```
 
-The internal file names may differ, but roles and invariants must remain explicit.
+Approved non-secret markers are limited to operations that require deterministic completion after an authoritative storage transition: Change Master Password post-commit finalization, destructive reset in progress, and restore post-commit finalization. Create Vault, manual backup, and biometric enable/disable do not introduce dedicated recovery markers.
 
-## 8. Password Generator hardening
+## 8. Password Generator hardening — T126 / ADR 0011
 
 ### 8.1 Random source
 
-Replace Kotlin default `.random()` calls used to generate secrets with an injected/owned `java.security.SecureRandom` instance.
+Replace Kotlin default `.random()` calls used to generate secrets with direct `java.security.SecureRandom` bounded index selection. No third-party randomness dependency is introduced.
 
 ### 8.2 Character selection
 
-Build the allowed alphabet from enabled categories and select each output character using secure bounded integer selection over that combined alphabet.
+Build one allowed alphabet from the currently enabled character categories and select every output character directly from that combined alphabet.
 
-Do not add a new generator UI, passphrase mode, or mandatory complexity behavior.
+```text
+enabled categories
+→ combined allowed alphabet
+→ SecureRandom.nextInt(alphabet.size)
+→ output character
+```
 
-### 8.3 Testability
+Do not perform category-first random selection. Enabled categories define the allowed alphabet only; Phase 13 does not add a requirement that every enabled category appear at least once in each generated password.
 
-Keep the production default CSPRNG secure. If deterministic tests require an abstraction, keep it narrow to random-index selection; do not create a generic crypto framework.
+### 8.3 Scope/testability
 
-## 9. Create-vault recovery acknowledgment
+Preserve existing length/category configuration, persistence, and generator entry points. Do not add passphrase mode, strength UI, complexity enforcement, a generic crypto/random abstraction, or a dependency solely for test determinism. Tests verify output length and membership in the configured allowed alphabet without depending on deterministic production output.
+
+## 9. Create-vault recovery acknowledgment — T127 / ADR 0012
 
 ### 9.1 UI state
 
-Create-vault state gains an `recoveryWarningAcknowledged` (or equivalent) state that is false on entry. The final Create Vault action is enabled only when normal password validation passes and acknowledgment is true.
+Create-vault state gains `recoveryWarningAcknowledged` (or equivalent), initialized `false` on entry. The final Create Vault action is enabled only when normal password validation passes and acknowledgment is true.
+
+The warning states that RAHSA cannot open or recover the vault if the Master Password is forgotten.
 
 ### 9.2 Swipe interaction
 
-Reuse the Material 3 swipe state/component already available in the current UI dependency (prefer `SwipeToDismissBox`/its state if compatible with the current Material 3 API) rather than implementing low-level drag/pointer gesture handling.
+Reuse an existing Material 3/platform swipe primitive compatible with the current dependency. Do not build low-level pointer/drag infrastructure or add a new gesture dependency.
 
-The swipe completion callback changes only acknowledgment state. It does not invoke vault creation.
+Swipe completion changes acknowledgment state only. It never creates the vault. Vault creation requires a separate explicit Create Vault action.
 
-### 9.3 Accessibility
+### 9.3 Accessibility and lifecycle
 
-Expose clear content description/state description and an accessibility action that completes the same acknowledgment transition for TalkBack users. Visual-only dragging must not be the sole operable path.
+Expose appropriate state/content semantics and an accessibility action that performs the same intentional acknowledgment transition for TalkBack users.
 
-## 10. Real KDBX Master Password re-key
+Acknowledgment and sensitive password drafts are ephemeral. Back/navigation away, abandonment, recreation, process death, or force-close before the final Create action does not persist acknowledgment; re-entering the flow starts with acknowledgment false. T127 does not add a recovery marker. After explicit Create starts, single-flight protection prevents duplicate execution and the existing safe vault-creation path remains authoritative.
+
+## 10. Real KDBX Master Password re-key — T129 / ADR 0007
 
 ### 10.1 Existing Kotpass capability
 
-Kotpass `0.13.0` exposes `KeePassDatabase.modifyCredentials { ... }`. Its implementation replaces `KeePassDatabase.credentials` and updates `Meta.masterKeyChanged` when passphrase material changes. Use this established API rather than implementing KDBX cryptography locally.
+Kotpass `0.13.0` exposes `KeePassDatabase.modifyCredentials { ... }`. Use this established API rather than implementing KDBX cryptography locally. New passphrase credentials use the existing Kotpass credential primitives already used by vault creation/opening.
 
-New passphrase credentials are constructed using the existing Kotpass `Credentials`/`EncryptedValue` APIs already used for vault creation/opening.
+### 10.2 User flow and acknowledgment
 
-### 10.2 Repository API
+```text
+Vault unlocked
+→ current Master Password
+→ new Master Password + confirmation
+→ optional prefilled/editable hint
+→ advisory strength
+→ unrecoverability/consequence warning
+→ swipe acknowledgment
+→ explicit Change Master Password
+```
 
-Add a narrow repository operation for changing Master Password. It must:
+The current password is verified against the active KDBX even when the session is already unlocked or was opened via biometric. The warning states that the old password will stop working and RAHSA cannot recover/open the vault if the new password is forgotten. The swipe uses the same approved acknowledgment pattern as Create Vault and never directly triggers re-key.
 
-1. require an unlocked vault;
-2. verify the supplied current Master Password against the active KDBX, not merely UI/session state;
-3. derive a candidate database with new Kotpass credentials;
-4. encode candidate KDBX to a temporary app-private path;
-5. decode/open the candidate using the new password to verify it;
-6. preserve the valid old active as LKG according to the storage transaction design;
-7. promote the verified candidate atomically/best-effort safely using the existing safe-write pattern;
-8. keep the verified new database as the active in-memory session;
-9. update the password hint only after successful vault promotion; and
-10. invalidate biometric quick-unlock state if such state exists.
+### 10.3 Repository operation and safe promotion
 
-Failure before successful promotion must leave the old active vault and old hint usable.
+The narrow repository operation must:
 
-### 10.3 Password strength
+1. verify the supplied current Master Password against active KDBX;
+2. derive a re-keyed candidate with Kotpass credential modification;
+3. encode candidate to an app-private temporary path;
+4. decode/open candidate using the new password;
+5. preserve the valid old active as LKG per ADR 0005;
+6. promote the verified candidate;
+7. treat verified candidate promotion as the authoritative **commit point**;
+8. update in-memory/session state when the process remains alive;
+9. finalize hint and biometric invalidation after commit; and
+10. clean temporary/finalization state idempotently.
 
-The strength indicator is advisory only. Preferred candidate is `zxcvbn4j` (`com.nulab-inc:zxcvbn`, previously researched MIT library). Adoption still requires task-level version/license/security verification before adding the dependency. Do not send Master Password text off-device.
+Before commit, the old active/password/hint and prior biometric state are authoritative. After commit, the new active/password are authoritative and must not be rolled back merely because UI completion was interrupted.
 
-## 11. Last-Known-Good and safe promotion
+### 10.4 Lifecycle/crash consistency
+
+Before the explicit final action starts, password drafts and acknowledgment are not persisted. Back/navigation away, abandoned background flow, recreation, process death, or force-close performs no vault mutation. Existing Auto-Lock behavior remains unchanged.
+
+Once the operation starts, Back/Home/navigation is not treated as transaction cancellation. A minimal app-private **non-secret post-commit finalization marker** may be used so a restart can finish hint application, stale biometric invalidation, and temp cleanup. The marker must contain no old/new Master Password or decrypted vault data. Finalization must be idempotent.
+
+### 10.5 Password strength
+
+Strength is advisory only. `zxcvbn4j` remains the preferred candidate but requires JIT task-level version/license/security verification before dependency addition. Master Password text never leaves the device.
+
+## 11. Last-Known-Good and safe promotion — T128 / ADR 0005
 
 ### 11.1 Roles
 
@@ -192,119 +223,141 @@ valid active
 → decode/open candidate with expected credentials
 → preserve old active as LKG
 → promote candidate to active
-→ verify active / update in-memory state
+→ verify promoted active
+→ reconcile in-memory/session state
 → clean temporary artifacts
 ```
 
-Do not update LKG from an unverified candidate. If a promotion step fails, prefer preserving a usable active/LKG pair over cleanup perfection.
+An unverified candidate never becomes active or LKG. LKG is sourced only from a previously valid active vault. Failure handling favors preserving a usable active/LKG state over cleanup perfection.
 
 ### 11.3 Corrupt active recovery
 
-When active KDBX cannot open due to corruption and an LKG exists, validate LKG separately. If valid, present an explicit restore offer and warn that the latest changes may be lost. No silent restore.
+When active KDBX cannot open due to corruption and an LKG exists, validate LKG separately. If valid, present an explicit restore offer and warn that latest changes may be lost. Never silently auto-restore.
 
-## 12. Forgot Master Password and destructive reset
+## 12. Forgot Master Password and destructive reset — T130 / ADR 0008
 
-Forgot flow reads only the stored hint and product explanation; it does not attempt recovery cryptography.
+Forgot flow reads only the stored hint and product explanation; it does not attempt password-recovery cryptography and does not present backup or biometric as recovery.
 
-Destructive reset uses exact typed `DELETE` confirmation and a single-flight repository/application operation that removes only RAHSA-managed vault-state artifacts:
+Reset requires exact typed `DELETE`. Before the final Reset action starts, Back/navigation away, backgrounding, recreation, process death, or force-close performs no deletion and typed confirmation need not persist.
+
+Once Reset starts, it converges to a fully reset RAHSA-managed state and is not cancellable through Back/Home navigation. Persist a minimal app-private **non-secret `RESET_IN_PROGRESS` marker** (or equivalent) before destructive cleanup. It contains no Master Password, credential data, decrypted vault data, or other secret material.
+
+Idempotent cleanup removes:
 
 - active KDBX;
 - LKG KDBX;
-- RAHSA-owned candidate/temp/recovery files;
+- RAHSA-owned candidate/temp/recovery artifacts;
 - password hint;
-- biometric quick-unlock wrapped state and Keystore alias.
+- biometric wrapped state; and
+- related Keystore alias when present.
 
-Do not delete SAF/external document URIs or user-selected backup files.
+On startup with a pending reset marker, complete cleanup before normal vault routing, clear the marker, then route to Create New Vault. Missing/already-deleted reset artifacts are treated as already-cleaned where safe. Do not attempt rollback or reconstruction. Preserve unrelated UI preferences and never delete user-managed external SAF backups. No secure-wipe or generic transaction framework is introduced.
 
-## 13. Manual backup via Storage Access Framework
+## 13. Manual backup via Storage Access Framework — T131 / ADR 0009
 
 ### 13.1 Destination selection
 
-Use Android's system document creation flow (`ACTION_CREATE_DOCUMENT` or the Activity Result equivalent). RAHSA writes encrypted KDBX bytes to the returned URI through `ContentResolver`.
-
-No direct cloud provider SDK is introduced. Any provider exposed by Android's DocumentsProvider system (local storage, Drive when installed/exposed, SD/USB, etc.) is treated uniformly.
+Use Android's system document creation flow (`ACTION_CREATE_DOCUMENT` or Activity Result equivalent). Write to the returned URI through `ContentResolver`. No direct cloud SDK/OAuth integration is introduced.
 
 ### 13.2 Backup source
 
-Backup the current verified encrypted active KDBX artifact. Do not decrypt and reserialize credentials merely to create an external backup unless a concrete implementation constraint requires it.
+Copy the current verified encrypted active KDBX bytes directly. Do not decrypt and reserialize credentials merely to produce backup. The external destination is output/transport only and never becomes the live active vault.
 
-### 13.3 Failure behavior
+### 13.3 Failure/lifecycle behavior
 
-Destination open/write/close failure surfaces an error and does not mutate active or LKG vault state.
+Destination open/write/close/finalization failure surfaces an error and leaves active/LKG unchanged. Success is reported only after output completion/finalization succeeds.
 
-## 14. Safe restore via Storage Access Framework
+T131 does **not** use an internal backup recovery marker because it does not mutate authoritative internal vault state. Process death/crash may leave an incomplete external document; internal state remains unchanged and the user can run backup again. The operation is single-flight.
 
-### 14.1 Candidate acquisition
+## 14. Safe restore via Storage Access Framework — T132 / ADR 0010
 
-Use Android's system document open flow (`ACTION_OPEN_DOCUMENT` or Activity Result equivalent). Treat the returned URI as an external input only.
+### 14.1 Candidate acquisition and validation
 
-Copy the selected document to a short-lived app-private candidate path before promotion. Do not operate on the external file as RAHSA's active vault.
+Use Android's system document open flow (`ACTION_OPEN_DOCUMENT` or Activity Result equivalent). Treat the external URI as untrusted input only. Copy it to an app-private candidate, ask for the selected backup password, and decode/open the copied candidate with Kotpass.
 
-### 14.2 Validation
+Wrong password, copy failure, unsupported/corrupt KDBX, decode failure, or validation failure stops with no active/LKG mutation.
 
-Ask for the selected backup's password and decode/open the copied candidate with Kotpass. Validate only supported KDBX versions/capabilities. Wrong password and decode/format failures stop before any active mutation.
+### 14.2 Validate-before-confirm
 
-### 14.3 Confirmation and promotion
+Only after successful candidate validation show the replacement confirmation. Before explicit Restore starts, Back/navigation away, cancellation, background abandonment, recreation, process death, or force-close performs no authoritative vault mutation and candidate/password UI state need not persist.
 
-Only after successful candidate validation show the replacement confirmation. On confirmation, preserve current valid active as LKG, promote the validated candidate, verify the promoted active, replace the in-memory database/session with the restored database, and invalidate biometric quick unlock.
+### 14.3 Promotion and commit point
 
-Initial setup restore uses the same validation/promotion pipeline but has no current active vault to preserve as LKG.
+When a current active exists:
+
+```text
+validated candidate
+→ current verified active → LKG
+→ candidate → ACTIVE
+→ verify promoted ACTIVE
+```
+
+During initial setup there is no old active to preserve as LKG; use the same validation discipline before promotion.
+
+Candidate promotion is the authoritative **commit point**. Before commit the old active is authoritative. After commit the restored active KDBX and restored Master Password are authoritative. Do not roll back solely because the success UI or process was interrupted after commit.
+
+### 14.4 Post-commit finalization
+
+A minimal app-private **non-secret restore-finalization marker** may be used after commit. It must not contain the backup password, external URI, credentials, decrypted vault data, or other secrets.
+
+Idempotent finalization invalidates stale biometric quick-unlock/Keystore state when present, cleans candidate/temp artifacts, reconciles routing/session state, and clears the marker. Startup with pending finalization treats the restored KDBX as authoritative and completes required non-secret cleanup before normal use.
+
+Restore remains full-vault replacement only; no merge, dedupe, conflict resolution, or partial import.
 
 ## 15. Backup/restore operation status UI
 
-Represent operation state as a small sealed state/enum such as `Idle`, `Copying`, `Validating`, `Restoring`, `Success`, `Error`; do not create a generic workflow engine.
+Represent operation status with small local state such as `Idle`, `Copying`, `Validating`, `Restoring`, `Success`, `Error`; do not build a generic workflow engine.
 
 Use existing Compose/Material 3 primitives:
 
-- `LinearProgressIndicator(progress = ...)` only when byte-copy progress is accurately measurable;
-- indeterminate `LinearProgressIndicator()` for decrypt/validation or other non-measurable stages;
-- `Crossfade` or `AnimatedContent` for subtle status-label transitions if it stays simple;
-- live-region/state semantics so accessibility services receive meaningful operation status.
+- determinate `LinearProgressIndicator` only when byte progress is accurately measurable;
+- indeterminate progress for decrypt/validation/promotion or providers without reliable size/progress;
+- optional lightweight `Crossfade`/`AnimatedContent` for status text;
+- live-region/state semantics for accessibility.
 
-Never synthesize percentages from arbitrary stage count or elapsed time.
+Never synthesize percentages from elapsed time or arbitrary stage counts.
 
 ## 16. Critical-operation single-flight
 
-Reuse the existing `AtomicBoolean`/state-guard pattern already used by credential persistence where suitable. Critical operations must have both UI disabling/in-progress state and a logic-layer guard when multiple events could reach the same mutation.
+Use existing local state/`AtomicBoolean`-style guards where suitable. Critical operations require UI in-progress/disablement plus a logic-layer single-flight guard when duplicate events can reach the same mutation.
 
-Keep guards local to each operation/repository boundary rather than building a global transaction manager.
+Keep guards local to the operation/repository boundary. Do not create a global transaction manager.
 
-## 17. Biometric Quick Unlock design
-
-See proposed ADR `docs/adr/0006-biometric-quick-unlock-keystore.md`.
+## 17. Biometric Quick Unlock — T133 / ADR 0006
 
 ### 17.1 Secure state
 
-RAHSA does not store plaintext Master Password. When biometric is enabled after explicit current-password reauthentication:
+Biometric Quick Unlock is OFF by default. Enable requires current Master Password reauthentication against active KDBX and successful qualifying biometric authentication.
 
-1. generate a non-exportable Android Keystore symmetric key scoped to RAHSA;
-2. require qualifying biometric authentication for use of that key;
-3. encrypt/wrap the minimum runtime vault-unlock secret needed to open the KDBX (currently the Master Password bytes) using an authenticated platform cipher such as AES-GCM;
-4. persist only ciphertext + required non-secret cipher metadata (for example IV) in app-private settings/storage; and
-5. clear transient plaintext/byte copies as soon as practical.
+RAHSA:
 
-This is envelope protection using Android platform cryptography, not a custom vault encryption format.
+1. generates a non-exportable Android Keystore symmetric key;
+2. requires `BIOMETRIC_STRONG` authentication for key use;
+3. wraps the minimum KDBX unlock secret needed at runtime (currently Master Password bytes) using an authenticated platform cipher such as AES-GCM;
+4. persists wrapped ciphertext plus required non-secret cipher/state metadata only; and
+5. clears transient plaintext/byte copies as soon as practical.
 
-### 17.2 Authentication
+`DEVICE_CREDENTIAL` is not a quick-unlock fallback.
 
-Use AndroidX `BiometricPrompt` with `CryptoObject` and request `BIOMETRIC_STRONG` only. Do not include `DEVICE_CREDENTIAL` as an allowed authenticator for quick unlock.
+### 17.2 Fail-closed enable lifecycle
 
-On biometric success, decrypt the wrapped unlock secret in memory and pass it through the normal `VaultRepository.openVault(...)` path. Home navigation happens only after real vault open succeeds.
+`enabled = true` is committed only after key creation, biometric authentication, wrapping, complete secure-state persistence, and consistency verification all succeed. Interrupted/failed enablement remains OFF. Orphaned aliases or incomplete wrapped state are cleanup-only and removable idempotently.
 
-### 17.3 Invalidation
+No biometric-specific transaction/recovery marker is introduced.
 
-Treat missing Keystore key, key invalidation, changed biometric enrollment/security state, decrypt/authentication error, or inconsistent wrapped state as quick-unlock invalidation:
+### 17.3 Real vault-open boundary
 
-- remove/disable biometric quick-unlock state;
-- do not loop prompts;
-- retain Master Password unlock path;
-- require explicit re-enable after password authentication.
+Biometric success unwraps the runtime secret transiently in memory and passes it through the normal `VaultRepository.openVault(...)` path. The session/UI becomes unlocked only after real KDBX open succeeds. Biometric prompt success by itself never constitutes unlock.
 
-Configure enrollment invalidation where supported by the Android API level and qualifying device capability.
+Auto-prompt occurs at most once per locked entry when enabled/valid. Cancel does not loop. Manual `Unlock with Biometrics` and `Use Master Password` remain available.
 
-### 17.4 Lifecycle
+### 17.4 Invalidation and fail-closed disable
 
-Wrapped biometric state is tied to the current vault credential. Master Password change, restore, destructive reset, reinstall, or new device invalidates/removes it. It is never included in external KDBX backup.
+Missing/invalidated key, enrollment/security-state change, unwrap failure, inconsistent secure state, or real vault-open failure keeps the vault locked, disables/removes unusable quick-unlock state where appropriate, and falls back to Master Password.
+
+Disable requires confirmation but does not lock the current live session. Disable transitions fail closed toward OFF; wrapped state/Keystore alias cleanup is idempotent and a crash must not resurrect a partially removed configuration.
+
+Master Password change, restore, reset, reinstall, or new device invalidates/removes biometric quick-unlock state. Wrapped biometric state is never included in external KDBX backup.
 
 ## 18. Dependency strategy for Phase 13
 
@@ -315,64 +368,95 @@ Expected existing/platform reuse:
 - Kotpass `0.13.0` for KDBX encode/decode/credential modification;
 - Android Storage Access Framework for external backup/restore;
 - AndroidX Biometric `1.1.0` + Android Keystore for biometric quick unlock;
-- Material 3/Compose animation/progress primitives for acknowledgment/progress UX;
+- Material 3/Compose progress/animation/swipe primitives;
 - `java.security.SecureRandom` for generator hardening.
 
-Potential new dependency only if approved during task preparation:
+Potential new dependency only if approved during T129 JIT preparation:
 
 - zxcvbn4j for advisory Master Password strength.
 
-Do not introduce a new crypto library, database, network/cloud SDK, gesture framework, shimmer library, or backup container.
+Do not introduce a new crypto library, database, network/cloud SDK, gesture framework, shimmer library, backup container, or generic transaction/workflow framework.
 
 ## 19. Error/security behavior
 
 - Wrong authentication credentials → deny access; no decrypted data.
 - Corrupt/unreadable vault → non-destructive failure.
-- Failed candidate creation/validation → current active/LKG unchanged.
+- Failed candidate creation/validation → current authoritative state unchanged.
+- Pre-commit re-key/restore failure → old active state remains authoritative.
+- Post-commit interruption → promoted active remains authoritative; approved non-secret finalization resumes idempotently.
+- Destructive reset once started → converge to fully reset state; never reconstruct partially deleted old vault.
 - External backup write failure → active/LKG unchanged.
 - Restore selection alone → no mutation.
-- Biometric UI success without a successful repository open → vault remains locked.
-- Secrets and candidate payloads → never intentionally log.
+- Biometric UI success without successful repository open → vault remains locked.
+- Partial biometric enable/disable → fail closed toward OFF.
+- Secrets, candidate payloads, passwords, external restore password, and transient biometric plaintext → never intentionally log.
 
 ## 20. Testing strategy
 
-Prioritize risk boundaries:
+Prioritize risk boundaries.
 
 ### Password Generator
-- generated length/allowed alphabet;
-- secure RNG path is used;
-- all existing entry points still work.
+- requested length and configured allowed alphabet;
+- production `SecureRandom` path;
+- existing category configuration/entry points;
+- no deterministic production-output assumption.
 
 ### Create Vault warning
 - Create Vault disabled until acknowledgment;
-- swipe completion only acknowledges;
+- swipe/action only acknowledges;
 - explicit Create action required;
-- TalkBack/accessibility action works.
+- acknowledgment resets across abandoned/recreated flow;
+- TalkBack/accessibility equivalent works;
+- duplicate Create execution rejected.
 
 ### Re-key
 - wrong current password rejected without mutation;
-- candidate/write/verification failures preserve old vault and hint;
-- success: old password fails, new password opens, session stays unlocked;
-- biometric state invalidated when present.
+- warning + acknowledgment required;
+- candidate/write/verification failures preserve old vault/hint/biometric state;
+- pre-commit crash leaves old state authoritative;
+- post-commit crash leaves new vault authoritative and finalization resumes idempotently;
+- success: old password fails, new password opens, live session remains unlocked;
+- biometric state invalidated when previously active.
 
-### LKG / backup / restore
-- no unverified candidate becomes active/LKG;
-- active corruption + valid LKG offers recovery rather than silent restore;
-- external backup bytes form an openable KDBX;
-- wrong restore password/invalid file leaves active untouched;
-- successful restore replaces full vault and invalidates biometric state;
-- measurable vs indeterminate progress behavior is truthful.
+### LKG
+- unverified candidate never becomes active/LKG;
+- exactly one LKG role;
+- active corruption + valid LKG offers recovery rather than silent restore.
+
+### Destructive reset
+- exact `DELETE` required;
+- before final action, lifecycle/process interruption deletes nothing;
+- after reset starts, restart completes cleanup idempotently;
+- internal vault/LKG/temp/hint/biometric state removed;
+- UI preferences and user-managed external backups preserved.
+
+### Backup
+- direct encrypted KDBX output remains openable;
+- provider/write/close failure leaves internal state unchanged;
+- interrupted write does not create internal recovery state;
+- truthful determinate vs indeterminate progress.
+
+### Restore
+- wrong password/corrupt/unsupported/copy failure leaves active unchanged;
+- candidate validated before confirmation;
+- current active becomes LKG when applicable;
+- pre-commit interruption leaves old active authoritative;
+- post-commit interruption leaves restored active authoritative and finalization resumes;
+- restored password becomes effective;
+- biometric state invalidated when applicable;
+- Settings and initial-setup flows both work.
 
 ### Biometric
 - enable requires current-password reauth;
-- cancel/failure leaves OFF;
+- partial/interrupted enable remains OFF;
 - biometric success causes real vault open;
 - cancellation does not auto-loop;
-- enrollment/key invalidation falls back to Master Password;
-- password change/restore/reset invalidates wrapped state;
-- test on a physical qualifying device when available.
+- key/enrollment/inconsistent-state invalidation falls back to Master Password;
+- partial disable fails closed toward OFF and does not resurrect;
+- password change/restore/reset invalidation hooks work;
+- test on a qualifying physical device.
 
-Device/instrumentation validation is mandatory for SAF provider behavior, biometric/Keystore behavior, accessibility swipe behavior, and relevant lifecycle transitions.
+Device/instrumentation validation is mandatory for SAF provider behavior, biometric/Keystore behavior, accessibility swipe behavior, and relevant lifecycle/process-death boundaries.
 
 ## 21. Explicit non-goals
 
@@ -382,12 +466,13 @@ No Phase 13 implementation of Autofill, favicon retrieval, camera/OCR scan, pass
 
 ```text
 approved PRD Phase 13 behavior
-→ owner reviews this TSD + proposed ADRs + Threat Model
-→ owner reviews Phase 13 T126–T133 definitions
-→ JIT Implementation Kit for exactly next approved Txxx
-→ TASKS activates exactly one Txxx + kit
+→ accepted ADRs for T126–T133
+→ final owner approval of consolidated TSD + Threat Model + task package
+→ JIT Implementation Kit for exactly T126
+→ TASKS activates exactly T126 + kit
 → Codex preflight / implement / validate / checkpoint
 → PLANNING_FREEZE
+→ next task requires a new JIT kit and explicit activation
 ```
 
-Until that gate is completed, application-code changes are not authorized.
+Until final technical-package approval and the JIT gate are completed, application-code changes are not authorized.
