@@ -155,7 +155,7 @@ Prototype is done only when:
 - [x] **T113** Refine Create/Edit form, contextual generator access, validation, saving feedback, and lightweight unsaved-change confirmation.
 - [x] **T114** Refine Standalone Generator using the existing engine/config, automatic fresh generation, simplified options, and secure copy behavior.
 - [x] **T115** Refine Settings into simple sections/list rows; preserve Password Hint/Auto-lock/Help/About and do not promote biometric UI.
-- [ ] **T116** Ensure global Back/lock/navigation state follows `docs/UX_UI_BASELINE.md`.
+- [x] **T116** Ensure global Back/lock/navigation state follows `docs/UX_UI_BASELINE.md`.
 
 ## Phase 12 — UX Feedback, Accessibility, and Regression
 

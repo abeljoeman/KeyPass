@@ -136,7 +136,13 @@ fun Dashboard(viewModel: BottomNavViewModel = androidx.lifecycle.viewmodel.compo
   val vaultRepository = LocalVaultRepository.current
   val dispatch = rememberDispatcher()
 
-  BackHandler(!systemBackPress) { dispatch(GoBackAction) }
+  BackHandler(!systemBackPress) {
+    when (currentScreen) {
+      is PasswordGeneratorState,
+      is SettingsState -> dispatch(NavigationAction(HomeState(), true))
+      else -> dispatch(GoBackAction)
+    }
+  }
 
   // Call this like any other SideEffect in your composable
   LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {

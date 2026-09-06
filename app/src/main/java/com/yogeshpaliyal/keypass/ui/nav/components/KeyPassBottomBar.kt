@@ -54,7 +54,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             selected = currentScreen is PasswordGeneratorState,
             onClick = {
                 if (currentScreen !is PasswordGeneratorState) {
-                    dispatchAction(NavigationAction(PasswordGeneratorState()))
+                    dispatchAction(NavigationAction(PasswordGeneratorState(), true))
                 }
             },
             icon = {
@@ -70,7 +70,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
             selected = currentScreen is SettingsState,
             onClick = {
                 if (currentScreen !is SettingsState) {
-                    dispatchAction(NavigationAction(SettingsState))
+                    dispatchAction(NavigationAction(SettingsState, true))
                 }
             },
             icon = {
