@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), ADR 0010 (safe KDBX restore validation/promotion/finalization), ADR 0011 (password generator SecureRandom + combined alphabet), and ADR 0012 (Create Vault ephemeral recovery acknowledgment) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. Implementation remains frozen. The next permitted preparation step is a JIT Implementation Kit for **T126 only**; T126 remains NOT ACTIVE until that kit is READY and this file explicitly activates exactly T126.
 
 ## Completed historical work
 
@@ -21,9 +21,9 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 # Phase 13 — Access & Data Safety Foundation
 
-**Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
+**Phase status:** APPROVED TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; ADR 0011 accepted; ADR 0012 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** owner-approved consolidated `TSD.md`; accepted ADRs 0005–0012; owner-approved `docs/THREAT_MODEL.md`
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -267,7 +267,7 @@ Do not create current-roadmap tasks for:
 
 ## Just-in-time Implementation Kit gate
 
-The Phase 13 tasks above are draft definitions only. After owner approval, ChatGPT prepares a JIT kit for **exactly the next task** against the latest verified checkpoint.
+The Phase 13 task definitions are owner-approved but remain inactive. ChatGPT may now prepare a JIT kit for **exactly T126** against the latest verified checkpoint.
 
 Every active task requires:
 
@@ -279,13 +279,15 @@ Do not pre-generate all Phase 13 patches.
 
 ## Activating exactly one task
 
-Only after owner approval and a READY JIT kit, change the header to:
+Only after the T126 JIT kit is READY and execution is explicitly authorized, change the header to:
 
 ```text
 EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: Txxx
-ACTIVE_KIT: implementation-kits/Txxx/README.md
+ACTIVE_TASK: T126
+ACTIVE_KIT: implementation-kits/T126/README.md
 ```
+
+Later tasks require their own JIT kit and explicit activation after the previous task checkpoint.
 
 ## End of each task
 

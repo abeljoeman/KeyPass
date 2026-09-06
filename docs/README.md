@@ -7,8 +7,8 @@ Use this index to distinguish current authority, planning state, and historical 
 1. `docs/GOVERNANCE_STATUS.md` — current workstream, execution gate, accepted Phase 13 architecture state.
 2. `TASKS.md` — machine-readable active-task/kit gate and T126–T133 task definitions.
 3. `PRD.md` — approved v0.2 baseline + approved Phase 13 product amendment.
-4. `TSD.md` — approved v0.2 technical baseline + consolidated Phase 13 technical design pending final owner approval.
-5. `docs/THREAT_MODEL.md` — consolidated Phase 13 security boundaries and validation gates pending final owner approval.
+4. `TSD.md` — approved v0.2 technical baseline + owner-approved consolidated Phase 13 technical design.
+5. `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 security boundaries and implementation validation gates.
 
 ## Source-of-truth hierarchy
 
@@ -33,9 +33,9 @@ Implementation Kit
 ## Current Phase 13 planning documents
 
 - `PRD.md` — Phase 13 product requirements approved by owner.
-- `TSD.md` — task architectures consolidated; final technical-package approval pending.
-- `docs/THREAT_MODEL.md` — Phase 13 threat model consolidated; final technical-package approval pending.
-- `TASKS.md` — T126–T133 defined; each task architecture owner-approved; **no task active**.
+- `TSD.md` — consolidated Phase 13 technical design approved by owner.
+- `docs/THREAT_MODEL.md` — consolidated Phase 13 threat model approved by owner; implementation/device validation gates remain unchecked until execution.
+- `TASKS.md` — T126–T133 approved task definitions; **no task active**.
 
 Accepted Phase 13 ADRs:
 
@@ -62,7 +62,7 @@ ACTIVE_TASK: NONE
 ACTIVE_KIT: NONE
 ```
 
-After final consolidated technical-package approval, the next workflow step is JIT preparation for **T126 only**. T126 is not activated until its repository-local Implementation Kit is READY and the execution gate is explicitly changed.
+The consolidated Phase 13 technical package is approved. The next workflow step is JIT preparation for **T126 only**. T126 is not activated until its repository-local Implementation Kit is READY and the execution gate is explicitly changed.
 
 ## Execution / workflow documents
 

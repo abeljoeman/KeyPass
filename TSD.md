@@ -1,10 +1,10 @@
 # Technical Design — RAHSA v0.2 Baseline + Phase 13 Consolidated Review
 
-**Status:** v0.2 baseline approved; Phase 13 technical design **CONSOLIDATED — final owner approval required**  
+**Status:** v0.2 baseline approved; Phase 13 technical design **APPROVED — owner-approved consolidated technical package**  
 **Updated:** 2026-09-06  
 **Related:** `PRD.md`, `ENGINEERING_PRINCIPLES.md`, `docs/THREAT_MODEL.md`, accepted ADRs `0005`–`0012`
 
-This TSD preserves the technical baseline at `v0.2-prototype` and consolidates the owner-approved task architectures for Phase 13. It does **not** activate implementation. All Phase 13 task architectures T126–T133 are owner-approved through accepted ADRs; this consolidated document and the aligned Threat Model still require final owner approval before a JIT Implementation Kit may be prepared.
+This TSD preserves the technical baseline at `v0.2-prototype` and consolidates the owner-approved task architectures for Phase 13. All Phase 13 task architectures T126–T133, accepted ADRs 0005–0012, this consolidated TSD, and the aligned Threat Model are owner-approved. This approval does **not** activate implementation; the next workflow step is JIT Implementation Kit preparation for T126 only, followed by explicit activation if that kit is READY.
 
 ## 1. Technical context
 
@@ -467,7 +467,7 @@ No Phase 13 implementation of Autofill, favicon retrieval, camera/OCR scan, pass
 ```text
 approved PRD Phase 13 behavior
 → accepted ADRs for T126–T133
-→ final owner approval of consolidated TSD + Threat Model + task package
+→ owner-approved consolidated TSD + Threat Model + task package
 → JIT Implementation Kit for exactly T126
 → TASKS activates exactly T126 + kit
 → Codex preflight / implement / validate / checkpoint
@@ -475,4 +475,4 @@ approved PRD Phase 13 behavior
 → next task requires a new JIT kit and explicit activation
 ```
 
-Until final technical-package approval and the JIT gate are completed, application-code changes are not authorized.
+Application-code changes remain unauthorized until T126's JIT Implementation Kit is READY and `TASKS.md` explicitly activates exactly T126 with its kit.

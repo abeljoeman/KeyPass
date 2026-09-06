@@ -19,9 +19,9 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — Access & Data Safety Foundation final technical consolidation review.**
+**Phase 13 — Access & Data Safety Foundation technical planning approved; JIT T126 preparation pending.**
 
-Owner product review is complete and the Phase 13 PRD amendment is approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. `TSD.md` and `docs/THREAT_MODEL.md` have been consolidated against those accepted decisions and are now pending **final owner approval of the technical package as a whole**.
+Owner product review is complete and the Phase 13 PRD amendment is approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. The consolidated `TSD.md`, `docs/THREAT_MODEL.md`, accepted ADRs, and task architecture package are now **owner-approved as the Phase 13 technical package**.
 
 There is **no active implementation task**. `TASKS.md` must remain:
 
@@ -31,7 +31,7 @@ ACTIVE_TASK: NONE
 ACTIVE_KIT: NONE
 ```
 
-No application code may be modified under this gate.
+No application code may be modified under this gate. The next permitted planning/preparation step is a JIT Implementation Kit for **T126 only** against the latest checkpoint; T126 remains inactive until that kit is READY and `TASKS.md` explicitly activates exactly T126.
 
 ## Approved Phase 13 product direction
 
@@ -93,7 +93,7 @@ T132 Safe KDBX Restore via SAF
 T133 Secure Biometric Quick Unlock
 ```
 
-Each task architecture is owner-approved, but all implementation tasks remain **NOT ACTIVE**. Final consolidated TSD/Threat Model/package approval is required before JIT preparation/activation of T126.
+The consolidated Phase 13 technical package and every task architecture are owner-approved, but all implementation tasks remain **NOT ACTIVE**. JIT preparation for T126 may now proceed; activation is a separate explicit gate after a repository-local READY kit exists.
 
 ## Standard planning-to-execution workflow
 
@@ -141,7 +141,7 @@ Execution/status documents and kits never override higher-level product/security
 - `ENGINEERING_PRINCIPLES.md`
 - `AGENTS.md`
 - `PRD.md` — v0.2 baseline + approved Phase 13 product amendment.
-- `TSD.md` — consolidated Phase 13 technical design; final owner approval pending.
+- `TSD.md` — owner-approved consolidated Phase 13 technical design.
 - `docs/adr/0005-data-safety-kdbx-lkg-saf.md` — accepted.
 - `docs/adr/0006-biometric-quick-unlock-keystore.md` — accepted.
 - `docs/adr/0007-master-password-change-crash-consistency.md` — accepted.
@@ -150,10 +150,10 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/adr/0010-safe-kdbx-restore-finalization.md` — accepted.
 - `docs/adr/0011-password-generator-secure-random.md` — accepted.
 - `docs/adr/0012-create-vault-recovery-acknowledgment.md` — accepted.
-- `docs/THREAT_MODEL.md` — consolidated Phase 13 threat extension; final owner approval pending.
+- `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 threat extension; implementation validation gates remain unchecked until execution/testing.
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
-- `TASKS.md` — T126–T133 defined; execution frozen.
+- `TASKS.md` — T126–T133 approved definitions; execution frozen.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 

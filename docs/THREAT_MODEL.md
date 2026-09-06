@@ -1,6 +1,6 @@
 # Threat Model — RAHSA Android Password Manager
 
-**Status:** v0.2 review preserved; Phase 13 extension **CONSOLIDATED — final owner approval required**  
+**Status:** v0.2 review preserved; Phase 13 extension **APPROVED — owner-approved consolidated technical package**  
 **Updated:** 2026-09-06  
 **Scope:** Local-first Android app, including owner-approved Phase 13 access/data-safety architectures
 
