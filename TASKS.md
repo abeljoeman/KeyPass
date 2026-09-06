@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), and ADR 0008 (resumable destructive reset) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), and ADR 0009 (manual external KDBX backup via provider-neutral SAF) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -147,22 +147,28 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T131 — Add manual external KDBX backup via SAF
 
-**Objective:** Export the current encrypted active KDBX to a user-selected Android document destination with truthful subtle progress UX.
+**Planning status:** Architecture approved via accepted ADR 0009; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-060..066, P13-FR-080..092; `TSD.md` §13/§15/§16; ADR 0005; Threat Model T17/T18/T22.
+**Objective:** Export the current verified encrypted active KDBX directly to a user-selected Android document destination through provider-neutral SAF with truthful subtle progress UX and no internal recovery marker.
+
+**References:** `PRD.md` P13-FR-060..066, P13-FR-080..092; `TSD.md` §13/§15/§16; accepted ADR 0005; accepted ADR 0009; Threat Model T17/T18/T22.
 
 **Acceptance:**
 - Uses system document create flow/provider-neutral SAF.
-- Writes encrypted `.kdbx` directly; no custom container/cloud SDK.
-- Destination write failure does not mutate active/LKG.
-- Success only after output completes.
-- Status uses existing Material 3 progress/animation primitives; determinate only when measurable, otherwise indeterminate.
+- Copies the verified encrypted active `.kdbx` bytes directly through `ContentResolver`; it does not decrypt and reserialize credentials merely for backup.
+- No custom backup container, direct cloud SDK, or OAuth integration is added.
+- External destination is output only and never becomes the active vault.
+- Destination write/finalization failure does not mutate active or LKG.
+- Success is reported only after destination write and close/finalization complete without error.
+- Status uses existing Material 3 progress/animation primitives; determinate only when real byte progress is measurable, otherwise indeterminate.
 - No fake percentages; accessible operation status.
+- No internal `BACKUP_IN_PROGRESS` transaction/recovery marker is introduced because backup does not mutate authoritative internal vault state.
+- Process death/crash during write may leave an incomplete external destination artifact; internal active/LKG remain unchanged and the user can run backup again.
 - Operation is single-flight.
 
-**Validation:** unit/instrumentation tests + physical provider smoke (at least local provider; Drive/provider if available) + open resulting KDBX with correct password.
+**Validation:** unit/instrumentation tests + interrupted/failing destination tests + physical provider smoke (at least local provider; Drive/provider if available) + open resulting KDBX with correct password.
 
-**Out of scope:** scheduled backup, cloud API/OAuth, backup retention manager.
+**Out of scope:** scheduled backup, cloud API/OAuth, backup retention manager, internal backup transaction/recovery marker, custom external cleanup framework.
 
 ## T132 — Add safe KDBX restore via SAF
 
