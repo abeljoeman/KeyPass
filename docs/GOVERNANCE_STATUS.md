@@ -19,19 +19,26 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126 Password Generator Security Hardening ACTIVE.**
+**Phase 13 — T126 complete; planning freeze before T127 JIT preparation.**
 
-Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. A READY JIT Implementation Kit exists for T126 and the owner has explicitly activated **T126 only**.
+Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
-The current execution gate in `TASKS.md` must be:
+T126 — Password Generator Security Hardening — was implemented, validated, checkpointed, and pushed at:
 
 ```text
-EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: T126
-ACTIVE_KIT: implementation-kits/T126/README.md
+e69ee8021e1c50c1ae244be2ad25790f0fd31dc0
+feat: harden password generator randomness
 ```
 
-Codex may modify application code only within the approved T126 scope after `python scripts/governance_preflight.py --implementation T126` succeeds. T127–T133 remain NOT ACTIVE and must not be implemented, bundled, or opportunistically advanced during T126.
+The current execution gate in `TASKS.md` is:
+
+```text
+EXECUTION_STATUS: PLANNING_FREEZE
+ACTIVE_TASK: NONE
+ACTIVE_KIT: NONE
+```
+
+No implementation task is currently active. The next permitted preparation step is a JIT Implementation Kit for **T127 only** against the latest verified checkpoint. T127 remains inactive until that kit is READY and separately activated.
 
 ## Approved Phase 13 product direction
 
@@ -83,7 +90,7 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 ## Phase 13 task sequence
 
 ```text
-T126 Password Generator Security Hardening       ACTIVE
+T126 Password Generator Security Hardening       COMPLETE — e69ee80
 T127 Create Vault Recovery Acknowledgment        NOT ACTIVE
 T128 One-LKG Safe Promotion Foundation           NOT ACTIVE
 T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
@@ -93,7 +100,7 @@ T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T126 is the sole active implementation task. After T126 validation and focused checkpoint, execution returns to `PLANNING_FREEZE / NONE / NONE`; T127 requires a new JIT kit and separate explicit activation.
+T126 is complete. T127 requires a new JIT kit and separate explicit activation; T128–T133 remain untouched.
 
 ## Standard planning-to-execution workflow
 
@@ -153,8 +160,8 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 threat extension; implementation validation gates remain unchecked until execution/testing.
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
-- `implementation-kits/T126/README.md` — READY JIT kit for the sole active task.
-- `TASKS.md` — T126 active; T127–T133 inactive.
+- `implementation-kits/T126/README.md` — historical READY kit for completed T126.
+- `TASKS.md` — T126 complete; execution frozen; T127–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -172,7 +179,7 @@ For new capability design and implementation, evaluate in order:
 
 Phase 13 verified reuse findings include Kotpass `0.13.0` `modifyCredentials()` for KDBX credential changes, Android SAF for provider-neutral document I/O, AndroidX Biometric + Android Keystore for quick unlock, Material 3 for swipe/progress/animation UX, and `java.security.SecureRandom` for generator hardening.
 
-For active T126, use direct `java.security.SecureRandom` combined-alphabet selection and add no new dependency, UX, passphrase mode, or complexity policy.
+For T127 preparation, reuse the existing Create Vault flow and an existing Material 3/platform/project swipe primitive or established pattern. Do not add a recovery marker, custom gesture framework, or new dependency merely for acknowledgment.
 
 ## Public release status
 
@@ -180,13 +187,9 @@ Public/Play Store release work remains **PARKED** until explicitly resumed.
 
 ## Implementation Kit / Codex gate
 
-Codex may modify application code only when `TASKS.md` exposes exactly one approved active Txxx and repository-local READY kit, and governance preflight passes. The current authorized command is:
+Codex may modify application code only when `TASKS.md` exposes exactly one approved active Txxx and repository-local READY kit, and governance preflight passes.
 
-```powershell
-python scripts/governance_preflight.py --implementation T126
-```
-
-After T126 passes required validation and a focused checkpoint is created, return to:
+Current state:
 
 ```text
 EXECUTION_STATUS: PLANNING_FREEZE
@@ -194,8 +197,8 @@ ACTIVE_TASK: NONE
 ACTIVE_KIT: NONE
 ```
 
-Codex must stop after that checkpoint and must not automatically continue to T127.
+T127 must not be implemented until its JIT kit is READY and `TASKS.md` explicitly activates it.
 
 ## Cost policy
 
-Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. T126 is a narrow low-risk deterministic hardening task; its READY kit recommends Luna + low. Vault/Master Password/Keystore/recovery semantics in later tasks remain security-sensitive regardless of kit completeness.
+Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. T126 was a narrow low-risk hardening task. T127 is a focused UX/state change around an unrecoverability warning; keep implementation narrow and reuse-first. Vault/Master Password/Keystore/recovery semantics in later tasks remain security-sensitive regardless of kit completeness.
