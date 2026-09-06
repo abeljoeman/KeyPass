@@ -1,7 +1,7 @@
 diff --git a/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt b/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
 --- a/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
 +++ b/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
-@@ -1,50 +1,46 @@
+@@ -1,51 +1,44 @@
  package com.yogeshpaliyal.common.utils
  
  import com.yogeshpaliyal.common.data.PasswordConfig
@@ -75,7 +75,7 @@ diff --git a/app/src/test/java/com/yogeshpaliyal/keypass/security/PasswordGenera
 new file mode 100644
 --- /dev/null
 +++ b/app/src/test/java/com/yogeshpaliyal/keypass/security/PasswordGeneratorTest.kt
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,94 @@
 +package com.yogeshpaliyal.keypass.security
 +
 +import com.yogeshpaliyal.common.data.PasswordConfig
