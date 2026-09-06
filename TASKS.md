@@ -1,17 +1,17 @@
 # RAHSA Implementation Tasks
 
-**EXECUTION_STATUS: ACTIVE_IMPLEMENTATION**  
-**ACTIVE_TASK: T126**  
-**ACTIVE_KIT: implementation-kits/T126/README.md**  
+**EXECUTION_STATUS: PLANNING_FREEZE**
+**ACTIVE_TASK: NONE**
+**ACTIVE_KIT: NONE**
 **Stable baseline:** `v0.2-prototype` (`5d6acd3 release: prepare v0.2 prototype`)
 
 ## Current execution gate
 
-T126 is the **only active implementation task**.
+No implementation task is active.
 
-Codex MAY modify application code only within the exact T126 scope and READY kit referenced above. T127–T133 remain NOT ACTIVE and MUST NOT be implemented or opportunistically prepared as part of T126.
+T126 is complete. T127–T133 remain NOT ACTIVE and MUST NOT be implemented or opportunistically prepared without a new JIT kit and explicit activation.
 
-Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. T126 now has a READY JIT Implementation Kit and explicit owner authorization; this activation does not authorize any later Phase 13 task.
+Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. T126's completed implementation does not authorize any later Phase 13 task.
 
 ## Completed historical work
 
@@ -21,15 +21,15 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 # Phase 13 — Access & Data Safety Foundation
 
-**Phase status:** APPROVED TASK PLAN — T126 ACTIVE ONLY  
+**Phase status:** APPROVED TASK PLAN — PLANNING FREEZE
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
 **Technical review:** owner-approved consolidated `TSD.md`; accepted ADRs 0005–0012; owner-approved `docs/THREAT_MODEL.md`
 
-Only T126 is active. Every later task requires a new JIT Implementation Kit against the latest checkpoint and separate explicit activation after the prior task completes.
+T126 is complete. Every later task requires a new JIT Implementation Kit against the latest checkpoint and separate explicit activation.
 
 ## T126 — Harden Password Generator randomness
 
-**Planning status:** ACTIVE IMPLEMENTATION via READY JIT kit `implementation-kits/T126/README.md`; no other task is active.
+**Planning status:** COMPLETE — validated and checkpointed; no implementation task is active.
 
 **Objective:** Replace non-cryptographic/default Kotlin randomness in secret generation with direct `java.security.SecureRandom` bounded selection from one combined allowed-character alphabet, without changing generator UX or adding dependencies.
 
@@ -279,15 +279,15 @@ Do not pre-generate all Phase 13 patches.
 
 ## Current activation
 
-The current execution gate is exactly:
+The execution gate is currently:
 
 ```text
-EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: T126
-ACTIVE_KIT: implementation-kits/T126/README.md
+EXECUTION_STATUS: PLANNING_FREEZE
+ACTIVE_TASK: NONE
+ACTIVE_KIT: NONE
 ```
 
-Codex must run `python scripts/governance_preflight.py --implementation T126` before modifying application code. Later tasks require their own JIT kit and explicit activation after the previous task checkpoint.
+T126 was validated and checkpointed. Later tasks require their own JIT kit and explicit activation.
 
 ## End of each task
 

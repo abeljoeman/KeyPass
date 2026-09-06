@@ -1,51 +1,44 @@
 package com.yogeshpaliyal.common.utils
 
 import com.yogeshpaliyal.common.data.PasswordConfig
+import java.security.SecureRandom
 
 class PasswordGenerator(
     val passwordConfig: PasswordConfig
 ) {
-    private val UPPER_CASE = 0
-    private val LOWER_CASE = 1
-    private val NUMBERS = 2
-    private val SYMBOLS = 3
-    private val BLANKSPACES = 4
-
     companion object {
         val totalSymbol = listOf('!', '@', '#', '$', '%', '&', '*', '+', '=', '-', '~', '?', '/', '_')
+        private val secureRandom = SecureRandom()
     }
 
     fun generatePassword(): String {
-        var password = ""
-        val list = ArrayList<Int>()
+        val allowedCharacters = ArrayList<Char>()
+
         if (passwordConfig.includeUppercaseLetters) {
-            list.add(UPPER_CASE)
+            allowedCharacters.addAll('A'..'Z')
         }
         if (passwordConfig.includeLowercaseLetters) {
-            list.add(LOWER_CASE)
+            allowedCharacters.addAll('a'..'z')
         }
         if (passwordConfig.includeNumbers) {
-            list.add(NUMBERS)
+            allowedCharacters.addAll('0'..'9')
         }
         if (passwordConfig.includeSymbols) {
-            list.add(SYMBOLS)
+            allowedCharacters.addAll(passwordConfig.listOfSymbols)
         }
-
         if (passwordConfig.includeBlankSpaces) {
-            list.add(BLANKSPACES)
+            allowedCharacters.add(' ')
         }
 
-        for (i in 1..passwordConfig.length.toInt()) {
-            if (list.isNotEmpty()) {
-                when (list.random()) {
-                    UPPER_CASE -> password += ('A'..'Z').random().toString()
-                    LOWER_CASE -> password += ('a'..'z').random().toString()
-                    NUMBERS -> password += ('0'..'9').random().toString()
-                    SYMBOLS -> password += passwordConfig.listOfSymbols.random().toString()
-                    BLANKSPACES -> password += (' ').toString()
-                }
+        val passwordLength = passwordConfig.length.toInt()
+        if (passwordLength <= 0 || allowedCharacters.isEmpty()) {
+            return ""
+        }
+
+        return buildString(passwordLength) {
+            repeat(passwordLength) {
+                append(allowedCharacters[secureRandom.nextInt(allowedCharacters.size)])
             }
         }
-        return password
     }
 }
