@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. The technical design, proposed ADRs, Threat Model extension, and the draft tasks below require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture) is owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft, ADR 0005/0006, `docs/THREAT_MODEL.md`
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -65,9 +65,11 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T128 — Establish one-LKG safe promotion foundation
 
+**Planning status:** Architecture approved via accepted ADR 0005; implementation task remains NOT ACTIVE.
+
 **Objective:** Extend internal vault persistence with exactly one encrypted LKG role and a reusable narrow validate-before-promote path for future re-key/restore operations.
 
-**References:** `PRD.md` P13-FR-050..055, P13-SR-004; `TSD.md` §11/§16; ADR 0005; Threat Model T14/T15/T18.
+**References:** `PRD.md` P13-FR-050..055, P13-SR-004; `TSD.md` §11/§16; accepted ADR 0005; Threat Model T14/T15/T18.
 
 **Acceptance:**
 - Exactly one internal LKG artifact is managed by RAHSA.

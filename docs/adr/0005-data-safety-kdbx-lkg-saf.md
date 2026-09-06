@@ -1,6 +1,6 @@
 # ADR 0005 — Keep Internal Active KDBX, One LKG Copy, and SAF External Backup/Restore
 
-**Status:** Proposed — Phase 13 technical review  
+**Status:** Accepted — owner-approved Phase 13 architecture  
 **Date:** 2026-09-06
 
 ## Context
