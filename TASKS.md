@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), and ADR 0010 (safe KDBX restore validation/promotion/finalization) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), and ADR 0010 (safe KDBX restore validation/promotion/finalization) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -204,27 +204,35 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T133 — Implement secure Biometric Quick Unlock
 
-**Objective:** Implement opt-in strong-biometric quick unlock using Android Keystore-protected wrapped unlock secret and real repository vault opening.
+**Planning status:** Architecture approved via accepted ADR 0006; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-100..114, P13-SR-001/006; `TSD.md` §17; ADR 0006; Threat Model T19/T20/T21.
+**Objective:** Implement opt-in strong-biometric quick unlock using Android Keystore-protected wrapped unlock secret, real repository vault opening, and fail-closed enable/disable lifecycle without a biometric-specific recovery marker.
+
+**References:** `PRD.md` P13-FR-100..114, P13-SR-001/006; `TSD.md` §17; accepted ADR 0006; Threat Model T19/T20/T21.
 
 **Acceptance:**
 - OFF by default; explicit enable from Settings.
-- Enable requires correct current Master Password plus successful qualifying biometric prompt.
+- Enable requires correct current Master Password verified against active KDBX plus successful qualifying biometric prompt.
 - Uses Android Keystore non-exportable key + authenticated cipher and AndroidX `BiometricPrompt.CryptoObject`.
 - Allowed authenticator is strong biometric; device credential is not quick-unlock fallback.
-- Persisted state contains no plaintext Master Password.
-- Biometric success decrypts wrapped secret in memory and calls normal repository open; no navigation-only unlock.
-- Cancel does not loop; manual biometric retry and Master Password paths remain.
-- Missing key/enrollment change/invalidation/unwrap failure disables quick unlock and falls back to Master Password.
-- Disable confirmation removes wrapped state/key without locking current session.
-- Password change/restore/reset hooks invalidate quick-unlock state.
-- One-time discoverability prompt/card does not nag after `Not Now`.
-- Operations are single-flight.
+- Persisted state contains no plaintext Master Password; wrapped ciphertext plus non-secret cipher/state metadata only.
+- Enable is fail-closed: `enabled = true` is committed only after key creation, successful biometric authentication, wrapping, complete secure-state persistence, and consistency verification all succeed.
+- Interrupted/failed enablement remains OFF; orphan aliases/incomplete state are cleanup-only and removable idempotently.
+- No biometric-specific transaction/recovery marker is introduced.
+- Biometric success decrypts the wrapped secret only transiently in memory and calls the normal repository open path; no navigation-only unlock.
+- Vault transitions to unlocked UI only after real KDBX open succeeds.
+- Auto-prompt occurs at most once per locked entry when enabled/valid; cancellation does not loop; manual `Unlock with Biometrics` and `Use Master Password` remain available.
+- Back/Home/process death while prompt/enablement is active does not produce an unlocked session or enabled state.
+- Missing key, enrollment/security-state change, key invalidation, unwrap failure, inconsistent secure state, or real vault-open failure keeps the vault locked, disables/removes unusable quick-unlock state where applicable, and falls back to Master Password.
+- Disable requires confirmation but does not lock the current unlocked session; disable lifecycle fails closed toward OFF and cleanup of wrapped state/Keystore alias is idempotent.
+- A crash/process death during disable must not safely resurrect a partially removed configuration.
+- Password change/restore/reset hooks invalidate quick-unlock state; reinstall/new device does not migrate it.
+- One-time discoverability card does not nag after `Not Now`.
+- Enable/disable operations are single-flight.
 
-**Validation:** unit/instrumentation tests + physical qualifying-device biometric/Keystore tests, including cancellation and invalidation scenarios.
+**Validation:** unit/instrumentation tests + partial/interrupted enable/disable state tests + Back/Home/process-death/cancellation cases + invalidation/fallback cases + physical qualifying-device biometric/Keystore tests.
 
-**Out of scope:** device-credential fallback, biometric recovery, cloud migration of biometric state.
+**Out of scope:** device-credential fallback, biometric recovery, cloud migration of biometric state, biometric-specific recovery marker, custom transaction framework.
 
 ## Parked future roadmap
 
