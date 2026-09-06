@@ -1,240 +1,114 @@
-# Product Requirements Document — Android Password Manager Prototype
+# Product Requirements Document — RAHSA v0.2 Baseline
 
-**Status:** Approved prototype baseline; UI/UX refinement planned
-**Created:** 2026-08-24  
-**Updated:** 2026-09-05
-**Target:** Android prototype  
-**Primary goal:** Validate the core password-manager experience with the smallest reasonable implementation and without creating security-critical infrastructure from scratch.
+**Status:** Approved stable baseline; product expansion planning in progress  
+**Updated:** 2026-09-06  
+**Baseline:** `v0.2-prototype`
 
-## 1. Problem
+This PRD describes the approved RAHSA v0.2 product baseline. It does **not** yet approve Phase 13 expansion features.
 
-Users need a simple Android application that can store credentials locally and retrieve them when needed without requiring an account, backend, or cloud synchronization.
+Historical prototype/UI-phase constraints remain available in Git history. Future capability expansion requires an explicit amendment to this PRD before implementation.
 
-The prototype must prove that the core UX is useful and that an existing encrypted vault format can be integrated cleanly into an Android-native application.
+## 1. Product
 
-## 2. Prototype Goal
+RAHSA is a local-first Android password manager that stores credentials in an encrypted app-private KDBX vault without requiring an account, backend, cloud synchronization, analytics, or network access for core behavior.
 
-Build a functional Android prototype that allows a user to:
+## 2. Approved v0.2 capabilities
 
-1. Create the app-private encrypted vault on first launch when no vault exists.
-2. Unlock the vault using a master password.
-3. View stored credentials.
-4. Add, edit, and delete credentials.
-5. Search credentials.
-6. Generate passwords.
-7. Copy usernames or passwords when needed.
-8. Lock the vault again.
+RAHSA currently supports:
 
-The prototype is successful if this end-to-end flow works reliably on a physical Android device.
+1. Create an app-private encrypted vault on first launch.
+2. Unlock the vault with a master password.
+3. Explicitly lock and background/auto-lock the vault.
+4. View credentials.
+5. Add, edit, and delete credentials.
+6. Search credentials by title or username.
+7. Generate passwords.
+8. Copy credential fields through the reviewed secure-clipboard path.
+9. Configure password hint and basic auto-lock behavior.
+10. Operate without a backend or Android `INTERNET` permission.
 
-## 3. Non-Goals
+Core credential fields are title, username, password, optional URL, and optional notes.
 
-The following are explicitly out of scope for the prototype unless separately approved:
+## 3. Product principles
 
-- User accounts
-- Backend services
-- Cloud sync
-- Team/shared vaults
-- Browser extensions
-- TOTP / authenticator features
-- Passkeys
-- Credit-card storage
-- Autofill service
-- Multi-device sync
-- Analytics or telemetry
-- Advertising
-- Custom cryptographic algorithms or custom encrypted-vault formats
-- External vault picker/import/export flows
-- Biometric unlock expansion during the next UI/UX refinement
-- OCR/camera capture
-- Theme selector or light theme
-- Rebranding implementation before the Brand Decision Gate
-
-## 4. Product Principles
-
-- Local-first.
+- Local first.
 - Reuse before build.
-- No custom cryptography when a mature format/library can be reused.
-- Prototype scope must remain narrow.
-- Security-sensitive shortcuts are not acceptable even for the prototype.
-- No network dependency is required for the core prototype.
+- Established crypto formats/libraries instead of custom cryptography.
+- Security-sensitive shortcuts are not acceptable.
+- Preserve the stable baseline unless an approved requirement changes it.
+- Product expansion is documented and approved before coding.
 
-## 5. User Stories
+## 4. Baseline functional requirements
 
-### US1 — Create or Unlock Local Vault (P1)
-
-As a user, I want the app to create my encrypted local vault on first launch and unlock that same vault on later launches.
-
-**Acceptance scenarios**
-
-1. Given the app-private `vault.kdbx` does not exist, when the app launches, then the user enters the create-master-password flow.
-2. Given the app-private `vault.kdbx` exists, when the app launches, then the user enters the unlock flow.
-3. Given an existing vault, when the correct master password is entered, then the vault opens.
-4. Given an existing vault, when an incorrect master password is entered, then access is denied and vault contents are not exposed.
-5. The current prototype does not offer an external KDBX picker or an "Open Existing Vault" choice.
-
-### US2 — View Credentials (P1)
-
-As a user, I want to see my saved credentials after unlocking the vault.
-
-**Acceptance scenarios**
-
-1. Given an unlocked vault with entries, when the vault screen opens, then credential entries are listed.
-2. Given a locked vault, when the user attempts to access credentials, then the app requires unlocking first.
-
-### US3 — Add Credential (P1)
-
-As a user, I want to add a credential to my vault.
-
-A credential contains:
-
-- Title
-- Username
-- Password
-- URL (optional)
-- Notes (optional)
-
-**Acceptance scenarios**
-
-1. Given an unlocked vault, when valid credential data is saved, then the new entry appears in the vault.
-2. After the app is restarted and the vault is reopened, the entry still exists.
-
-### US4 — Edit and Delete Credential (P1)
-
-As a user, I want to update or remove credentials.
-
-**Acceptance scenarios**
-
-1. Edited values persist after vault reopen.
-2. Deleted entries no longer appear after vault reopen.
-3. Canceling an edit does not modify the stored entry.
-
-### US5 — Search Credentials (P2)
-
-As a user, I want to search by title or username.
-
-**Acceptance scenarios**
-
-1. Search returns relevant matching entries.
-2. Clearing search restores the normal credential list.
-
-### US6 — Generate Password (P2)
-
-As a user, I want to generate a strong password when creating or editing a credential.
-
-**Acceptance scenarios**
-
-1. The generator creates a password using user-selected length and character categories.
-2. Generated passwords can be inserted into the credential form.
-
-### US7 — Copy Credential Fields (P2)
-
-As a user, I want to copy username or password values.
-
-**Acceptance scenarios**
-
-1. Username can be copied.
-2. Password can be copied.
-3. Password is not printed to application logs.
-
-### US8 — Lock Vault (P1)
-
-As a user, I want the vault to lock when I leave it or explicitly lock it.
-
-**Acceptance scenarios**
-
-1. Manual lock removes access to credential screens.
-2. After the configured inactivity/background condition, reopening credential screens requires unlock.
-
-## 6. Functional Requirements
-
-- **FR-001:** The application MUST work without a backend.
-- **FR-002:** Credential storage MUST use an encrypted vault format supplied by an established library.
-- **FR-003:** The application MUST NOT persist the master password in plaintext.
-- **FR-004:** The application MUST support credential create/read/update/delete operations.
-- **FR-005:** The application MUST support credential search.
-- **FR-006:** The application MUST provide password generation.
-- **FR-007:** The application MUST provide manual vault locking.
+- **FR-001:** Core RAHSA behavior MUST work without a backend.
+- **FR-002:** Persisted credentials MUST use the established KDBX format through the approved vault engine.
+- **FR-003:** RAHSA MUST NOT persist the master password in plaintext.
+- **FR-004:** RAHSA MUST support credential create/read/update/delete persistence.
+- **FR-005:** RAHSA MUST support credential search.
+- **FR-006:** RAHSA MUST provide password generation.
+- **FR-007:** RAHSA MUST provide manual locking and current approved background/auto-lock behavior.
 - **FR-008:** Sensitive values MUST NOT be intentionally written to logs.
-- **FR-009:** Sensitive screens SHOULD prevent screenshots/screen recording where supported.
-- **FR-010:** The prototype SHOULD run without Android INTERNET permission unless a dependency makes it strictly necessary and the exception is documented.
-- **FR-011:** The prototype MUST fail closed when vault decryption/opening fails.
-- **FR-012:** The prototype MUST use the app-private `vault.kdbx` as its current single persisted vault and MUST NOT silently create/overwrite it after an open/decode failure.
-- **FR-013:** The next UI/UX refinement MUST preserve the current architecture and feature scope unless a separate requirement explicitly changes them.
-- **FR-014:** The next UI/UX refinement MUST follow `docs/UX_UI_BASELINE.md`.
-- **FR-015:** The product MUST NOT proceed from UX validation into public/store release preparation until the Brand Decision Gate is completed.
+- **FR-009:** Sensitive screens MUST use the current secure-screen protections where supported.
+- **FR-010:** Core RAHSA SHOULD continue without Android `INTERNET` permission unless a future approved requirement explicitly justifies it.
+- **FR-011:** Vault authentication/decryption failure MUST fail closed.
+- **FR-012:** Failed vault open/decode MUST NOT silently create or overwrite the existing vault.
+- **FR-013:** Credential mutations MUST preserve the last known valid vault on write failure as implemented in the baseline.
+- **FR-014:** Existing correct CRUD/search/generator/lock behavior is presumed preserved unless an approved requirement explicitly changes it.
+- **FR-015:** The product name in new product-facing work is RAHSA; KeyPass refers only to upstream/legacy technical context.
 
-## 7. Key Entities
+## 5. Security requirements
 
-### Vault
+- KDBX remains the persisted source of truth.
+- Decrypted application state is available only during an unlocked session.
+- Manual/background lock removes normal application access to decrypted credential state.
+- Wrong master password does not expose credentials.
+- Corrupt/unreadable vault failures are non-destructive.
+- Secrets are not intentionally logged.
+- Existing reviewed clipboard and screen-privacy protections remain regression requirements.
 
-Represents the current single app-private encrypted credential store (`vault.kdbx`).
+See `docs/THREAT_MODEL.md`.
 
-### Credential
-
-Core fields:
-
-- id
-- title
-- username
-- password
-- url
-- notes
-
-The exact encrypted representation is delegated to the vault library and format.
-
-## 8. Edge Cases
-
-The prototype must define behavior for:
-
-- Wrong master password
-- Empty vault
-- Duplicate titles
-- Very long username/password/notes
-- App backgrounded while vault is unlocked
-- Android process killed while vault is unlocked
-- Vault file missing
-- Vault file corrupted
-- Storage write failure
-- User cancels credential edit
-- User cancels vault creation
-
-## 9. Success Criteria
-
-Prototype is considered successful when:
-
-- A new vault can be created on a physical Android device.
-- The same vault can be reopened after app restart.
-- At least 20 credentials can be created and searched without functional issues.
-- CRUD operations persist correctly.
-- Incorrect master password does not expose vault contents.
-- No credential or master password appears in normal application logs during the defined test flow.
-- The app can be demonstrated end-to-end without any backend service.
-
-## 10. Assumptions
-
-- Prototype targets Android only.
-- Development uses Kotlin and Jetpack Compose.
-- Existing open-source Android password-manager code is reused where practical.
-- Existing KDBX support is preferred over inventing a new encrypted database format.
-- Physical-device testing is available.
-
-## 11. Next UI/UX Refinement
-
-The approved next-build UX/UI contract is `docs/UX_UI_BASELINE.md`.
-
-The refinement is successful when:
-
-- Approved flows are implemented without architecture expansion.
-- Dark-only presentation is consistent from launch through operational screens.
-- Loading/error feedback is clear on the physical test device.
-- Core CRUD, search, generator, clipboard, and lock behavior remain regression-safe.
-- Accessibility basics are validated, including touch targets, localized icon semantics, font scaling, and a basic TalkBack pass.
-
-Final product name:
+## 6. Current storage model
 
 ```text
-RAHSA
+app-private-storage/
+└── vault.kdbx
 ```
 
-RAHSA and its supplied shield logo were selected at the Brand Decision Gate. Public/store release preparation remains blocked until trademark clearance, the final `applicationId`/package identity strategy, signing/store identity, and complete attribution presentation are resolved in `docs/BRAND_DECISION.md`.
+Current launch behavior:
+
+```text
+vault.kdbx missing → create-master-password flow
+vault.kdbx exists  → unlock flow
+```
+
+The baseline does not expose an external vault picker.
+
+## 7. Expansion governance
+
+The following topics are currently planning candidates only and are **not approved requirements yet**:
+
+- master-password change;
+- forgotten-master-password / recovery policy;
+- biometric quick-unlock;
+- lock/session refinements;
+- Autofill;
+- safe KDBX backup/export/import;
+- passphrase generation;
+- other future product capabilities.
+
+Historical prototype non-goal lists are not permanent bans. A candidate becomes approved scope only when this PRD is amended and the required downstream TSD/ADR/Threat Model/TASKS changes are approved.
+
+## 8. Release work
+
+Public/Play Store release preparation is PARKED. Trademark, package/applicationId migration, signing/store identity, listing/compliance, and release-specific attribution work are not current product tasks.
+
+## 9. Success condition for current planning stage
+
+Before implementation of a new expansion capability:
+
+1. behavior and security policy are explicit;
+2. reuse options have been assessed;
+3. this PRD is amended;
+4. TSD/ADR/Threat Model are updated where required;
+5. small implementation tasks and acceptance criteria are approved in `TASKS.md`.

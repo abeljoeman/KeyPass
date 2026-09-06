@@ -1,82 +1,113 @@
-﻿# KeyPass Agent Instructions
+# RAHSA Agent Instructions
 
-## Cost-Aware Codex Model & Reasoning Policy
+These instructions apply to Codex work in this repository.
 
-Cost awareness is mandatory for every Codex task.
+## 1. Mandatory startup sequence
 
-Always choose the lowest-cost model and lowest reasoning effort that is reasonably likely to complete the task correctly. Do not default to the strongest model or highest reasoning effort merely because they are available.
+Before modifying anything, read in this order:
 
-Before every Codex implementation, review, debugging, inspection, or test task:
+1. `docs/GOVERNANCE_STATUS.md`
+2. `ENGINEERING_PRINCIPLES.md`
+3. `docs/WORKFLOW.md`
+4. `TASKS.md`
+5. The PRD/TSD/ADR/threat-model sections referenced by the exact active task.
 
-1. Classify the task by complexity, security sensitivity, uncertainty, and expected exploration.
-2. Choose the cheapest model likely to succeed.
-3. Choose the lowest reasoning effort likely to succeed.
-4. State the selected model, reasoning effort, and a brief cost-effectiveness reason.
-5. Escalate only when the cheaper choice is inadequate, risk materially requires it, or an earlier attempt failed.
+Verify branch, HEAD, and working-tree state before work.
 
-### Model selection
+## 2. Terminology
 
-- `gpt-5.6-luna`
-  - Preferred for smoke tests, repository inspection, grep/search, mechanical edits, formatting, straightforward tests, and narrow low-risk work.
+- **RAHSA** = the product being developed.
+- **KeyPass** = upstream open-source reference/base or legacy technical identifiers that still contain `keypass`.
 
-- `gpt-5.6-terra`
-  - Default for normal implementation requiring coding judgment with clear scope and moderate complexity.
+Do not rename legacy package/class paths casually. Do not call the current product KeyPass in new planning or product documentation.
 
-- `gpt-5.6-sol`
-  - Reserve for security-sensitive work, vault/master-password semantics, concurrency or lifecycle races, architecture decisions, difficult multi-file debugging, or cases where cheaper models are insufficient.
+## 3. Hard execution gate
 
-Do not use `gpt-5.6-sol` automatically for ordinary implementation.
+Codex may modify application code only when `TASKS.md` exposes exactly one approved active `Txxx` task.
 
-### Reasoning effort
+If `TASKS.md` says `EXECUTION_STATUS: PLANNING_FREEZE` or `ACTIVE_TASK: NONE`:
 
-When supported by the installed Codex version:
+- do not implement features;
+- do not opportunistically refactor code;
+- do not execute parked release tasks;
+- stop after reporting that no implementation task is active.
 
-- `none`: truly trivial deterministic work needing essentially no planning.
-- `low`: smoke tests, inspections, searches, narrow mechanical work.
-- `medium`: normal implementation/debugging with clear scope.
-- `high`: security-sensitive logic, concurrency, lifecycle/state interactions, or difficult debugging.
-- `xhigh`: only when `high` is plausibly insufficient.
-- `max`: exceptional long-horizon critical investigation only.
+Documentation/planning changes are allowed only when the owner explicitly asks for a planning/governance documentation task.
 
-Never increase reasoning effort merely because a higher option exists.
+Run the repository preflight before implementation:
 
-### Practical starting points
+```powershell
+python scripts/governance_preflight.py --implementation Txxx
+```
 
-- Read-only smoke test/status/simple inspection:
-  `gpt-5.6-luna` + `low`
+If preflight fails, do not bypass it. Resolve the governance/task state first.
 
-- Mechanical edit or very small test:
-  `gpt-5.6-luna` + `low` or `medium`
+## 4. One task at a time
 
-- Focused feature implementation:
-  `gpt-5.6-terra` + `medium`
+For an active task:
 
-- Moderate multi-file refactor:
-  `gpt-5.6-terra` + `medium` or `high`
+- Work only on the exact Txxx scope.
+- Do not start the following task in the same run.
+- Do not change unrelated files.
+- If the task requires a product/security/architecture decision not already approved, stop and return the issue to planning.
 
-- Security-sensitive vault/master-password/lock-state task:
-  evaluate `gpt-5.6-sol`, but start with the lowest sufficient effort rather than assuming `high`
+## 5. Reuse-first audit
 
-- Complex race, architecture problem, or failed cheaper attempt:
-  `gpt-5.6-sol` + `high`
+Before writing a new implementation or adding a dependency, check in order:
 
-- `xhigh` or `max`:
-  require an explicit reason before use
+1. retained RAHSA implementation;
+2. upstream KeyPass implementation/pattern;
+3. Android / AndroidX / Jetpack;
+4. mature, maintained, license-compatible open source;
+5. minimum local implementation.
 
-### Cost-control rules
+Document a new dependency's purpose, source repository/project, license, why earlier options are insufficient, and relevant security/privacy impact.
 
-- Keep each Codex prompt narrowly scoped.
-- Read only files needed for the current decision.
-- Avoid repeated broad repository scans when verified context is still valid.
-- Prefer targeted tests before expensive broad validation when risk permits.
-- Run broader validation when required by security risk or acceptance criteria.
-- Prefer one well-scoped Codex run over multiple speculative runs.
-- Do not use multi-agent / Ultra-style execution by default.
-- Reuse verified context when safe, but re-check security-critical assumptions.
-- A higher-cost model must have a concrete expected benefit.
+Never reuse security-sensitive inherited code blindly.
 
-The goal is not minimum token usage at any cost.
+## 6. Preserve the v0.2 baseline
 
-The goal is:
+`v0.2-prototype` is the stable baseline. Preserve working vault lifecycle, KDBX/Kotpass persistence, CRUD, search, generator, locking, clipboard protections, fail-closed behavior, and corrupt-vault protections unless the active approved requirement explicitly changes them.
 
-**lowest expected total cost while preserving correctness, security, and sufficient verification.**
+Do not perform broad rewrites or architecture migrations as incidental work.
+
+## 7. No custom cryptography
+
+Do not invent crypto primitives, KDFs, key wrapping formats, encrypted containers, recovery formats, or authentication schemes. Use approved Android platform APIs and established libraries/formats.
+
+## 8. Cost-aware model and reasoning policy
+
+Choose the lowest-cost model and lowest reasoning effort reasonably likely to complete the task correctly and safely. State the chosen model, reasoning effort, and brief justification before an execution task.
+
+### Preferred starting points
+
+- `gpt-5.6-luna` + `low`: repository inspection, grep/search, status, smoke tests, formatting, mechanical edits, narrow low-risk tests.
+- `gpt-5.6-terra` + `medium`: normal focused implementation with clear scope and moderate coding judgment.
+- `gpt-5.6-sol`: reserve for security-sensitive vault/master-password/authentication semantics, difficult lifecycle/concurrency races, architecture-critical work, or a failed cheaper attempt.
+
+Do not use Sol automatically. Do not raise reasoning effort merely because a higher option exists. `xhigh` or `max` require an explicit reason.
+
+The goal is lowest expected total cost while preserving correctness, security, and sufficient verification.
+
+## 9. Execution cycle
+
+For each active Txxx:
+
+1. Verify repo/branch/status.
+2. Read the exact task and source-of-truth references.
+3. Run governance preflight.
+4. Inspect reuse options and current implementation.
+5. Apply the smallest sufficient change.
+6. Review full diff for unrelated changes.
+7. Run targeted tests/build required by acceptance criteria.
+8. Run smoke/device validation when required.
+9. Only after validation, mark that one task complete.
+10. Stage only task-owned files.
+11. Commit one focused checkpoint.
+12. Report checkpoint and stop.
+
+Never mark a task complete because code merely compiles.
+
+## 10. Public release work is parked
+
+Do not perform Play Store/public-release preparation, trademark clearance, package/applicationId migration, release signing/store identity, listing work, or release compliance work until the owner explicitly resumes that workstream and TASKS.md activates it.

@@ -1,113 +1,146 @@
-# Workflow Implementasi KeyPass
+# Workflow Implementasi RAHSA
 
-Dokumen ini adalah panduan operasional untuk melanjutkan pekerjaan KeyPass lintas sesi. Gunakan bersama `TASKS.md`, `PRD.md`, `TSD.md`, `ENGINEERING_PRINCIPLES.md`, dan dokumen relevan di `docs/`. Jika ada konflik, dokumen sumber tersebut tetap menjadi acuan utama.
+Dokumen ini adalah prosedur operasional lintas sesi untuk RAHSA. `ENGINEERING_PRINCIPLES.md` tetap menjadi governance tertinggi; status kerja saat ini ada di `docs/GOVERNANCE_STATUS.md`.
 
-## 1. Prinsip kerja
+## 1. Pembagian peran
 
-- Kerjakan task sesuai urutan di `TASKS.md`, kecuali task ditandai dapat berjalan paralel.
-- Ambil hanya satu task kecil pada satu waktu. Jangan memperluas scope atau melakukan refactor yang tidak diperlukan.
-- Sebelum mengubah kode, baca definisi task secara exact beserta acceptance/checkpoint dan file sumber kebenaran yang dirujuk.
-- Pertahankan perilaku yang sudah benar. Setiap perubahan harus mudah ditinjau, diuji, dan dibatalkan.
-- Jangan menebak scope task berikutnya. Baca langsung bagian terkait dari `TASKS.md`.
+### Planning di ChatGPT
 
-## 2. Cara membuat perubahan
+Sebelum implementasi fitur baru, lakukan:
 
-- Utamakan patch terarah untuk perubahan kecil dan terkontrol.
-- Untuk perubahan mekanis berulang, gunakan script sekali pakai yang deterministik, lalu periksa diff secara penuh.
-- Jangan menulis ulang seluruh file jika perubahan lokal sudah cukup.
-- Jangan mengubah file di luar scope task aktif.
-- Di PowerShell, gunakan `-LiteralPath` untuk path yang sudah diketahui dan hindari wildcard yang tidak perlu.
-- Waspadai encoding dan line ending. Pertahankan encoding file asal; jangan memakai `Set-Content` atau `Out-File` tanpa encoding eksplisit karena perilakunya berbeda antarversi PowerShell dan dapat mengubah UTF-8/BOM atau CRLF/LF. Setelah script menyentuh file teks, periksa diff untuk karakter rusak dan perubahan seluruh file yang tidak disengaja.
+1. diskusi requirement dan tujuan produk;
+2. audit implementasi/reuse yang sudah ada;
+3. review security/privacy dan trade-off;
+4. update `PRD.md`;
+5. update `TSD.md`, ADR, dan `docs/THREAT_MODEL.md` bila keputusan teknis/security berubah;
+6. susun `TASKS.md` menjadi task kecil dengan acceptance criteria;
+7. owner melakukan approval.
 
-## 3. Siklus satu task
+Tidak ada handoff implementasi sebelum dokumen yang diperlukan disetujui.
 
-1. Pastikan branch dan working tree diketahui dengan `git status -sb`.
-2. Baca task aktif secara exact dari `TASKS.md` dan identifikasi scope serta acceptance-nya.
-3. Inspeksi implementasi saat ini dan dokumen sumber kebenaran yang relevan.
-4. Terapkan perubahan paling kecil yang memenuhi task.
-5. Tinjau `git diff` dan pastikan tidak ada perubahan di luar scope.
-6. Jalankan build yang relevan sebelum commit. Build harus lulus; jangan commit perubahan yang belum berhasil dibangun.
-7. Lakukan smoke test secara manual, satu skenario pada satu waktu. Catat hasil tiap skenario sebelum beralih ke skenario berikutnya agar penyebab kegagalan tetap jelas.
-8. Setelah build dan smoke test lulus, ubah checkbox task di `TASKS.md` dari `[ ]` menjadi `[x]` dengan exact replacement, bukan patch berbasis konteks. Pastikan hanya baris task yang dimaksud berubah.
-9. Stage hanya file milik task aktif, lalu periksa staged diff.
-10. Commit sebagai satu checkpoint yang fokus.
-11. Verifikasi status dan log setelah commit.
+### Execution di Codex
 
-## 4. Build dan smoke test Android
+Setelah ada satu active approved Txxx, Codex:
 
-- Gunakan Gradle Wrapper milik repo dan variant yang sesuai dengan project. Untuk alur prototype saat ini, build utama adalah `./gradlew :app:assembleFreeDebug` (di PowerShell dapat memakai `.\\gradlew.bat :app:assembleFreeDebug`).
-- Build dilakukan sebelum staging final dan commit. Jika build gagal, perbaiki dalam scope task atau hentikan dan laporkan blocker; jangan menandai task selesai.
-- Untuk pengujian emulator, targetkan serial ADB secara eksplisit: `emulator-5554`.
-- Contoh pola perintah: `adb -s emulator-5554 ...`. Jangan mengandalkan device default ketika ada lebih dari satu target ADB.
-- Pastikan device tersedia sebelum instalasi/tes dengan `adb devices`.
-- Jalankan smoke test satu per satu: instal/luncurkan aplikasi, lakukan satu alur, amati hasil, lalu lanjut ke alur berikutnya. Jangan menggabungkan banyak skenario menjadi satu verdict yang sulit ditelusuri.
-- Jika validasi harus dilakukan pada perangkat fisik sesuai task, hasil emulator tidak menggantikannya.
+1. membaca governance/status;
+2. memverifikasi repo/branch/status;
+3. menjalankan governance preflight;
+4. mengerjakan hanya task tersebut;
+5. menjalankan build/test/validasi;
+6. membuat focused checkpoint;
+7. berhenti setelah task tersebut selesai.
 
-## 5. Memperbarui `TASKS.md`
+Codex tidak mengambil keputusan product scope atau architecture yang belum disetujui.
 
-- Checklist hanya boleh diubah setelah implementasi, build, dan validasi task selesai.
-- Gunakan exact string replacement untuk mengganti baris lengkap `- [ ] **Txxx** ...` menjadi `- [x] **Txxx** ...`.
-- Jangan menggunakan patch kontekstual untuk checklist `TASKS.md`; ini mengurangi risiko salah mencentang task yang mirip atau bergeser.
-- Dalam script replacement, hentikan proses jika baris lama tidak ditemukan atau baris baru sudah ada. Baca file sebagai satu string, ganti tepat satu kemunculan, lalu tulis kembali dengan encoding UTF-8 yang ditentukan secara eksplisit sambil mempertahankan line ending asal.
-- Setelah replacement, tampilkan/periksa baris Txxx tersebut dan `git diff -- TASKS.md`.
-- Jangan sekaligus mencentang task berikutnya atau mengubah redaksi task.
+## 2. Naming
 
-## 6. Staging dan commit
+- Gunakan **RAHSA** untuk produk, requirement, roadmap, task, dan dokumentasi baru.
+- Gunakan **KeyPass** hanya untuk upstream open-source project, historical reference, atau legacy package/class/path yang memang masih bernama `keypass`.
 
-- Jangan memakai `git add .` atau staging luas. Stage daftar file exact yang termasuk dalam task.
-- Sebelum commit, jalankan:
-  - `git status -sb`
-  - `git diff --cached --check`
-  - `git diff --cached --stat`
-  - `git diff --cached`
-- Pastikan staged diff hanya memuat implementasi task dan satu perubahan checklist yang sesuai.
-- Gunakan pesan commit singkat dan spesifik, mengikuti pola histori repo, misalnya `ui: ...`, `fix: ...`, `test: ...`, atau `docs: ...`.
-- Satu task idealnya menghasilkan satu commit checkpoint. Jangan menyertakan perubahan lokal milik user atau task lain.
-- Setelah commit, verifikasi dengan `git status -sb` dan `git log -3 --oneline --decorate`. Working tree harus bersih sebelum melanjutkan.
+## 3. Reuse-first sebelum coding
 
-## 7. Checkpoint dan handoff sesi
+Untuk setiap capability baru, periksa:
 
-Pada akhir task, catat checkpoint dengan format berikut:
+1. retained RAHSA code;
+2. upstream KeyPass;
+3. Android/AndroidX/Jetpack;
+4. mature maintained license-compatible OSS;
+5. minimum local implementation.
+
+Jika menambah dependency, dokumentasikan purpose, source, license, alasan reuse/platform tidak cukup, dan security/privacy impact.
+
+## 4. Menyusun task untuk Codex
+
+Task baru hanya dibuat setelah upstream docs disetujui.
+
+Setiap Txxx harus memiliki:
+
+- satu tujuan sempit;
+- referensi PRD/TSD/ADR/Threat Model yang relevan;
+- file/scope yang diharapkan bila dapat diketahui;
+- acceptance criteria;
+- build/test command atau validation expectation;
+- security notes bila relevan;
+- explicit out-of-scope agar Codex tidak memperluas task.
+
+Satu task idealnya satu focused commit.
+
+## 5. Handoff ke Codex
+
+Handoff minimum:
+
+```text
+Repo: G:\Projects\KeyPass
+Product: RAHSA
+Branch: <branch>
+Baseline: v0.2-prototype
+Active task: <exact Txxx line>
+Checkpoint terakhir: <commit>
+Instruksi: ikuti AGENTS.md, docs/GOVERNANCE_STATUS.md, ENGINEERING_PRINCIPLES.md, docs/WORKFLOW.md, dan source-of-truth task. Jalankan hanya task aktif dan berhenti setelah checkpoint.
+```
+
+Tidak perlu menyalin seluruh governance ke prompt Codex; governance harus hidup di repository.
+
+## 6. Siklus satu task Codex
+
+1. `git status -sb` dan verifikasi HEAD/branch.
+2. Baca exact task dan dokumen sumber kebenaran.
+3. Jalankan:
+
+```powershell
+python scripts/governance_preflight.py --implementation Txxx
+```
+
+4. Inspeksi reuse options dan current implementation.
+5. Terapkan perubahan paling kecil yang memenuhi requirement.
+6. Review `git diff`; jangan biarkan unrelated changes.
+7. Jalankan targeted unit/instrumentation tests sesuai task.
+8. Jalankan build relevan; untuk prototype Android saat ini umumnya `./gradlew :app:assembleFreeDebug` bila task membutuhkan build aplikasi.
+9. Jalankan smoke/device validation bila acceptance criteria memerlukannya.
+10. Ubah hanya checkbox/status task aktif setelah seluruh validation lulus.
+11. Stage hanya task-owned files.
+12. Periksa staged diff/check.
+13. Commit focused checkpoint.
+14. Report checkpoint dan stop.
+
+Jika implementation membuka keputusan product/security/architecture baru, **jangan putuskan lokal**. Stop dan kembalikan ke planning di ChatGPT.
+
+## 7. Checkpoint task
+
+Gunakan format:
 
 ```text
 Checkpoint Txxx selesai
 - Commit/HEAD: <hash> <subject>
-- Branch: <nama-branch>
-- Status terhadap origin: <ahead/behind>
-- Working tree: <bersih atau daftar perubahan yang sengaja tersisa>
-- Build/test: <perintah dan hasil>
-- Smoke test: <skenario yang lulus/gagal>
-- Catatan/blocker: <jika ada>
-- Berikutnya: <Txxx dan judul exact dari TASKS.md>
+- Branch: <branch>
+- Working tree: <clean/intentional changes>
+- Build/test: <commands + result>
+- Smoke/device test: <result>
+- Reuse/dependency note: <if relevant>
+- Blocker/decision needed: <if any>
+- Berikutnya: stop; owner decides next active task
 ```
 
-Saat memulai sesi baru, berikan handoff minimum berikut kepada asisten:
+Codex tidak otomatis memulai task berikutnya.
 
-```text
-Repo: G:\Projects\KeyPass
-Branch: <nama-branch>
-Checkpoint terakhir: <Txxx, commit hash, subject>
-Status working tree: <hasil git status -sb>
-Task berikutnya: <baris exact dari TASKS.md>
-Build terakhir: <perintah dan hasil>
-Smoke test terakhir: <hasil>
-Instruksi: baca docs/WORKFLOW.md dan dokumen sumber kebenaran terkait sebelum mengubah kode.
-```
+## 8. Cost-effective development
 
-Asisten pada sesi baru harus memverifikasi informasi tersebut langsung dari repo sebelum mulai bekerja.
+Model/reasoning dipilih per task, bukan per project:
 
-## 8. Batas sesi per phase
+- inspection/mechanical/smoke → Luna + low;
+- normal focused implementation → Terra + medium;
+- security-sensitive vault/master-password/authentication semantics, hard races, architecture-critical changes → pertimbangkan Sol dengan alasan konkret.
 
-- Selesaikan seluruh task dalam satu phase, termasuk build/test, smoke test, checklist, commit, dan checkpoint akhir phase.
-- Setelah phase selesai dan working tree bersih, hentikan pekerjaan pada sesi tersebut.
-- Buat handoff akhir phase menggunakan format di atas, sebutkan seluruh task phase yang selesai dan task pertama phase berikutnya secara exact.
-- Mulai phase berikutnya di sesi chat baru. Jangan memulai implementasi phase baru di sesi lama.
-- Sesi baru harus dimulai dengan membaca `docs/WORKFLOW.md`, memeriksa `git status -sb` dan commit terakhir, lalu membaca scope phase berikutnya langsung dari `TASKS.md`.
+Selalu gunakan lowest sufficient cost. Security/correctness tetap lebih penting daripada penghematan token.
 
-## 9. Checkpoint saat ini
+## 9. Current workstream
 
-- Phase 12 selesai sampai T125 dan batch brand RAHSA telah dibungkus sebagai prototype v0.2.
-- Checkpoint sebelum rilis v0.2: `aae0760 fix: keep legacy vault navigation icon`.
-- Branch rilis: `prototype/v0.2`; tag: `v0.2-prototype`.
-- Brand Decision Gate: nama, logo, launcher icon, dan identity surface RAHSA telah diterapkan.
-- Berikutnya: selesaikan B002, B004, B005, dan B006 sesuai `docs/BRAND_DECISION.md`; public/store release tetap diblokir sampai seluruh gate selesai.
+Saat ini:
+
+- `v0.2-prototype` adalah stable baseline RAHSA;
+- tidak ada active implementation task;
+- Phase 13 masih tahap product/security planning;
+- public/Play Store release work PARKED;
+- B002/B004/B005/B006 bukan task aktif.
+
+Jangan menjalankan feature implementation sampai `TASKS.md` berubah dari planning freeze menjadi satu approved active Txxx.

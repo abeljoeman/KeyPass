@@ -1,46 +1,35 @@
-# Technical Design — Android Password Manager Prototype
+# Technical Design — RAHSA v0.2 Baseline
 
-**Status:** Approved prototype baseline; UI/UX refinement planned
-**Created:** 2026-08-24  
-**Updated:** 2026-09-05
-**Related:** `PRD.md`, `docs/UX_UI_BASELINE.md`
+**Status:** Approved stable technical baseline; expansion design not yet approved  
+**Updated:** 2026-09-06  
+**Related:** `PRD.md`, `ENGINEERING_PRINCIPLES.md`, `docs/THREAT_MODEL.md`
 
-## 1. Summary
+This TSD describes the technical baseline at `v0.2-prototype`. It does not yet define Phase 13 feature implementations.
 
-The prototype will be an Android-native application built with Kotlin and Jetpack Compose.
+## 1. Technical context
 
-The implementation follows a reuse-first strategy:
+- Platform: Android.
+- Language: Kotlin / Java 17 compatibility.
+- UI: Jetpack Compose + Material 3.
+- Vault format/engine: KDBX via Kotpass.
+- Base/reference application: upstream KeyPass.
+- Persisted storage: app-private `vault.kdbx`.
+- Backend/network requirement for core flow: none.
+- Implementation executor after planning approval: Codex.
 
-- Reuse suitable application/UI patterns from **yogeshpaliyal/KeyPass** where practical.
-- Use **keemobile/kotpass** as the KDBX read/write engine.
-- Store credentials in a single app-private KDBX vault file.
-- Avoid backend services and custom encrypted-storage formats.
+## 2. Reuse-first technical strategy
 
-## 2. Technical Context
+For a new capability, evaluate:
 
-**Language / JVM:** Kotlin, Java 17 compatibility  
-**Target platform:** Android  
-**UI:** Jetpack Compose + Material 3
-**Build:** Gradle Wrapper  
-**Vault engine:** Kotpass (KDBX)  
-**Base/reference application:** KeyPass  
-**Storage:** Local KDBX file  
-**Backend:** None  
-**Network dependency:** None required for prototype core flow  
-**IDE/editor:** VS Code  
-**Coding agent:** Codex and/or DeepSeek  
-**Testing:** Kotlin/JUnit + Android instrumentation/device testing where needed
+1. retained RAHSA implementation;
+2. upstream KeyPass implementation/pattern;
+3. Android/AndroidX/Jetpack APIs;
+4. mature maintained license-compatible OSS;
+5. minimum local implementation.
 
-## 3. Architectural Principles
+Security-sensitive reuse is reviewed before adoption. Do not add a third-party dependency without purpose/source/license/justification/security-impact documentation.
 
-1. Reuse existing code and libraries before creating new components.
-2. Keep security-sensitive custom code to a minimum.
-3. No custom cryptographic primitive, key derivation scheme, or encrypted file format.
-4. Keep application architecture simple enough to understand in one sitting.
-5. Add abstractions only where they reduce coupling or improve testability.
-6. Prototype code may be refactored later, but security behavior may not be knowingly weakened.
-
-## 4. High-Level Architecture
+## 3. Baseline architecture
 
 ```text
 Jetpack Compose UI
@@ -58,303 +47,113 @@ Kotpass
 vault.kdbx
 ```
 
-The repository boundary isolates UI code from KDBX-specific operations.
+`VaultRepository` isolates application/UI behavior from KDBX-specific operations and remains the approved vault boundary unless a future TSD/ADR explicitly changes it.
 
-## 5. Main Components
+## 4. Baseline VaultRepository responsibilities
 
-### 5.1 UI Layer
+- Create vault.
+- Open/unlock vault using runtime-supplied credentials.
+- Lock/clear repository access to decrypted state.
+- List credentials.
+- Create credential.
+- Update credential.
+- Delete credential.
+- Search credentials.
+- Persist safe KDBX mutations.
 
-Responsibilities:
+The repository MUST NOT implement cryptographic primitives itself.
 
-- Unlock/create-vault screens
-- Credential list
-- Credential detail
-- Add/edit credential
-- Search
-- Password generator
-- Lock action
-- Error states
+## 5. Storage and session invariants
 
-Reuse existing KeyPass UI/components, state, actions, ViewModels, navigation, generator, settings, and security behavior where they fit. Approved presentation/interaction behavior is defined in `docs/UX_UI_BASELINE.md`.
+- KDBX remains the persisted source of truth.
+- Do not introduce a second plaintext credential database.
+- The master password is not persisted as plaintext.
+- Decrypted vault/application data is accessible only during an unlocked session.
+- Manual/background lock clears normal application access to decrypted state.
+- Failed open/decode is fail-closed and non-destructive.
+- Failed writes preserve the last known valid vault according to the baseline implementation.
 
-### 5.2 VaultRepository
+## 6. Existing product layers to preserve
 
-Responsibilities:
+Unless an approved requirement explicitly changes them:
 
-- Create vault
-- Open vault
-- Close/lock vault
-- List entries
-- Create entry
-- Update entry
-- Delete entry
-- Search entries
-- Save vault after mutations
+- retained Compose/navigation/state structure;
+- credential CRUD/search flows;
+- password generator engine/config;
+- secure clipboard path;
+- secure-screen behavior;
+- current lock lifecycle;
+- current error/write-failure protections.
 
-The repository MUST NOT implement cryptographic algorithms itself.
+Avoid whole-app rewrites, new state/navigation frameworks, or broad architecture migration as incidental feature work.
 
-### 5.3 Kotpass Adapter
+## 7. Dependency strategy
 
-Responsibilities:
+Prefer existing dependencies and platform APIs.
 
-- Convert application credential model to KDBX entries.
-- Convert KDBX entries to application credential model.
-- Decode/open KDBX using credentials supplied at runtime.
-- Encode/write KDBX after changes.
+Avoid unless an approved design justifies them:
 
-Keep this adapter small and explicit.
+- new crypto libraries;
+- new database engines;
+- new DI/navigation/state frameworks;
+- networking/cloud SDKs;
+- generic frameworks created for one feature;
+- native/Rust/JNI infrastructure.
 
-### 5.4 Session / Lock State
+Any security-sensitive dependency requires additional review.
 
-For the prototype:
+## 8. Error/security behavior
 
-- Master password is entered when opening the vault.
-- Master password is not persisted as plaintext.
-- Decrypted vault/application models only exist during an unlocked session.
-- Manual lock clears in-memory application access to decrypted entries.
-- Background/timeout behavior should trigger a lock according to prototype settings.
+- Wrong authentication credentials → deny access; do not expose decrypted data.
+- Corrupt/unreadable vault → non-destructive failure; do not overwrite automatically.
+- Write failure → surface failure and preserve last known valid persisted vault.
+- Missing vault at normal first launch → create-vault flow.
+- Secrets MUST NOT be intentionally logged.
+- Biometric UI success alone MUST NOT be treated as an unlocked vault. Any future biometric design must result in an actual approved vault-open/session transition.
 
-Biometric key wrapping is NOT required for v0.1.
+## 9. Testing strategy
 
-## 6. Data Model
+Prioritize risk boundaries:
 
-Application-level model:
+- vault create/open/reopen;
+- wrong credentials;
+- KDBX mapping and persistence;
+- credential mutation failures;
+- lock/unlock and process/background lifecycle;
+- corruption handling;
+- clipboard/screen privacy;
+- any new master-password or biometric security boundary once approved.
 
-```kotlin
-data class Credential(
-    val id: String,
-    val title: String,
-    val username: String,
-    val password: String,
-    val url: String?,
-    val notes: String?
-)
-```
+Device/instrumentation validation is required where acceptance criteria depend on Android lifecycle, platform security, biometric behavior, or physical-device performance.
 
-KDBX remains the source of truth for persisted credential data.
+## 10. Expansion design status
 
-Do not create a second plaintext credential database for convenience.
+No technical design is yet approved for:
 
-## 7. Storage Design
+- master-password change/re-keying;
+- forgotten-master-password/recovery;
+- biometric quick-unlock;
+- Autofill;
+- KDBX backup/export/import expansion;
+- other Phase 13 features.
 
-Preferred prototype layout:
+Do not infer a solution from inherited KeyPass code. These topics require explicit design review, reuse research, threat-model updates, and approved downstream tasks.
 
-```text
-app-private-storage/
-└── vault.kdbx
-```
+## 11. Planning-to-implementation gate
 
-Current launch behavior is:
-
-```text
-vault.kdbx missing → CreatePassword flow
-vault.kdbx exists  → Login / unlock flow
-```
-
-The next UI/UX build does not expose an external KDBX chooser/import flow. Alternative storage may be considered later only through an explicit product requirement.
-
-A failed open/decode MUST NOT fall through to vault creation or overwrite the existing vault.
-
-## 8. Dependency Strategy
-
-### Required / Preferred
-
-- AndroidX / Jetpack Compose
-- Kotlin coroutines where already used by the base app
-- Kotpass for KDBX
-- Existing dependencies already required by retained KeyPass code
-
-### Avoid Unless Justified
-
-- New DI frameworks
-- New navigation/state-management frameworks
-- New database engines
-- New crypto libraries
-- Networking libraries
-- Firebase
-- Analytics SDKs
-- Background sync frameworks
-- Shimmer/loading libraries for simple placeholders
-- Material icon mega-bundles solely for a small icon set
-- Rust / JNI / NDK
-
-Any new dependency must state:
-
-1. Problem solved.
-2. Why platform/existing dependency cannot solve it.
-3. License.
-4. Security impact.
-
-## 9. Reuse Strategy
-
-### Reuse / Adapt from KeyPass
-
-Candidates include:
-
-- Compose theme and app shell
-- Navigation structure
-- Credential list/detail/form components
-- Password generator
-- Authentication state/components where useful; biometric UI is not promoted in the next refinement
-- Secure-screen behavior
-- Settings patterns if needed
-
-### Do Not Reuse Blindly
-
-- Existing encryption helpers
-- Existing backup encryption logic
-- Features outside PRD scope
-- Components that force unnecessary architectural complexity
-
-Code must be reviewed before reuse.
-
-## 10. Error Handling
-
-Vault open/write failures must be explicit and fail closed.
-
-Examples:
-
-- Wrong password → show unlock error, do not expose data.
-- Corrupted vault → show non-destructive error, do not overwrite automatically.
-- Write failure → show save failure and preserve last known valid file.
-- Missing vault at normal launch → enter the first-launch create flow.
-
-No exception stack trace containing secret values may be intentionally logged.
-
-## 11. Security Controls for Prototype
-
-- KDBX-backed encrypted persistence.
-- No plaintext master-password persistence.
-- No intentional secret logging.
-- Secure-screen flag on sensitive UI where supported.
-- Manual lock.
-- Background/timeout lock.
-- Clipboard handling reviewed and tested.
-- No backend.
-- Prefer no INTERNET permission.
-- Fail closed on vault-open failure.
-
-See `docs/THREAT_MODEL.md`.
-
-## 12. Testing Strategy
-
-### Unit Tests
-
-Prioritize:
-
-- KDBX ↔ application model mapping
-- Search
-- Password generator
-- Repository behavior using test vaults
-
-### Device / Instrumentation Tests
-
-Prioritize:
-
-- Create/open vault
-- Wrong-password handling
-- App restart
-- Lock/unlock
-- Screenshot protection
-- Clipboard behavior
-- Process/background lifecycle
-
-See `docs/TEST_PLAN.md`.
-
-## 13. Prototype Project Structure
-
-Exact paths may evolve based on retained KeyPass structure.
-
-Target logical structure:
+A future architecture/security change follows:
 
 ```text
-app/
-└── src/main/java/.../
-    ├── ui/
-    ├── vault/
-    │   ├── VaultRepository.kt
-    │   ├── KotpassVaultRepository.kt
-    │   └── CredentialMapper.kt
-    └── security/
-        └── LockState.kt
+approved PRD behavior
+→ TSD design
+→ ADR when a durable architecture/security choice is made
+→ Threat Model update when trust/secrets change
+→ approved TASKS.md Txxx
+→ Codex implementation
 ```
 
-Avoid reorganizing the entire inherited codebase unless necessary.
+Codex must stop and return to planning if implementation requires an unapproved architecture or security decision.
 
-## 14. Build and Tooling
+## 12. Release status
 
-Baseline expectations:
-
-- JDK 17
-- Android SDK compatible with the retained KeyPass project
-- Gradle Wrapper from repository
-- VS Code
-- Physical Android test device
-- `adb`
-
-Do not require Docker, backend databases, Node.js, Rust, or NDK for the prototype.
-
-## 15. Open Questions
-
-These do not block the first implementation tasks:
-
-- Exact auto-lock timeout defaults
-- Clipboard auto-clear timing
-- Whether a user-selected external KDBX file is required before v0.2
-- Whether biometric quick-unlock belongs in prototype v0.2
-
-## 16. UI/UX Refinement Guardrails
-
-The next build is an incremental presentation/interaction refinement.
-
-It MUST preserve the current repository, KDBX storage model, Redux/navigation/state structure, and security boundaries unless a separately approved requirement requires change.
-
-Prefer Material 3 directly for standard controls. Create reusable wrappers only for application-specific repeated behavior.
-
-The next build MUST NOT introduce merely as part of redesign:
-
-- A second persistence layer.
-- A new navigation/state architecture.
-- Accounts/cloud/sync.
-- OCR/camera capture.
-- Typed vault items.
-- Biometric expansion.
-- External vault picker/import/export.
-- A custom design-system framework.
-
-Theme direction:
-
-- Fixed dark Material 3.
-- Layered charcoal surfaces rather than pure black everywhere.
-- Calm recognizable blue primary.
-- Restrained warm brand accent used only for identity moments.
-- Material/platform sans-serif for normal UI; monospace only for secrets where useful.
-- No Dynamic Color in the first rollout.
-- Align window/splash/system surfaces to avoid a bright launch flash.
-
-Loading direction:
-
-- Unlock → `Unlocking...` inside the primary button.
-- Create vault → `Creating vault...`.
-- Save → `Saving...`.
-- Static content placeholder only if latency is perceptible.
-- No skeleton before unlock.
-- No shimmer dependency.
-
-The current broad Auth open-error mapping may conflate wrong password and unreadable/corrupt vault. First check whether existing Kotpass/repository exception signals allow a small reliable distinction. Do not rewrite the repository solely for richer error taxonomy.
-
-## 17. Brand Decision Gate
-
-`RAHSA` is the selected final product name. The supplied RAHSA shield is the approved primary mark.
-
-After UI implementation/pilot + UX validation, STOP before public/store release preparation and resolve:
-
-1. Final product name.
-2. Trademark/name clearance for intended markets.
-3. Final app icon/logo and brand assets.
-4. Final Android `applicationId` / package identity strategy.
-5. Signing/store identity.
-6. Store-facing product name/listing identity.
-7. Upstream/open-source attribution presentation.
-
-Implementation must preserve the approved RAHSA artwork and keep package/signing changes blocked until owner-controlled identities are selected. See `docs/BRAND_DECISION.md`.
+Public/Play Store release engineering, package/applicationId migration, release signing/store identity, and listing/compliance work are PARKED until explicitly resumed by the owner.

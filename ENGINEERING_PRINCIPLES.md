@@ -1,135 +1,137 @@
-# Engineering Principles — Android Password Manager Prototype
+# Engineering Principles — RAHSA
 
-**Version:** 1.0  
-**Ratified:** 2026-08-24
+**Version:** 1.1  
+**Updated:** 2026-09-06
 
-These principles govern implementation decisions for the prototype.
+These principles govern engineering decisions for RAHSA. They supersede prototype-era governance where the two conflict.
 
-If another document conflicts with this file, this file takes precedence unless explicitly amended.
+## I. Product terminology
 
-## I. Reuse First
+- **RAHSA** is the current product/application name.
+- **KeyPass** means the upstream open-source project or a legacy technical identifier that still contains `keypass`.
+- New product requirements, roadmap items, tasks, and user-facing documentation MUST use RAHSA unless they are explicitly discussing upstream KeyPass or historical code identifiers.
 
-Before implementing a new component, check in this order:
+## II. Reuse First
 
-1. Is a suitable implementation already present in the retained KeyPass code?
-2. Does Android/Jetpack provide the capability?
-3. Does a mature, license-compatible open-source library provide it?
-4. Only then implement it locally.
+Before implementing a new capability, check in this order:
 
-Reuse must not bypass code review.
+1. Suitable implementation already retained in RAHSA.
+2. Suitable implementation/pattern in upstream KeyPass.
+3. Android / AndroidX / Jetpack platform capability.
+4. Mature, actively maintained, license-compatible open-source library or implementation.
+5. Only then implement the minimum required code locally.
 
-## II. No Custom Cryptography
+Reuse is not blind copying. Security-sensitive inherited or third-party code MUST be reviewed before use.
 
-Do not invent:
+## III. No Custom Cryptography
 
-- Cryptographic algorithms
-- Encryption modes
-- Key derivation algorithms
-- Encrypted file/container formats
-- Authentication/tagging schemes
+Do not invent cryptographic algorithms, encryption modes, key-derivation schemes, encrypted containers, recovery formats, or authentication/tagging schemes.
 
-Use established platform APIs and established libraries/formats.
+Use established platform APIs and established libraries/formats. Persisted credential data remains KDBX-backed through Kotpass unless an explicitly approved architecture decision changes that.
 
-For persisted credentials, the prototype uses KDBX through Kotpass.
+## IV. Approved Scope Controls Implementation
 
-## III. Prototype Scope Is Binding
+The current approved `PRD.md` controls product scope.
 
-Only implement functionality described in `PRD.md`.
+Prototype-era non-goals were boundaries for those historical phases; they are **not permanent product bans**. A previously excluded feature may enter implementation only after explicit owner approval and the required PRD/TSD/ADR/threat-model updates are complete.
 
-Do not add "useful" adjacent features without an explicit scope change.
+An idea, roadmap candidate, inherited code path, or unchecked historical item is not implementation approval.
 
-Especially avoid:
+## V. Preserve the v0.2 Baseline
 
-- Cloud sync
-- Accounts
-- TOTP
-- Passkeys
-- Autofill
-- Browser extensions
-- Analytics
-- Backend APIs
+`v0.2-prototype` is the stable RAHSA baseline.
 
-## IV. Local First
+Existing correct behavior is presumed preserved unless an approved requirement explicitly changes it. In particular, preserve:
 
-Core prototype behavior must work without a network.
+- KDBX/Kotpass as the persisted source of truth.
+- `VaultRepository` as the vault boundary unless an approved TSD/ADR changes it.
+- Fail-closed vault behavior.
+- Regression-safe CRUD, search, generator, lock, clipboard, and corrupt-vault protections.
+- Local-first operation.
 
-Do not add network dependencies unless the product requirement explicitly changes.
+Do not perform unrelated architecture migrations or rewrites while adding a feature.
 
-Prefer no Android INTERNET permission.
+## VI. Local First
 
-## V. Security Over Convenience
+Core RAHSA behavior should work without a network. Do not add network dependencies or Android `INTERNET` permission without an explicitly approved requirement and documented justification.
 
-The prototype may be visually incomplete, but it may not knowingly:
+## VII. Security Over Convenience
 
-- Store passwords in plaintext.
-- Persist the master password in plaintext.
-- Log secret values.
-- Disable vault integrity checks.
-- Silently continue after vault-decryption failure.
-- Replace a corrupted vault without user-visible failure.
+RAHSA may not knowingly:
 
-## VI. Simplicity / YAGNI
+- Store credential values in plaintext persistence.
+- Persist a master password in plaintext.
+- Log secrets.
+- Bypass vault integrity/decryption checks.
+- Continue as unlocked after authentication/decryption failure.
+- Replace a corrupt or unreadable vault silently.
+- Treat biometric success as vault unlock unless the vault is actually unlocked through the approved security design.
 
-Prefer the smallest structure that satisfies the requirement.
+## VIII. Simplicity / YAGNI
 
-Avoid:
+Prefer the smallest structure that satisfies an approved requirement. Avoid premature layers, generic frameworks for one use, new dependencies for trivial helpers, broad refactors unrelated to the active task, and abstractions added only for hypothetical future scale.
 
-- Premature multi-module architecture
-- Layers with no current responsibility
-- Generic frameworks created for one use
-- New dependencies for trivial helpers
-- Large refactors unrelated to the active task
-- Abstractions added "for future scalability"
+## IX. Explicit Open-Source Dependencies
 
-## VII. Explicit Dependencies
+Every new third-party dependency MUST record:
 
-Every new third-party dependency must have:
-
-- Purpose
-- License
-- Source repository
-- Why existing code/platform API is insufficient
+- Purpose.
+- Source repository/project.
+- License.
+- Why retained RAHSA code, upstream KeyPass, or Android/Jetpack is insufficient.
+- Security/privacy impact where relevant.
 
 Security-sensitive dependencies require additional review.
 
-## VIII. Test Important Boundaries
+## X. Test Important Boundaries
 
-Tests should focus on the highest-risk behavior:
-
-- Vault create/open/write
-- Wrong password
-- Credential mapping
-- CRUD persistence
-- Lock/unlock
-- Corrupted vault handling
-- Sensitive-data leakage
+Prioritize tests around security and persistence boundaries: vault create/open/re-key/write, wrong credentials, credential mapping, CRUD persistence, lock/unlock, lifecycle races, corrupted vaults, recovery/failure paths, biometric security boundaries, and sensitive-data leakage.
 
 Do not chase coverage percentage for its own sake.
 
-## IX. Small AI-Agent Tasks
+## XI. Planning and Implementation Are Separate
 
-Codex/DeepSeek tasks should:
+Product/security planning is completed before Codex implementation.
 
-- Reference one task ID from `TASKS.md`.
-- Reference `PRD.md` and `TSD.md`.
-- Avoid modifying unrelated files.
-- Include acceptance criteria.
-- End with a build/test command.
+Planning flow:
 
-Do not prompt an agent to "build the whole password manager."
+```text
+Discussion/research
+→ PRD
+→ TSD / ADR / Threat Model as needed
+→ TASKS.md
+→ owner approval
+```
 
-## X. Documentation Is Part of the Codebase
+Implementation flow:
 
-Architecture and product decisions belong in Markdown and version control.
+```text
+approved active Txxx
+→ Codex executes exactly one task
+→ build/test/validation
+→ focused checkpoint
+```
 
-When a significant decision changes:
+Codex MUST NOT invent product scope or architecture during implementation. If an active task requires contradicting a higher-level decision, stop and return the conflict to planning.
 
-1. Update or supersede the relevant ADR.
-2. Update `TSD.md` if architecture changes.
-3. Update `PRD.md` if product scope changes.
-4. Regenerate/revise `TASKS.md` accordingly.
+## XII. Cost-Effective AI Development
 
-## Governance
+Use the lowest-cost model and lowest reasoning effort reasonably likely to complete the task correctly and safely. Do not default to the strongest model.
+
+- Inspection, status, grep, smoke tests, mechanical work: prefer Luna + low.
+- Focused normal implementation: prefer Terra + medium.
+- Security-sensitive vault/master-password/authentication semantics, difficult lifecycle races, or architecture-critical problems: consider Sol with a justified reasoning level.
+- `xhigh`/`max` require an explicit reason.
+
+Correctness and security take precedence over token savings, but higher cost requires a concrete expected benefit.
+
+## XIII. Public Release Work Is Parked
+
+Play Store/public-release preparation, trademark clearance, package/applicationId migration, release signing/store identity, listing identity, and final release compliance work are PARKED until the owner explicitly resumes that workstream.
+
+## XIV. Documentation Is Part of the Codebase
+
+Significant decisions MUST be reflected in version-controlled source-of-truth documents before implementation.
 
 Authority order:
 
@@ -142,9 +144,13 @@ ENGINEERING_PRINCIPLES.md
         ↓
       ADRs
         ↓
+docs/THREAT_MODEL.md
+        ↓
      TASKS.md
         ↓
        Code
 ```
+
+`AGENTS.md`, `docs/WORKFLOW.md`, and `docs/GOVERNANCE_STATUS.md` govern execution mechanics/status and MUST NOT override product/security decisions above.
 
 A code change that violates a higher-level document is not accepted merely because it builds.

@@ -1,72 +1,75 @@
-# Feature Inventory
+# RAHSA Feature Inventory
 
-**Updated:** 2026-09-05
+**Updated:** 2026-09-06
 
 Status taxonomy:
 
-- `[CURRENT]` implemented/current capability.
-- `[PROPOSED]` approved change for the next UI/UX build.
-- `[FUTURE]` expected later, not currently available/approved.
-- `[IDEA]` exploration only.
+- `[CURRENT]` implemented and part of the `v0.2-prototype` baseline.
+- `[PLANNING]` candidate under product/security discussion; not approved for implementation.
+- `[PARKED]` intentionally deferred workstream.
 
 ## Vault and Security
 
-- `[CURRENT]` Single app-private `vault.kdbx`.
+- `[CURRENT]` Single app-private `vault.kdbx` backed by Kotpass.
 - `[CURRENT]` First-launch vault creation and master-password unlock.
 - `[CURRENT]` Manual lock and background auto-lock behavior.
 - `[CURRENT]` Secure-screen protection.
 - `[CURRENT]` Sensitive logging hardening.
 - `[CURRENT]` Reviewed secure clipboard behavior.
 - `[CURRENT]` Corrupted-vault overwrite protection.
-- `[PROPOSED]` Clearer loading/error presentation and dark startup.
-- `[FUTURE]` Biometric quick-unlock after dedicated security review.
-- `[FUTURE]` External vault selection/import only if separately approved.
+- `[CURRENT]` Storage-write failure handling and lock/load race protection.
+- `[PLANNING]` Master-password change semantics.
+- `[PLANNING]` Forgotten-master-password / recovery policy.
+- `[PLANNING]` Biometric quick-unlock after dedicated security design/review.
+- `[PLANNING]` Lock/session policy refinements.
 
 ## Credentials
 
-- `[CURRENT]` CRUD with title, username, password, URL, notes.
-- `[CURRENT]` Search and copy username/password.
-- `[PROPOSED]` Read-first Credential Detail.
-- `[PROPOSED]` Simplified Create/Edit + validation + unsaved-change confirmation.
-- `[PROPOSED]` Improved long-title handling.
-- `[IDEA]` Typed items such as PIN, Wi-Fi, bank account, secure note.
-- `[IDEA]` Tags/categories expansion.
+- `[CURRENT]` CRUD with title, username, password, URL, and notes.
+- `[CURRENT]` Search by title/username.
+- `[CURRENT]` Read-first Credential Detail.
+- `[CURRENT]` Create/Edit validation and unsaved-change handling.
+- `[CURRENT]` Safe copy/reveal behavior.
+- `[PLANNING]` Typed items, tags/categories, or other credential-model expansion only after explicit requirement review.
 
 ## Password Generator
 
-- `[CURRENT]` Existing generator engine/config and persisted settings.
-- `[PROPOSED]` Standalone top-level Generator.
-- `[PROPOSED]` Contextual generator bottom sheet.
-- `[PROPOSED]` Fresh generation on entry/settings changes.
-- `[PROPOSED]` Uppercase/Lowercase/Numbers/Symbols baseline.
-- `[PROPOSED]` Remove blank-spaces toggle and individual-symbol matrix from refreshed UI.
-- `[FUTURE]` Passphrase mode.
-- `[IDEA]` Profiles/history.
+- `[CURRENT]` Standalone Generator.
+- `[CURRENT]` Contextual generator use in credential editing.
+- `[CURRENT]` Length and character-category configuration.
+- `[CURRENT]` Secure copy path and generated-secret logging protections.
+- `[PLANNING]` Passphrase generation.
 
 ## Navigation and UI
 
-- `[CURRENT]` Compose UI with retained Redux/navigation state.
-- `[PROPOSED]` Top-level `Vault | Generator | Settings`.
-- `[PROPOSED]` Lock in top app bar and Add Extended FAB on Vault.
-- `[PROPOSED]` Fixed dark Material 3 visual system.
-- `[PROPOSED]` Material Symbols Rounded direction.
-- `[PROPOSED]` Material/platform sans typography for normal UI.
-- `[PROPOSED]` Static placeholders only where latency is perceptible.
-- `[PROPOSED]` Accessibility baseline: touch targets, semantics, font scaling, TalkBack.
+- `[CURRENT]` Compose UI with retained navigation/state architecture.
+- `[CURRENT]` Top-level Vault / Generator / Settings navigation.
+- `[CURRENT]` Fixed dark Material 3 visual direction.
+- `[CURRENT]` Loading/error conventions.
+- `[CURRENT]` Accessibility baseline including touch targets, semantics, font scaling, and basic TalkBack validation.
 
 ## Settings
 
-- `[CURRENT]` Password hint, binary auto-lock, feedback/share/about.
-- `[CURRENT]` Biometric-related inherited code/preferences exist.
-- `[PROPOSED]` Simplified Settings list presentation.
-- `[PROPOSED]` Do not surface biometric controls.
-- `[PROPOSED]` Remove Settings search/collapsible cards.
-- `[PROPOSED]` Remove duplicate generator-length setting.
+- `[CURRENT]` Password hint.
+- `[CURRENT]` Auto-lock toggle.
+- `[CURRENT]` Help/About surfaces.
+- `[CURRENT]` Legacy biometric-related code/settings may still exist internally but are not an approved unlock implementation.
+- `[PLANNING]` Secure biometric enablement/disablement UX and lifecycle.
 
-## Connectivity and Branding
+## Integration / Data Portability
 
-- `[CURRENT]` No backend required for core prototype.
-- `[CURRENT]` `RAHSA` is the selected product name and its supplied shield is the primary mark.
-- `[CURRENT]` Product-name/app-mark slots use the RAHSA identity assets.
-- `[FUTURE]` Cloud sync, OCR, Play Store release readiness.
-- `[FUTURE]` Complete trademark clearance, `applicationId`, signing/store identity, and full attribution review at the mandatory Brand Decision Gate.
+- `[CURRENT]` Core application requires no backend and no Android `INTERNET` permission.
+- `[PLANNING]` Android Autofill.
+- `[PLANNING]` Safe KDBX backup/export/import strategy.
+- `[PLANNING]` Cloud sync only if separately approved in the future; it is not part of current planning by default.
+
+## Branding and Release
+
+- `[CURRENT]` Product name: **RAHSA**.
+- `[CURRENT]` RAHSA shield/logo and launcher identity assets.
+- `[PARKED]` Trademark/name clearance.
+- `[PARKED]` Final package/applicationId migration.
+- `[PARKED]` Release signing/store identity.
+- `[PARKED]` Play Store listing/compliance/readiness.
+
+Planning status does not authorize Codex implementation. Only an approved active `Txxx` in `TASKS.md` does.

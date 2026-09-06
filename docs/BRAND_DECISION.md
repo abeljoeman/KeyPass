@@ -1,68 +1,36 @@
 # RAHSA Brand Decision Record
 
-**Status:** Brand Decision Gate in progress
+**Status:** Approved identity decisions; remaining public-release work PARKED  
 **Updated:** 2026-09-06
 
 ## Approved decisions
 
-- **Product and store-facing name:** RAHSA.
-- **Primary mark:** the user-supplied blue shield with white R monogram and
-  padlock, stored as `branding/logo_RAHSA.png`.
-- **Android presentation:** RAHSA labels, Auth/About identity, legacy launcher
-  icons, adaptive foreground, and a dedicated monochrome layer are generated
-  from the approved master artwork.
-- **Brand colors represented by the artwork:** dominant electric blue near
-  `#0068FC`, white, and the existing dark application surface.
+- Product name: **RAHSA**.
+- Primary mark: user-supplied blue shield with white R monogram and padlock, retained in `branding/logo_RAHSA.png`.
+- Android identity surfaces use RAHSA labels and generated launcher/adaptive/monochrome assets.
+- Existing package/signing identities remain unchanged until separately approved.
 
-Generated raster assets are reproducible with:
+## Historical release-gate findings
 
-```powershell
-& 'C:\Users\User\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' scripts\generate_brand_assets.py
-```
+A preliminary Indonesia trademark screen was performed on 2026-09-06. It was not professional clearance and did not complete B002. Detailed evidence remains in Git history at `v0.2-prototype`.
 
-## Preliminary Indonesia trademark screening
+`NOTICE.md` preserves primary KeyPass and Kotpass MIT attribution, but final release-oriented dependency/attribution presentation was not completed.
 
-On 2026-09-06, the official PDKI text search for `RAHSA` returned seven
-records containing the word, in classes 5, 29, 30, and 32. None of those seven
-normal-search records was an application/password-manager product. A phonetic
-search was much broader and included similar marks, including `RAISA` in class
-9.
+## Parked items
 
-- PDKI search: https://pdki-indonesia.dgip.go.id/search?keyword=RAHSA&type=trademark
-- Relevant software screening still needs structured review in at least Nice
-  classes 9 and 42, plus any class selected for the final commercial model.
-- The intended markets outside Indonesia have not yet been specified.
+The following remain unresolved but are **not the current workstream**:
 
-This is only a preliminary availability screen. PDKI explicitly states that
-its data can be incomplete and decisions must not be based on the search
-alone. Appropriate professional trademark/name clearance remains required, so
-`B002` is not complete.
+- **B002 — Trademark/name clearance** for intended launch markets.
+- **B004 — Android identity** / final owner-controlled `applicationId` strategy.
+- **B005 — Signing/store identity** and release-key ownership/process.
+- **B006 — Final release attribution presentation** and transitive dependency review.
 
-## Remaining gate decisions
+Do not interpret these unfinished items as the next Codex tasks.
 
-- **B002 — Trademark/name clearance:** obtain and record appropriate clearance
-  for Indonesia and every intended launch market.
-- **B004 — Android identity:** replace `com.yogeshpaliyal.keypass` only after an
-  owner-controlled, globally unique reverse-domain namespace is selected. The
-  Kotlin namespace may remain unchanged initially to reduce migration risk.
-- **B005 — Signing/store identity:** establish the release keystore owner,
-  protected credential-handling process, Play Console account, support contact,
-  and final listing identity. Never commit signing secrets or keystores.
-- **B006 — Attribution:** `NOTICE.md` now preserves primary KeyPass and Kotpass
-  MIT notices, but a complete transitive-dependency notice and final in-app/store
-  presentation still require review.
+They may resume only when the owner explicitly reopens public-release planning and `TASKS.md` contains approved active tasks for that work.
 
-Public/store release preparation remains blocked until those items are closed.
+## Current operational direction
 
-## Implementation verification
+RAHSA `v0.2-prototype` is the stable baseline. Current work is product/security expansion planning, not store release preparation.
 
-- `:app:testFreeDebugUnitTest`: passed.
-- `:app:assembleFreeDebug`: passed.
-- `:app:assembleFreeRelease`: passed and produced an unsigned APK labelled
-  `RAHSA`; signing remains deliberately unresolved under B005.
-- Samsung Galaxy A11: updated staging APK installed and launched successfully;
-  no fatal application error was observed after launch.
-- Release lint still reports the existing `ExtraTranslation` backlog caused by
-  locale resources retained after out-of-scope features were removed. The build
-  currently does not fail on lint (`abortOnError = false`); release readiness
-  must address or explicitly disposition this backlog.
+See `docs/GOVERNANCE_STATUS.md` and `docs/ROADMAP.md`.

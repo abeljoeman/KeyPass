@@ -1,136 +1,111 @@
-# Documentation Guide
+# RAHSA Documentation Guide
 
-This repository uses a deliberately small documentation set.
+**Updated:** 2026-09-06
 
-## Authority Order
+Start every new planning or Codex session with `docs/GOVERNANCE_STATUS.md`.
+
+## Decision authority
 
 1. `ENGINEERING_PRINCIPLES.md`
 2. `PRD.md`
 3. `TSD.md`
 4. `docs/adr/*.md`
-5. `TASKS.md`
-6. Implementation code
+5. `docs/THREAT_MODEL.md`
+6. `TASKS.md`
+7. Implementation code
 
-If documents conflict, resolve the higher-authority document first.
+If documents conflict, resolve the higher-authority decision before implementation.
 
-## Files
+Execution/status documents (`AGENTS.md`, `docs/WORKFLOW.md`, `docs/GOVERNANCE_STATUS.md`) describe how and when work is performed; they do not override approved product/security decisions.
 
-### `PRD.md`
+## Current operational documents
 
-Defines what the prototype must do and what is out of scope.
+### `docs/GOVERNANCE_STATUS.md`
 
-### `TSD.md`
-
-Defines how the prototype is implemented.
-
-### `docs/UX_UI_BASELINE.md`
-
-Defines the approved next-build UX flows, component mapping, visual direction, interaction states, accessibility baseline, and UI-specific scope guardrails. It is required input for UI/UX tasks and remains subordinate to `ENGINEERING_PRINCIPLES.md`, `PRD.md`, and `TSD.md`.
-
-### `docs/FEATURES.md`
-
-Feature inventory using `[CURRENT]`, `[PROPOSED]`, `[FUTURE]`, and `[IDEA]` labels.
-
-### `docs/ROADMAP.md`
-
-Sequencing and release gates. Roadmap items are not promises.
-
-### `docs/NEXT_BUILD_NOTES.md`
-
-Implementation-facing notes and targeted follow-ups for the next UI/UX build.
-
-### `CHANGELOG.md`
-
-Records completed/released work and planning artifacts that actually land in version control.
-
-### `TASKS.md`
-
-Executable implementation backlog for humans and AI coding agents.
+First-read status page: RAHSA naming, stable baseline, current workstream, active/parked/historical documents, implementation gate, and model-cost policy.
 
 ### `ENGINEERING_PRINCIPLES.md`
 
-Non-negotiable engineering rules.
+Non-negotiable engineering governance: reuse-first, no custom crypto, baseline preservation, explicit OSS provenance, planning/implementation separation, and cost-effective AI development.
+
+### `AGENTS.md`
+
+Mandatory Codex repository instructions. Codex may modify application code only when `TASKS.md` exposes one approved active Txxx and preflight passes.
+
+### `PRD.md`
+
+Approved RAHSA v0.2 product baseline. Expansion features require explicit amendment before implementation.
+
+### `TSD.md`
+
+Approved RAHSA v0.2 technical baseline. New architecture/security designs require explicit amendment/ADR before implementation.
 
 ### `docs/THREAT_MODEL.md`
 
-Security assets, threats, trust boundaries, and mitigations.
+Security assets, threats, boundaries, and mitigations. Update when a planned feature changes trust boundaries, stored secrets, authentication, recovery, or external interaction.
 
-### `docs/TEST_PLAN.md`
+### `TASKS.md`
 
-Physical-device and prototype release checklist.
+Machine-readable execution gate plus approved implementation tasks. Roadmap/ideas do not authorize coding.
 
-### `docs/TEST_RESULTS.md`
+### `docs/WORKFLOW.md`
 
-Recorded physical-device results, known limitations, and release-gate findings for the current prototype test pass.
+Planning in ChatGPT → documentation approval → one-task-at-a-time Codex execution.
+
+### `docs/ROADMAP.md`
+
+Sequencing and planning candidates. Roadmap items do not authorize implementation.
+
+### `docs/FEATURES.md`
+
+Feature inventory using `[CURRENT]`, `[PLANNING]`, and `[PARKED]`.
+
+## Historical / evidence documents
+
+### `docs/UX_UI_BASELINE.md`
+
+Source-of-truth for the UI/UX rollout completed by `v0.2-prototype`. It remains useful for preserving current UX behavior but is not the current expansion backlog.
+
+### `docs/NEXT_BUILD_NOTES.md`
+
+Archived/superseded UI rollout instructions. Do not use as current execution scope.
+
+### `docs/TEST_PLAN.md` / `docs/TEST_RESULTS.md`
+
+Baseline test plan/evidence and known limitations. New feature phases may extend these documents or add focused validation as approved.
+
+### `docs/FEATURE_AUDIT.md`
+
+Historical audit of inherited KeyPass features and prototype scope decisions. It is evidence/reuse context, not a permanent ban list.
+
+### `docs/BRAND_DECISION.md`
+
+Approved RAHSA identity decisions plus parked public-release items.
 
 ### `docs/adr/`
 
-Small Architecture Decision Records for choices that should not be repeatedly re-litigated.
+Architecture Decision Records. Accepted ADRs remain authoritative unless explicitly superseded.
 
-## Build and Run — Verified Baseline (T013)
+## Verified Android baseline
 
-### Verified Environment
-
-- OS: Windows
-- JDK 17
-- Android SDK Platform 35
-- Android Build Tools 35.0.0
-- Android platform-tools / adb
-- Repository Gradle Wrapper (no global Gradle installation required)
-- Physical Android device with USB debugging enabled
-
-### Prerequisites
-
-1. Install JDK 17 and point `JAVA_HOME` at it.
-2. Install the Android SDK with Platform 35, Build Tools 35.0.0, and `platform-tools`.
-3. Enable USB debugging on the physical device and connect it via USB.
-
-### Build
+Development baseline remains Windows + JDK 17 + Android SDK/ADB + repository Gradle Wrapper. A typical debug build is:
 
 ```bat
-.\gradlew.bat assembleFreeDebug
+.\gradlew.bat :app:assembleFreeDebug
 ```
 
-### APK Output
+Build/test requirements for implementation are defined by the active Txxx acceptance criteria.
 
-```text
-app\build\outputs\apk\free\debug\app-free-debug.apk
+## Codex handoff pattern
+
+Do not paste the whole governance into every prompt. Keep governance in the repository.
+
+A handoff should identify only the repo/branch/checkpoint and exact active task, then instruct Codex to obey repository governance.
+
+Before implementation Codex runs:
+
+```powershell
+python scripts/governance_preflight.py --implementation Txxx
 ```
 
-### Install / Run
-
-```bat
-adb install -r "app\build\outputs\apk\free\debug\app-free-debug.apk"
-```
-
-## Recommended AI-Agent Prompt Pattern
-
-```text
-Implement TASKS.md task T0XX.
-
-Read and obey:
-1. ENGINEERING_PRINCIPLES.md
-2. PRD.md
-3. TSD.md
-4. docs/UX_UI_BASELINE.md when the task affects UI/UX
-5. relevant docs/adr files
-
-Constraints:
-- Do not implement adjacent tasks.
-- Reuse existing code before creating new code.
-- Do not introduce a new dependency without justification.
-- Do not invent cryptographic behavior.
-- Do not expand product scope as a side effect of UI work.
-- Run the relevant build/tests before finishing.
-- Summarize changed files and remaining risks.
-```
-
-## Template Sources / Inspiration
-
-This documentation set is adapted from ideas in:
-
-- GitHub Spec Kit — https://github.com/github/spec-kit
-- Markdown Architectural Decision Records (MADR) — https://github.com/adr/madr
-- OWASP Threat Modeling Playbook — https://github.com/OWASP/threat-modeling-playbook
-
-The files here are intentionally simplified for a prototype.
+If `TASKS.md` has `ACTIVE_TASK: NONE`, implementation must not start.

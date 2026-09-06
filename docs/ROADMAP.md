@@ -1,93 +1,74 @@
-# Product Roadmap
+# RAHSA Product Roadmap
 
 **Updated:** 2026-09-06
 
-This roadmap communicates sequencing and decision gates. It is not a promise of release dates.
+This roadmap communicates sequencing and decision gates. It is not a promise of release dates and it does not authorize implementation by itself.
 
-## Completed — v0.1 Prototype Baseline
+## Completed — v0.2 Stable Baseline
 
-- Local KDBX source of truth via Kotpass.
-- Create/unlock/lock lifecycle.
+RAHSA `v0.2-prototype` includes:
+
+- Local KDBX source of truth through Kotpass.
+- Create/unlock/manual-lock/background-lock lifecycle.
 - Credential CRUD and persistence.
 - Search and password generator.
-- Secure-screen/logging/clipboard hardening.
-- Corrupted-vault overwrite regression protection.
-- Physical-device regression pass and `v0.1-prototype` tag.
+- Secure-screen, logging, clipboard, and corrupt-vault protections.
+- Write-failure and lifecycle-race hardening.
+- Dark Material 3 UI rollout.
+- Auth, Vault, Credential Detail, Create/Edit, Generator, and Settings refinement.
+- Loading/error/accessibility regression work.
+- Physical-device validation on Samsung Galaxy A11.
+- RAHSA product name, logo, and Android identity surfaces.
 
-## Completed — UX/UI Source of Truth
+The stable baseline tag is `v0.2-prototype`.
 
-- Approved UX flows and component mapping.
-- Dark-only Material 3 direction.
-- Loading/error/accessibility rules.
-- Feature inventory and out-of-scope boundaries.
-- Mandatory Brand Decision Gate.
+## Now — Product & Security Expansion Planning
 
-**Exit:** consolidated source-of-truth patch reviewed and committed.
+No expansion feature is approved for implementation yet.
 
-## Completed — UI Foundation Pilot
+Planning candidates include:
 
-1. Fixed dark Material 3 theme and dark startup.
-2. Typography cleanup.
-3. Small Material Symbols icon set.
-4. Minimal reusable app-specific UI components.
-5. Validate on emulator + Samsung Galaxy A11 before broad rollout.
-
-**Principle:** no architecture migration.
-
-## Completed — Screen Rollout
-
-1. Auth/Create/Confirm/Unlock.
-2. Vault/Dashboard.
-3. Credential Detail.
-4. Create/Edit + contextual generator.
-5. Standalone Generator.
-6. Settings.
-7. Global navigation/back/lock consistency.
-
-Each task is small, reviewable, built, and tested.
-
-## Completed — UX Validation
-
-- Loading feedback on slower physical hardware.
-- Empty/no-results/error/destructive flows.
-- Long-title behavior.
-- Font scaling and basic TalkBack.
-- Regression of lock/unlock, CRUD persistence, secure clipboard, and corrupt-vault protection.
-
-## Now — Mandatory Brand Decision Gate
-
-**STOP HERE before public/store release preparation.**
-
-Resolved:
-
-- Final product name: **RAHSA**.
-- Final app icon/logo and brand assets: supplied RAHSA shield integrated.
-
-Still required:
-
-- Trademark/name clearance for intended markets.
-- Final Android `applicationId` / package identity strategy.
-- Signing/store identity.
-- Store-facing product name/listing identity.
-- Upstream/open-source attribution presentation.
-
-Until complete:
-
-```text
-Final product name: RAHSA
-Public release status: BLOCKED on remaining gate items
-```
-
-## After Brand Gate — Release Readiness
-
-Revalidate Play Store requirements at that time, then address privacy/data-safety, AAB/signing, target API/testing, listing assets, support/privacy/contact URLs, and dependency/license attribution as applicable.
-
-## Future — Product Expansion
-
-Only after explicit requirement review:
-
+- Master-password management/change.
+- Forgotten-master-password and recovery policy.
 - Biometric quick-unlock.
-- OCR/camera-assisted capture.
-- Online/cloud sync.
-- Typed vault items.
+- Lock/session policy refinements.
+- Android Autofill.
+- Safe KDBX backup/export/import strategy.
 - Passphrase generation.
+- Other owner-approved product capabilities.
+
+These items are candidates for discussion and research, not executable tasks.
+
+## Documentation Gate Before Implementation
+
+For each expansion capability:
+
+1. Discuss product behavior and security policy.
+2. Audit reuse options: retained RAHSA → upstream KeyPass → Android/Jetpack → mature OSS → minimum local code.
+3. Amend `PRD.md`.
+4. Amend `TSD.md` and ADRs where architecture/security choices change.
+5. Update `docs/THREAT_MODEL.md` where trust boundaries or secrets change.
+6. Create small `TASKS.md` tasks with acceptance criteria.
+7. Obtain owner approval.
+8. Only then hand one active task at a time to Codex.
+
+## Later — Expansion Implementation
+
+Implementation sequencing will be decided only after planning. Do not infer an implementation order from the candidate list above.
+
+Each task must preserve the `v0.2-prototype` baseline unless an approved requirement explicitly changes behavior.
+
+## Parked — Public / Play Store Release
+
+Release preparation is intentionally paused.
+
+Parked work includes:
+
+- Trademark/name clearance for launch markets.
+- Final Android `applicationId` / package identity migration.
+- Release signing/store identity.
+- Store listing identity and compliance.
+- Privacy/data-safety/support URLs as applicable.
+- Final release-oriented attribution presentation.
+
+Do not resume this workstream until the owner explicitly requests it and active tasks are authored.

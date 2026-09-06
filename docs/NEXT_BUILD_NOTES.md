@@ -1,113 +1,29 @@
-# Next Build Notes — UI/UX Refinement
+# Next Build Notes — Archived
 
-**Updated:** 2026-09-05
-**Working name:** KeyPass
-**Scope:** Incremental UI/UX refinement over completed v0.1 prototype
+**Status:** ARCHIVED / SUPERSEDED  
+**Archived:** 2026-09-06
 
-The approved UX contract is `docs/UX_UI_BASELINE.md`.
+This document previously described the UI/UX refinement work that followed the original RAHSA prototype baseline.
 
-## Non-Negotiable Guardrails
+That rollout is complete in `v0.2-prototype`, including theme/typography, Auth, Vault, Credential Detail, Create/Edit, Generator, Settings, navigation consistency, loading/error behavior, accessibility checks, and physical-device validation.
 
-- KDBX remains the single source of truth.
-- Preserve current `VaultRepository`.
-- Preserve existing Redux/navigation/state unless a tiny localized change is required by an approved flow.
-- Reuse current ViewModels/actions/settings/generator/security behavior.
-- No accounts/cloud/sync/OCR/biometric expansion/typed items/external vault picker.
-- No custom design-system framework.
-- No shimmer/icon mega dependency.
-- Security/lock behavior wins over preserving transient UI state.
+The original instructions remain available in Git history and at the `v0.2-prototype` tag.
 
-## Implementation Order
+## Do not use this file as current execution scope
 
-1. Theme/dark startup/typography.
-2. Icon inventory + accessibility semantics.
-3. Small reusable app-specific components.
-4. Auth.
-5. Vault/Dashboard.
-6. Credential Detail.
-7. Create/Edit + contextual generator.
-8. Standalone Generator.
-9. Settings.
-10. Global loading/error/accessibility regression.
+This file MUST NOT be used to:
 
-Do not attempt a whole-app rewrite in one task/commit.
+- infer the next implementation task;
+- prohibit a future feature merely because it was excluded from the completed UI phase;
+- authorize biometric, Autofill, backup, OCR, typed items, cloud, or any other expansion;
+- resume public/Play Store release work.
 
-## Theme / Identity
+Current operational status is defined by:
 
-- Dark-only Material 3.
-- Layered charcoal surfaces.
-- Calm recognizable blue primary.
-- Restrained warm amber/gold identity accent.
-- No Dynamic Color initially.
-- Sans for normal UI; monospace only for secret values when useful.
-- Exact palette remains subject to physical contrast/daylight validation.
+1. `docs/GOVERNANCE_STATUS.md`
+2. `ENGINEERING_PRINCIPLES.md`
+3. `PRD.md` / `TSD.md` / ADRs / `docs/THREAT_MODEL.md`
+4. `TASKS.md`
+5. `docs/WORKFLOW.md`
 
-Keep identity replaceable: app mark + product name + brand accent. Do not invest in a new KeyPass-specific logo now.
-
-## Targeted Checks
-
-### Auth errors
-
-Current Auth maps broad open failures to `incorrect_password`.
-
-Before a separate corrupt/unreadable state, inspect existing exception signals. Add a localized distinction only if reliable. Never overwrite/create after failed open/decode.
-
-### Create → Detail
-
-Approved UX is:
-
-```text
-Vault → Add → Save → Detail → Back → Vault
-```
-
-Use the smallest localized change to expose the newly created ID/saved credential to existing navigation. Do not redesign repository/navigation.
-
-### Generator
-
-UX candidate length: 8–64, default ~20. Verify current config/constants/tests before coding.
-
-Standalone Copy must use the existing reviewed secure-clipboard path + safe Snackbar rather than the current separate helper/Toast.
-
-Remove blank-spaces and individual-symbol controls from refreshed UI without aggressive generator-model refactoring.
-
-### Settings
-
-Do not promote inherited biometric controls. Do not delete/rewrite biometric internals as part of this UI pass.
-
-Generator becomes the single place for generator configuration; remove duplicate password-length row from refreshed Settings.
-
-### Vault icon
-
-Current candidate: `shield_lock` for Vault and `lock` for manual Lock. Visually verify before finalizing.
-
-## Loading Rules
-
-- Unlock → `Unlocking...`.
-- Create vault → `Creating vault...`.
-- Save → `Saving...`.
-- Disable duplicate mutation action.
-- Static placeholder only where latency is perceptible.
-- No skeleton before unlock.
-- No shimmer.
-
-## Accessibility / Device Validation
-
-At minimum:
-
-- 48dp touch targets where applicable.
-- Localized descriptions for icon-only actions.
-- Decorative icons null.
-- Font scaling.
-- Long-title handling.
-- Basic TalkBack.
-- Password masked by default.
-
-Physical baseline: Samsung Galaxy A11 (`SM-A115F`, Android 12/API 31) plus emulator.
-
-## Brand Decision Gate Reminder
-
-After UI implementation/pilot + UX validation, stop before release work.
-
-RAHSA and its primary logo are selected. Complete trademark clearance, final `applicationId`/package identity, signing/store identity, listing identity, and attribution/license presentation.
-
-Until the remaining items close: **RAHSA** is the selected name, but public/store release work remains blocked.
+Current workstream: product/security expansion planning. There is no active implementation task until `TASKS.md` explicitly says otherwise.
