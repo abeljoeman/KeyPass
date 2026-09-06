@@ -1,23 +1,26 @@
-# Threat Model — Android Password Manager Prototype
+# Threat Model — RAHSA Android Password Manager
 
-**Status:** Draft  
-**Created:** 2026-08-24  
-**Scope:** Local-only Android prototype
-
-This is intentionally lightweight. It identifies prototype assets, trust boundaries, major threats, and required mitigations.
+**Status:** v0.2 review preserved; Phase 13 extension **DRAFT — owner review required**  
+**Updated:** 2026-09-06  
+**Scope:** Local-first Android app, including proposed Phase 13 access/data-safety boundaries
 
 ## 1. Assets
 
 High-value assets:
 
-- Master password
-- `vault.kdbx`
-- Stored credentials
-- Decrypted credentials in application memory
-- Passwords copied to clipboard
-- Generated passwords before saving
+- Master Password and transient password input.
+- Active `vault.kdbx`.
+- Internal encrypted Last-Known-Good KDBX.
+- External user-managed KDBX backups.
+- Short-lived candidate/temp KDBX artifacts.
+- Stored credentials and decrypted credentials in application memory.
+- Passwords copied to clipboard.
+- Generated passwords before saving.
+- Restore-candidate password input.
+- Biometric wrapped unlock ciphertext/metadata.
+- Android Keystore key protecting biometric quick-unlock state.
 
-## 2. Trust Boundaries
+## 2. Trust boundaries
 
 ```text
 User
@@ -25,192 +28,234 @@ User
  v
 Android App Process
  |
- +--> UI / ViewModels
+ +--> Compose UI / ViewModels
+ |       |
+ |       +--> Android BiometricPrompt
  |
  +--> VaultRepository
-        |
-        v
-      Kotpass
-        |
-        v
-   Local vault.kdbx
+ |       |
+ |       +--> Kotpass → active/LKG/candidate KDBX
+ |       |
+ |       +--> Android Keystore → biometric wrapping key
+ |
+ +--> ContentResolver / SAF
+         |
+         v
+   External DocumentsProvider
+   (local / Drive / SD / USB / other provider)
 ```
 
 External trust boundaries:
 
-- Android operating system
-- Device lock / physical access
-- Clipboard subsystem
-- Local filesystem
-- Third-party libraries included in the app
+- Android operating system and device lock.
+- Biometric subsystem / Trusted Execution Environment where provided by device.
+- Android Keystore.
+- Clipboard subsystem.
+- App-private filesystem.
+- User-selected external document providers/storage.
+- Third-party libraries included in the app.
 
-No backend trust boundary exists in the prototype.
+No RAHSA backend trust boundary exists for Phase 13.
 
-## 3. Threat Actors
+## 3. Threat actors
 
-- Person with temporary physical access to an unlocked phone
-- Person who steals the phone
-- Malicious Android application on the same device
-- Malware with elevated/device-level privileges
-- Developer accidentally leaking secrets through logs/debug tooling
-- Future code change accidentally weakening storage handling
+- Person with temporary physical access to an unlocked phone.
+- Person who steals the phone.
+- Malicious Android application on the same device.
+- Malware with elevated/device-level privileges.
+- Malicious/corrupt external KDBX input.
+- Buggy/unavailable external document provider.
+- Developer accidentally leaking secrets through logs/debug tooling.
+- Future code change accidentally weakening storage/authentication handling.
 
-The prototype does not claim to protect against a fully compromised/rooted operating system.
+RAHSA does not claim to protect against a fully compromised/rooted operating system.
 
-## 4. Threats and Mitigations
+## 4. Baseline threats and mitigations
 
-### T1 — Credentials persisted as plaintext
+### T1 — Credentials persisted as plaintext — Critical
 
-**Risk:** Critical
-
-**Mitigation:**
 - Persist credentials only through KDBX/Kotpass.
 - Do not maintain a secondary plaintext database.
-- Test app-private files after normal flows.
 
-### T2 — Master password persisted
+### T2 — Master Password persisted — Critical
 
-**Risk:** Critical
+- Master Password exists transiently for active operations/session needs.
+- Never store plaintext in SharedPreferences, DataStore, Room, files, or logs.
+- Phase 13 biometric stores only Keystore-protected wrapped secret material.
 
-**Mitigation:**
-- Master password exists only for the active unlock operation/session.
-- Do not store it in SharedPreferences, DataStore, Room, files, or logs.
-- Biometric key wrapping is deferred rather than improvised.
+### T3 — Secret values leaked to logs — High
 
-### T3 — Secret values leaked to logs
+- Never log credential payloads, Master Password, generated passwords, restore passwords, wrapped-secret plaintext, or decrypted vault data.
+- Review error/crash paths.
 
-**Risk:** High
+### T4 — Screenshot/screen-record leakage — Medium/High
 
-**Mitigation:**
-- Audit logging statements.
-- Never log credential payloads, master passwords, generated passwords, or decrypted vault data.
-- Review crash/error messages.
+- Preserve secure-screen protection on sensitive screens.
+- Verify on physical device.
 
-### T4 — Screenshot / screen-record leakage
+### T5 — Clipboard leakage — High
 
-**Risk:** Medium / High
+- Copy only on explicit action using the reviewed secure clipboard path.
+- Preserve existing expiration/cleanup behavior.
 
-**Mitigation:**
-- Use Android secure-screen protection on sensitive screens where supported.
-- Test screenshot behavior on a physical device.
+### T6 — Vault remains unlocked in background — High
 
-### T5 — Clipboard leakage
+- Preserve current manual lock and approved Auto-Lock behavior.
+- Phase 13 does not redesign session policy.
 
-**Risk:** High
+### T7 — Corrupted/tampered vault silently accepted — High
 
-**Mitigation:**
-- Copy only on explicit user action.
-- Prefer clearing copied password after a short interval where reliable.
-- Avoid copying automatically.
-- Document Android-version limitations.
-
-### T6 — Vault remains unlocked in background
-
-**Risk:** High
-
-**Mitigation:**
-- Manual lock.
-- Lock after background/timeout based on prototype policy.
-- Test process/background transitions.
-
-### T7 — Corrupted/tampered vault is silently accepted
-
-**Risk:** High
-
-**Mitigation:**
 - Rely on KDBX integrity/authentication behavior.
-- Treat decode/open failure as locked/error state.
-- Never silently replace the original vault after decode failure.
+- Decode/open failure stays locked/error.
+- Never silently replace original vault after decode failure.
 
-### T8 — Network exfiltration
+### T8 — Network exfiltration — High
 
-**Risk:** High
+- No backend/analytics.
+- Core flow should retain no INTERNET permission.
+- Backup/restore uses SAF, not a direct cloud/network SDK.
 
-**Mitigation:**
-- No backend.
-- No analytics.
-- Prefer no INTERNET permission.
-- Review dependency behavior and Android manifest.
+### T9 — Secrets exposed in recent-apps preview — Medium
 
-### T9 — Secrets exposed in recent-apps preview
+- Preserve secure-screen behavior and verify on device.
 
-**Risk:** Medium
+### T10 — Decrypted state retained too long — Medium/High
 
-**Mitigation:**
-- Secure-screen behavior should cover recent-app preview where Android supports it.
-- Verify on target device.
+- Clear reachable decrypted application state on lock/lifecycle boundaries.
+- Do not cache plaintext credentials to disk.
+- Minimize unnecessary secret copies.
 
-### T10 — Decrypted state retained longer than intended
+### T11 — Supply-chain dependency risk — Medium
 
-**Risk:** Medium / High
+- Minimize dependencies; pin versions; record source/license/security impact.
+- Prefer AndroidX/platform and established OSS.
 
-**Mitigation:**
-- Clear reachable decrypted application state on lock.
-- Do not cache decrypted credentials to disk.
-- Minimize unnecessary copies of password strings.
+### T12 — AI-generated insecure implementation — High
 
-### T11 — Supply-chain dependency risk
+- Use narrow owner-approved tasks and JIT kits.
+- Security decisions come from PRD/TSD/ADR/Threat Model, not implementation-agent invention.
+- Reject unapproved custom crypto/storage mechanisms.
 
-**Risk:** Medium
+## 5. Phase 13 threats and mitigations
 
-**Mitigation:**
-- Minimize dependencies.
-- Pin versions.
-- Record source and license.
-- Prefer AndroidX and established open-source libraries.
-- Review dependency changes before upgrades.
-
-### T12 — AI-generated insecure implementation
-
-**Risk:** High
+### T13 — User creates vault without understanding password irrecoverability — High product/data-loss risk
 
 **Mitigation:**
-- AI agents implement narrowly scoped tasks.
-- Security decisions come from TSD/ADRs, not agent invention.
-- Review security-sensitive diffs.
-- Reject new crypto/storage mechanisms not approved in ADRs.
+- Explicit unrecoverability warning before Create New Vault.
+- Mandatory swipe acknowledgment using existing Material/platform interaction.
+- Swipe only acknowledges; explicit Create Vault action remains required.
+- Accessibility semantics/action must provide equivalent intentional acknowledgment.
 
-## 5. Security Assumptions
+### T14 — Master Password change corrupts or permanently replaces the only valid vault — Critical
+
+**Mitigation:**
+- Verify current password.
+- Create new-credential KDBX candidate separately using Kotpass credential-modification APIs.
+- Validate candidate with new password before promotion.
+- Preserve valid old active as LKG before verified candidate promotion.
+- Update hint only after successful promotion.
+- Test failure injection around write/verify/promotion steps.
+
+### T15 — LKG is overwritten by corrupt/unverified data — High
+
+**Mitigation:**
+- Exactly one LKG, sourced only from a previously valid active vault.
+- Candidate validation occurs before LKG replacement/promotion sequence.
+- Never use unverified candidate as LKG.
+- No silent auto-restore.
+
+### T16 — Malicious/corrupt external restore file destroys current data — Critical
+
+**Mitigation:**
+- Treat SAF URI as untrusted external input.
+- Copy to app-private candidate first.
+- Decode/open with user-supplied backup password using Kotpass before confirmation.
+- Wrong password/unsupported/corrupt file stops with zero active mutation.
+- Full replacement only after explicit confirmation and safe promotion.
+
+### T17 — Backup operation leaks plaintext data — Critical
+
+**Mitigation:**
+- Backup the already-encrypted KDBX artifact through SAF.
+- No plaintext export/container.
+- No secret logging.
+- External location is explicitly user selected and outside RAHSA's confidentiality guarantee once written.
+
+### T18 — Duplicate critical operation races produce inconsistent vault state — High
+
+**Mitigation:**
+- UI in-progress disablement plus logic-layer single-flight guard.
+- Serialize relevant vault replacement mutations.
+- No concurrent change-password/restore/reset/create operations.
+
+### T19 — Biometric bypass via UI-only success — Critical
+
+**Mitigation:**
+- Biometric success alone never marks repository/session unlocked.
+- `BiometricPrompt.CryptoObject` unlocks the Keystore-protected wrapped secret.
+- Normal `VaultRepository.openVault` must succeed before unlocked navigation.
+
+### T20 — Biometric wrapped secret becomes usable after security assumptions change — High
+
+**Mitigation:**
+- Keystore key requires qualifying biometric authentication.
+- Configure enrollment invalidation where supported.
+- Missing/invalid key, enrollment/security change, unwrap failure, Master Password change, restore, or reset disables quick unlock.
+- No device-credential fallback for this feature.
+
+### T21 — Wrapped Master Password or transient plaintext leaks through persistence/logs — Critical
+
+**Mitigation:**
+- Persist ciphertext + non-secret cipher metadata only.
+- Never log wrapped plaintext/cipher operation inputs.
+- Clear transient buffers/state as soon as practical.
+- Wrapped state is app-private and not exported in KDBX backup.
+
+### T22 — Fake progress causes unsafe user interruption/false confidence — Low/Medium
+
+**Mitigation:**
+- Determinate progress only when measurable.
+- Indeterminate progress for validation/decrypt stages.
+- Subtle Material 3 animation is status feedback, not fabricated completion percentage.
+
+### T23 — Destructive reset deletes user-managed backups — High
+
+**Mitigation:**
+- Reset deletion scope is limited to RAHSA-managed internal vault/LKG/temp, hint, and biometric state.
+- Never delete external SAF backup documents.
+- Require exact typed `DELETE`.
+
+## 6. Security assumptions
 
 - Android OS is not fully compromised.
-- The user can protect the device with an OS lock.
-- KDBX/Kotpass performs vault cryptography correctly for supported files.
-- The application does not attempt to defend against forensic extraction from a fully rooted live device.
+- User can protect the device with an OS lock.
+- Kotpass/KDBX cryptography behaves correctly for supported files.
+- Android Keystore/BiometricPrompt enforce their documented device guarantees on qualifying hardware.
+- External document providers may fail, disappear, or expose files according to their own policies; RAHSA only controls what it writes.
+- RAHSA does not attempt forensic secure erase against a fully compromised/rooted live device.
 
-## 6. Prototype Security Exit Checklist
+## 7. Phase 13 security validation gates
 
-- [ ] Master password not persisted in plaintext.
-- [ ] Credential data not persisted outside encrypted KDBX.
-- [ ] No secret logging found in defined test flow.
-- [ ] Wrong password fails closed.
-- [ ] Corrupted vault fails visibly and non-destructively.
-- [ ] Secure-screen behavior enabled.
-- [ ] Manual lock works.
-- [ ] Background/timeout lock works.
-- [ ] Clipboard behavior reviewed.
-- [ ] INTERNET permission absent or exception documented.
+- [ ] Generator no longer uses non-security Kotlin default randomness for secret generation.
+- [ ] New-vault recovery warning cannot be bypassed through ordinary UI flow and is accessible.
+- [ ] Master Password re-key: wrong current password is non-destructive.
+- [ ] Re-key: old password fails/new password opens after success.
+- [ ] Re-key failure injection preserves old valid vault and hint.
+- [ ] LKG never accepts unverified candidate data.
+- [ ] Active corruption + valid LKG requires user confirmation to restore.
+- [ ] Backup produces encrypted KDBX through a user-selected SAF destination.
+- [ ] Invalid/wrong-password restore cannot mutate active vault.
+- [ ] Successful restore preserves old active as LKG when applicable.
+- [ ] Restore/password-change/reset invalidate biometric state.
+- [ ] Biometric success performs actual repository vault open.
+- [ ] Biometric cancellation does not loop prompts.
+- [ ] Enrollment/key invalidation falls back to Master Password.
+- [ ] No Phase 13 secret values appear in Logcat during representative tests.
+- [ ] Critical operations reject duplicate execution.
+- [ ] External user-managed backups survive destructive reset.
 
-## 7. T077 Threat-Model Review Record
+## 8. Historical v0.2 review record
 
-Review performed at checkpoint `a0df20b` after Phase 7 hardening.
+The Phase 7/T077 review at checkpoint `a0df20b` found no new unresolved Critical/High implementation issue at that time. The v0.2 baseline validated KDBX persistence, no intended plaintext Master Password persistence, logging hardening, secure screen, reviewed clipboard behavior, fail-closed corruption handling, no core network requirement, and decrypted-state cleanup patterns. Those findings remain baseline evidence but do not pre-validate new Phase 13 code.
 
-| Threat | Review finding | Remaining verification |
-| --- | --- | --- |
-| T1 — Plaintext credential persistence | Mitigated in the prototype architecture: credential CRUD persists through Kotpass/KDBX, legacy Room runtime consumers were removed, and no active plaintext credential export path was found. | Inspect app-private storage on a physical device in Phase 8. |
-| T2 — Master password persistence | Mitigated in source: unlock uses transient password input and the static storage/logging audits found no intended persistence path. | Re-check app-private files and Logcat during device testing. |
-| T3 — Secret logging | Application logging paths were hardened and static audits found no intentional secret logging. | Run representative flows under Logcat in Phase 8. |
-| T4 — Screenshot / screen-record leakage | `FLAG_SECURE` is enabled on sensitive app activities. | Verify screenshot/screen-record behavior on the target device. |
-| T5 — Clipboard leakage | Copy is explicit-only; shared sensitive clipboard handling is used, with Android 13+ platform expiration and a 60-second best-effort cleanup on older supported Android versions. | Verify clipboard behavior on representative target Android versions. |
-| T6 — Vault remains unlocked in background | Manual lock and prototype background/timeout locking are implemented, and reachable decrypted UI/repository state is cleared on lock. | Exercise background, foreground, process-kill, and timeout transitions on-device. |
-| T7 — Corrupted/tampered vault | Failed decode leaves the repository locked; a unit test verifies corrupted source bytes are not overwritten. | Verify the UI presents a recoverable, non-destructive error on-device. |
-| T8 — Network exfiltration | No backend is required; FreeDebug merged-manifest audit found no `INTERNET` or network-state permissions, and no analytics/telemetry SDK is apparent in current app/common runtime dependencies. | Confirm core flows in airplane mode and observe runtime behavior in Phase 8. |
-| T9 — Recent-app preview leakage | Sensitive activities use the same secure-screen protection as T4. | Verify the recent-app preview on the target device. |
-| T10 — Decrypted state lifetime | Lock clears repository session state and dashboard sensitive state; T074 found no decrypted credential disk cache in the active prototype flow. | Validate lock/process transitions and storage after normal flows on-device. |
-| T11 — Supply-chain dependency risk | Dependencies are explicit and version-pinned in Gradle, including Kotpass `0.13.0`; Phase 2 removed dependencies tied only to removed features. | Continue dependency/license review before release or future upgrades. |
-| T12 — AI-generated insecure implementation | Security work was split into narrow tasks with diff review, unit/build checks, and task-per-commit history; no new crypto mechanism was introduced. | Continue the same review discipline for Phase 8 fixes and later changes. |
-
-### Review conclusion
-
-No new unresolved Critical or High implementation finding was identified during T077. The remaining items are primarily runtime/device verification gates already represented in Phase 8; they must not be treated as passed until those checks are executed.
-
-The Prototype Security Exit Checklist above intentionally remains unchecked at this checkpoint. It is a release-exit checklist, while T077 records the current evidence and residual verification without prematurely claiming the physical-device gates have passed.
+Phase 13 checklist items stay unchecked until implementation/device validation is actually performed.

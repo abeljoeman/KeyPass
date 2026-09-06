@@ -4,73 +4,74 @@
 
 Status taxonomy:
 
-- `[CURRENT]` implemented and part of the `v0.2-prototype` baseline.
-- `[PLANNING]` under product/security discussion; not approved for implementation.
-- `[PARKED]` intentionally deferred workstream.
+- `[CURRENT]` implemented in the `v0.2-prototype` baseline.
+- `[APPROVED-P13]` owner-approved Phase 13 product scope; implementation not yet active.
+- `[PARKED]` intentionally deferred to a future roadmap/workstream.
+- `[CLOSED]` reviewed and intentionally no change for the current roadmap.
 
 ## Vault and Security
 
-- `[CURRENT]` Single app-private `vault.kdbx` backed by Kotpass.
-- `[CURRENT]` First-launch vault creation and master-password unlock.
-- `[CURRENT]` Manual lock and background auto-lock behavior.
-- `[CURRENT]` Secure-screen protection.
-- `[CURRENT]` Sensitive logging hardening.
-- `[CURRENT]` Reviewed secure clipboard behavior.
-- `[CURRENT]` Corrupted-vault overwrite protection.
-- `[CURRENT]` Storage-write failure handling and lock/load race protection.
-- `[PLANNING]` Master-password change semantics — high-priority planning.
-- `[PLANNING]` Forgotten-master-password / recovery policy — high-priority planning.
-- `[PLANNING]` Lock/session policy refinements.
-- `[PLANNING]` Biometric quick-unlock after dedicated security design/review.
+- `[CURRENT]` Single app-private active `vault.kdbx` backed by Kotpass.
+- `[CURRENT]` First-launch vault creation and Master Password unlock.
+- `[CURRENT]` Manual lock and background Auto-Lock behavior.
+- `[CURRENT]` Secure-screen, sensitive logging, secure clipboard, corruption/write-failure protections.
+- `[APPROVED-P13]` Explicit Master Password unrecoverability warning + mandatory swipe acknowledgment before Create Vault.
+- `[APPROVED-P13]` Real Master Password change/re-key with current-password reauthentication, advisory strength, and safe promotion.
+- `[APPROVED-P13]` Forgot Master Password explanation/hint plus typed-`DELETE` destructive reset.
+- `[APPROVED-P13]` Exactly one encrypted internal Last-Known-Good vault copy.
+- `[APPROVED-P13]` Secure Biometric Quick Unlock as opt-in convenience only.
+- `[CLOSED]` Session/Auto-Lock redesign — existing behavior accepted.
 
 ## Data Safety / Backup / Restore
 
-- `[PLANNING]` Internal last-known-good and/or versioned recovery copies to reduce the impact of local corruption/write failures.
-- `[PLANNING]` Manual external encrypted KDBX backup through Android user-selected document/storage providers.
-- `[PLANNING]` Provider-neutral backup destination support, including Google Drive when exposed through the Android system document provider, without a direct Google/cloud API integration by default.
-- `[PLANNING]` Versioned backup/restore points rather than silently overwriting a single backup artifact.
-- `[PLANNING]` Safe restore validation: validate/decrypt candidate first, preserve current vault until replacement is proven safe, and fail closed on errors.
-- `[PLANNING]` Backup/restore does not constitute forgotten-master-password recovery.
-- `[PLANNING]` Retention, naming, manual-vs-automatic behavior, restore UX, and replace/merge rules remain undecided.
+- `[APPROVED-P13]` Exactly one LKG, not version history.
+- `[APPROVED-P13]` Manual external encrypted KDBX backup through Android user-selected document providers/SAF.
+- `[APPROVED-P13]` Provider-neutral destinations; no direct Google/cloud API by default.
+- `[APPROVED-P13]` Safe restore: copy/select candidate, ask its password, decrypt/validate first, explicit full replacement, preserve current active as LKG, verify.
+- `[APPROVED-P13]` Restore available from Settings and initial setup.
+- `[APPROVED-P13]` Truthful subtle animated operation statuses using existing Material 3 progress/animation primitives; no fake percentages.
+- `[APPROVED-P13]` Backup is availability, not forgotten-password recovery.
 
 ## Credentials
 
 - `[CURRENT]` CRUD with title, username, password, URL, and notes.
 - `[CURRENT]` Search by title/username.
-- `[CURRENT]` Read-first Credential Detail.
-- `[CURRENT]` Create/Edit validation and unsaved-change handling.
-- `[CURRENT]` Safe copy/reveal behavior.
-- `[PLANNING]` Typed items, tags/categories, or other credential-model expansion only after explicit requirement review.
+- `[CURRENT]` Existing sorting by Title/Username and direction.
+- `[CURRENT]` Read-first detail, create/edit validation, safe copy/reveal.
+- `[CLOSED]` Additional Sort/Filter expansion for current roadmap.
+- `[CLOSED]` Tags/Categories for current roadmap.
+- `[CLOSED]` Typed Items for current roadmap.
+- `[PARKED]` Camera/OCR Scan Credential; explored for future use, not Phase 13.
+- `[PARKED]` Website/favicon retrieval.
 
 ## Password Generator
 
-- `[CURRENT]` Standalone Generator.
-- `[CURRENT]` Contextual generator use in credential editing.
-- `[CURRENT]` Length and character-category configuration.
-- `[CURRENT]` Secure copy path and generated-secret logging protections.
-- `[PLANNING]` Passphrase generation.
+- `[CURRENT]` Standalone and contextual generator; length/category configuration.
+- `[APPROVED-P13]` Security hardening to CSPRNG/`SecureRandom` with no UX expansion.
+- `[CLOSED]` Passphrase Generator for current roadmap.
 
 ## Navigation and UI
 
 - `[CURRENT]` Compose UI with retained navigation/state architecture.
 - `[CURRENT]` Top-level Vault / Generator / Settings navigation.
-- `[CURRENT]` Fixed dark Material 3 visual direction.
-- `[CURRENT]` Loading/error conventions.
-- `[CURRENT]` Accessibility baseline including touch targets, semantics, font scaling, and basic TalkBack validation.
+- `[CURRENT]` Dark Material 3 visual direction, loading/error conventions, accessibility baseline.
+- `[APPROVED-P13]` Create-vault swipe acknowledgment must reuse existing Material/platform interaction and remain accessible.
+- `[APPROVED-P13]` Backup/restore status uses subtle existing Material 3 progress animation and light text transitions.
 
 ## Settings
 
-- `[CURRENT]` Password hint.
-- `[CURRENT]` Auto-lock toggle.
+- `[CURRENT]` Password hint and Auto-Lock toggle.
 - `[CURRENT]` Help/About surfaces.
-- `[CURRENT]` Legacy biometric-related code/settings may still exist internally but are not an approved unlock implementation.
-- `[PLANNING]` Secure biometric enablement/disablement UX and lifecycle.
+- `[APPROVED-P13]` Change Master Password.
+- `[APPROVED-P13]` Backup / Restore.
+- `[APPROVED-P13]` Secure biometric enable/disable lifecycle.
 
 ## Integration / Data Portability
 
 - `[CURRENT]` Core application requires no backend and no Android `INTERNET` permission.
-- `[PLANNING]` Android Autofill.
-- `[PLANNING]` Cloud sync only if separately approved in the future; it is not part of current planning by default.
+- `[APPROVED-P13]` External KDBX backup/restore through SAF only.
+- `[PARKED]` Android Autofill.
+- `[PARKED]` Cloud sync unless explicitly reopened.
 
 ## Branding and Release
 
@@ -81,4 +82,4 @@ Status taxonomy:
 - `[PARKED]` Release signing/store identity.
 - `[PARKED]` Play Store listing/compliance/readiness.
 
-Planning status does not authorize Codex implementation. Only an approved active `Txxx` in `TASKS.md` does.
+`[APPROVED-P13]` does not authorize Codex implementation. Only an approved active `Txxx` plus READY JIT Implementation Kit in `TASKS.md` does.
