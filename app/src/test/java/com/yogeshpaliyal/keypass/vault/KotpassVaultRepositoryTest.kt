@@ -1,9 +1,17 @@
 package com.yogeshpaliyal.keypass.vault
 
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.Credentials
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.database.decode
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -166,6 +174,173 @@ class KotpassVaultRepositoryTest {
         }
     }
 
+    @Test
+    fun successfulPromotion_replacesActiveAndRetainsPreviousActiveAsOnlyLkg() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val original = vaultFile.readBytes()
+            val created = testCredential("B")
+            val repository = openKnownVault(vaultFile)
+
+            repository.createCredential(created)
+            repository.lock()
+
+            assertEquals(created, openKnownVault(vaultFile).listCredentials().first { it.id == created.id })
+            assertArrayEquals(original, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(vaultFile)
+            assertDecryptableKdbx(lkgFile(vaultFile))
+            assertEquals(1, lkgFiles(vaultFile).size)
+        }
+    }
+
+    @Test
+    fun repeatedPromotion_replacesRatherThanAccumulatesLkgHistory() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val repository = openKnownVault(vaultFile)
+            val created = testCredential("B")
+            repository.createCredential(created)
+            val activeB = vaultFile.readBytes()
+            repository.updateCredential(created.copy(title = "C"))
+            repository.lock()
+
+            assertEquals("C", openKnownVault(vaultFile).listCredentials().first { it.id == created.id }.title)
+            assertArrayEquals(activeB, lkgFile(vaultFile).readBytes())
+            assertEquals(1, lkgFiles(vaultFile).size)
+        }
+    }
+
+    @Test
+    fun freshVault_doesNotCreateSyntheticLkgUntilFirstMutation() = runBlocking {
+        val directory = File.createTempFile("fresh-vault-", "").also { temporary ->
+            check(temporary.delete() && temporary.mkdirs())
+        }
+        val vaultFile = File(directory, "vault.kdbx")
+        try {
+            val repository = KotpassVaultRepository(vaultFile)
+            repository.createVault("test-password".toCharArray())
+            assertFalse(lkgFile(vaultFile).exists())
+            val original = vaultFile.readBytes()
+
+            repository.createCredential(testCredential("first-mutation"))
+            assertArrayEquals(original, lkgFile(vaultFile).readBytes())
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun candidateValidationFailure_leavesActiveAndLkgByteForByteUntouched() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("B"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val repository = KotpassVaultRepository(vaultFile, FailCandidateValidationOperations())
+            repository.openVault("test-password".toCharArray())
+
+            val result = runCatching {
+                repository.createCredential(testCredential("invalid", "423e4567-e89b-12d3-a456-426614174003"))
+            }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+        }
+    }
+
+    @Test
+    fun promotionFailureAfterValidation_restoresPreviousUsableStateWithoutExtraLkg() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("B"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val operations = FailCandidatePromotionOperations(vaultFile)
+            val repository = KotpassVaultRepository(vaultFile, operations)
+            repository.openVault("test-password".toCharArray())
+
+            val result = runCatching {
+                repository.createCredential(testCredential("should-fail", "423e4567-e89b-12d3-a456-426614174003"))
+            }
+
+            assertTrue(result.isFailure)
+            assertTrue("Candidate must be validated before promotion is attempted.", operations.candidateWasRead)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertEquals(1, lkgFiles(vaultFile).size)
+            assertDecryptableKdbx(vaultFile)
+            assertDecryptableKdbx(lkgFile(vaultFile))
+        }
+    }
+
+    @Test
+    fun corruptActiveWithValidLkg_doesNotSilentlyRestore() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("B"))
+            setup.lock()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val corrupt = "corrupt-active".toByteArray()
+            vaultFile.writeBytes(corrupt)
+
+            val result = runCatching { KotpassVaultRepository(vaultFile).openVault("test-password".toCharArray()) }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(corrupt, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(lkgFile(vaultFile))
+        }
+    }
+
+    @Test
+    fun corruptActiveWithoutUsableLkg_doesNotAutoRepair() = runBlocking {
+        val vaultFile = File.createTempFile("invalid-no-lkg-", ".kdbx")
+        try {
+            val corrupt = "invalid-active".toByteArray()
+            vaultFile.writeBytes(corrupt)
+
+            val result = runCatching { KotpassVaultRepository(vaultFile).openVault("test-password".toCharArray()) }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(corrupt, vaultFile.readBytes())
+            assertFalse(lkgFile(vaultFile).exists())
+        } finally {
+            vaultFile.delete()
+        }
+    }
+
+    @Test
+    fun wrongPasswordWithLkg_remainsFailedOpenAndDoesNotChangeArtifacts() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("B"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+
+            val result = runCatching { KotpassVaultRepository(vaultFile).openVault("wrong-password".toCharArray()) }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+        }
+    }
+
+    @Test
+    fun lkgArtifact_isEncryptedKdbxAndDoesNotContainKnownPlaintextCredential() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val repository = openKnownVault(vaultFile)
+            repository.createCredential(testCredential("B"))
+            repository.lock()
+            val lkgBytes = lkgFile(vaultFile).readBytes()
+
+            assertTrue(lkgBytes.size > 8)
+            assertFalse(String(lkgBytes).contains("fixture-password-1"))
+            assertDecryptableKdbx(lkgFile(vaultFile))
+        }
+    }
+
     private suspend fun openKnownVault(vaultFile: File): KotpassVaultRepository {
         val repository = KotpassVaultRepository(vaultFile)
         repository.openVault("test-password".toCharArray())
@@ -185,6 +360,80 @@ class KotpassVaultRepositoryTest {
             if (vaultFile.exists() && !vaultFile.delete()) {
                 vaultFile.deleteOnExit()
             }
+        }
+    }
+
+    private fun lkgFile(vaultFile: File): File =
+        File(vaultFile.parentFile, "${vaultFile.nameWithoutExtension}.lkg.kdbx")
+
+    private fun lkgFiles(vaultFile: File): List<File> = vaultFile.parentFile
+        ?.listFiles { _, name -> name == lkgFile(vaultFile).name }
+        ?.toList()
+        .orEmpty()
+
+    private fun testCredential(
+        suffix: String,
+        id: String = "323e4567-e89b-12d3-a456-426614174002"
+    ): Credential = Credential(
+        id = id,
+        title = "T128 $suffix",
+        username = "user-$suffix",
+        password = "password-$suffix",
+        url = "https://$suffix.example.test",
+        notes = "T128 promotion test"
+    )
+
+    private fun assertDecryptableKdbx(file: File) {
+        FileInputStream(file).use { input ->
+            KeePassDatabase.decode(input, testCredentials())
+        }
+    }
+
+    private fun testCredentials(): Credentials =
+        Credentials.from(EncryptedValue.fromString("test-password"))
+
+    private open class DelegatingFileOperations : VaultFileOperations {
+        override fun createTempFile(prefix: String, suffix: String, directory: File): File =
+            File.createTempFile(prefix, suffix, directory)
+
+        override fun openInput(file: File): FileInputStream = FileInputStream(file)
+
+        override fun openOutput(file: File): FileOutputStream = FileOutputStream(file)
+
+        override fun move(source: File, destination: File): Boolean = source.renameTo(destination)
+
+        override fun delete(file: File): Boolean = file.delete()
+    }
+
+    private class FailCandidateValidationOperations : DelegatingFileOperations() {
+        override fun openInput(file: File): FileInputStream {
+            if (file.name.startsWith("rahsa-vault-candidate-")) {
+                throw IOException("Injected candidate validation failure.")
+            }
+            return super.openInput(file)
+        }
+    }
+
+    private class FailCandidatePromotionOperations(
+        private val target: File
+    ) : DelegatingFileOperations() {
+        var candidateWasRead = false
+            private set
+        private var failed = false
+
+        override fun openInput(file: File): FileInputStream {
+            if (file.name.startsWith("rahsa-vault-candidate-")) {
+                candidateWasRead = true
+            }
+            return super.openInput(file)
+        }
+
+        override fun move(source: File, destination: File): Boolean {
+            if (!failed && source.name.startsWith("rahsa-vault-candidate-") && destination == target) {
+                failed = true
+                return false
+            }
+            return super.move(source, destination)
         }
     }
 }

@@ -24,10 +24,18 @@ import kotlinx.coroutines.withContext
 class KotpassVaultRepository(
     private val vaultFile: File
 ) : VaultRepository {
+    private var fileOperations: VaultFileOperations = DefaultVaultFileOperations
     private val operationLock = Any()
     private val stateLock = Any()
     private var database: KeePassDatabase? = null
     private var sessionVersion = 0L
+
+    internal constructor(
+        vaultFile: File,
+        fileOperations: VaultFileOperations
+    ) : this(vaultFile) {
+        this.fileOperations = fileOperations
+    }
 
     override suspend fun createVault(masterPassword: CharArray) {
         withContext(Dispatchers.IO) {
@@ -58,7 +66,7 @@ class KotpassVaultRepository(
                 }
 
                 val credentials = credentialsFrom(masterPassword)
-                val decoded = FileInputStream(vaultFile).use { input ->
+                val decoded = fileOperations.openInput(vaultFile).use { input ->
                     KeePassDatabase.decode(input, credentials)
                 }
                 completeUnlock(version, decoded)
@@ -213,32 +221,45 @@ class KotpassVaultRepository(
             throw IOException("Vault file already exists.")
         }
 
-        val temporary = File.createTempFile("keypass-vault-", ".tmp", parent)
+        val temporary = fileOperations.createTempFile("rahsa-vault-candidate-", ".kdbx", parent)
         try {
-            val encoded = FileOutputStream(temporary).use { output ->
+            fileOperations.openOutput(temporary).use { output ->
                 candidate.encode(output)
             }
-            replaceVaultFile(temporary, target, targetMustExist, parent)
-            return encoded
+            val validated = decode(temporary, candidate.credentials)
+            promoteValidatedCandidate(temporary, target, targetMustExist, parent, candidate.credentials)
+            return validated
         } finally {
-            if (temporary.exists() && !temporary.delete()) {
+            if (temporary.exists() && !fileOperations.delete(temporary)) {
                 temporary.deleteOnExit()
             }
         }
     }
 
-    private fun replaceVaultFile(
-        temporary: File,
+    private fun decode(file: File, credentials: Credentials): KeePassDatabase =
+        fileOperations.openInput(file).use { input -> KeePassDatabase.decode(input, credentials) }
+
+    private fun promoteValidatedCandidate(
+        candidate: File,
         target: File,
         targetMustExist: Boolean,
-        parent: File
+        parent: File,
+        credentials: Credentials
     ) {
         if (!targetMustExist) {
             if (target.exists()) {
                 throw IOException("Vault file already exists.")
             }
-            if (!temporary.renameTo(target)) {
+            if (!fileOperations.move(candidate, target)) {
                 throw IOException("Could not install the new vault file.")
+            }
+            try {
+                decode(target, credentials)
+            } catch (failure: Exception) {
+                if (!fileOperations.move(target, candidate)) {
+                    failure.addSuppressed(IOException("Could not preserve the failed vault candidate."))
+                }
+                throw failure
             }
             return
         }
@@ -247,29 +268,80 @@ class KotpassVaultRepository(
             throw FileNotFoundException("Vault file does not exist.")
         }
 
-        val backup = File.createTempFile("keypass-vault-backup-", ".kdbx", parent)
-        if (!backup.delete()) {
-            throw IOException("Could not prepare a vault backup file.")
+        // Confirm the on-disk source before it is allowed to become the next LKG.
+        decode(target, credentials)
+
+        val previousActive = prepareEmptyTempFile("rahsa-vault-previous-", parent)
+        val previousLkg = lkgFile(target)
+        val displacedLkg = if (previousLkg.exists()) {
+            prepareEmptyTempFile("rahsa-vault-displaced-lkg-", parent)
+        } else {
+            null
         }
-        if (!target.renameTo(backup)) {
-            throw IOException("Could not preserve the existing vault file.")
-        }
+        var promoted = false
 
         try {
-            if (!temporary.renameTo(target)) {
+            if (!fileOperations.move(target, previousActive)) {
+                throw IOException("Could not preserve the existing vault file.")
+            }
+            if (!fileOperations.move(candidate, target)) {
                 throw IOException("Could not install the updated vault file.")
             }
-        } catch (failure: Exception) {
-            if (!target.exists() && !backup.renameTo(target)) {
-                failure.addSuppressed(
-                    IOException("Could not restore the previous vault; its backup was preserved.")
-                )
+            decode(target, credentials)
+
+            if (displacedLkg != null && !fileOperations.move(previousLkg, displacedLkg)) {
+                throw IOException("Could not preserve the previous LKG.")
             }
+            if (!fileOperations.move(previousActive, previousLkg)) {
+                throw IOException("Could not install the new LKG.")
+            }
+            promoted = true
+        } catch (failure: Exception) {
+            rollbackPromotion(target, candidate, previousActive, previousLkg, displacedLkg, failure)
             throw failure
+        } finally {
+            if (promoted) {
+                deleteIfPresent(previousActive)
+                displacedLkg?.let(::deleteIfPresent)
+            }
+        }
+    }
+
+    private fun rollbackPromotion(
+        target: File,
+        candidate: File,
+        previousActive: File,
+        previousLkg: File,
+        displacedLkg: File?,
+        failure: Exception
+    ) {
+        if (!target.exists() && previousActive.exists() && !fileOperations.move(previousActive, target)) {
+            failure.addSuppressed(IOException("Could not restore the previous active vault."))
+        } else if (target.exists() && previousActive.exists()) {
+            if (candidate.exists()) {
+                deleteIfPresent(candidate)
+            }
+            if (!fileOperations.move(target, candidate) || !fileOperations.move(previousActive, target)) {
+                failure.addSuppressed(IOException("Could not restore the previous active vault."))
+            }
+        }
+        if (displacedLkg != null && displacedLkg.exists() && !fileOperations.move(displacedLkg, previousLkg)) {
+            failure.addSuppressed(IOException("Could not restore the previous LKG."))
+        }
+    }
+
+    private fun prepareEmptyTempFile(prefix: String, parent: File): File =
+        fileOperations.createTempFile(prefix, ".kdbx", parent).also { temporary ->
+            if (!fileOperations.delete(temporary)) {
+                throw IOException("Could not prepare a vault transaction file.")
+            }
         }
 
-        if (backup.exists() && !backup.delete()) {
-            backup.deleteOnExit()
+    private fun lkgFile(target: File): File = File(target.parentFile, "${target.nameWithoutExtension}.lkg.kdbx")
+
+    private fun deleteIfPresent(file: File) {
+        if (file.exists() && !fileOperations.delete(file)) {
+            file.deleteOnExit()
         }
     }
 
