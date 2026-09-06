@@ -17,14 +17,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -34,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -43,16 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.common.utils.email
 import com.yogeshpaliyal.common.utils.openLink
 import com.yogeshpaliyal.keypass.BuildConfig
 import com.yogeshpaliyal.keypass.R
-import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultBottomAppBar
 import com.yogeshpaliyal.keypass.ui.commonComponents.DefaultTopAppBar
 import com.yogeshpaliyal.keypass.ui.commonComponents.PreferenceItem
-import com.yogeshpaliyal.keypass.ui.redux.actions.Action
-import com.yogeshpaliyal.keypass.ui.redux.actions.GoBackAction
-import org.reduxkotlin.compose.rememberTypedDispatcher
 
 @Composable
 fun AboutScreen() {
@@ -117,7 +107,7 @@ private fun MainContent() {
                         .padding(8.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                        painter = painterResource(id = R.drawable.logo_rahsa),
                         contentDescription = stringResource(R.string.app_name),
                         modifier = Modifier.fillMaxSize()
                     )
@@ -125,13 +115,12 @@ private fun MainContent() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-//                // App Name
-//                Text(
-//                    text = stringResource(id = R.string.app_name),
-//                    style = MaterialTheme.typography.headlineMedium,
-//                    fontWeight = FontWeight.Bold,
-//                    color = MaterialTheme.colorScheme.primary
-//                )
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -160,7 +149,7 @@ private fun MainContent() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            context.openLink("https://github.com/yogeshpaliyal/KeyPass")
+                            context.openLink("https://github.com/abeljoeman/KeyPass")
                         },
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer
@@ -193,9 +182,8 @@ private fun MainContent() {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Developer section
         Text(
-            text = stringResource(id = R.string.app_developer),
+            text = stringResource(id = R.string.open_source_credits),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -212,57 +200,39 @@ private fun MainContent() {
             shape = RoundedCornerShape(16.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Social links
-                PreferenceItem(
-                    painter = painterResource(id = R.drawable.ic_twitter),
-                    title = R.string.app_developer_x,
-                    onClickItem = {
-                        context.openLink("https://twitter.com/yogeshpaliyal")
-                    }
-                )
-                
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                
                 PreferenceItem(
                     painter = painterResource(id = R.drawable.ic_github),
-                    title = R.string.app_developer_github,
+                    title = R.string.upstream_keypass,
+                    summary = R.string.upstream_keypass_desc,
                     onClickItem = {
-                        context.openLink("https://github.com/yogeshpaliyal")
+                        context.openLink("https://github.com/yogeshpaliyal/KeyPass")
                     }
                 )
-                
+
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                
+
                 PreferenceItem(
-                    painter = painterResource(id = R.drawable.ic_linkedin),
-                    title = R.string.app_developer_linkedin,
+                    painter = painterResource(id = R.drawable.ic_github),
+                    title = R.string.kotpass_library,
+                    summary = R.string.kotpass_library_desc,
                     onClickItem = {
-                        context.openLink("https://linkedin.com/in/yogeshpaliyal")
+                        context.openLink("https://github.com/keemobile/kotpass")
                     }
                 )
-                
+
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                
-                // Email contact
+
                 PreferenceItem(
-                    icon = Icons.Rounded.Email,
-                    title = R.string.contact_developer,
-                    summary = R.string.contact_via_email,
+                    painter = painterResource(id = R.drawable.ic_code),
+                    title = R.string.license_notices,
+                    summary = R.string.license_notices_desc,
                     onClickItem = {
-                        context.email("Feedback for KeyPass", "yogeshpaliyal.foss+keypass@gmail.com")
+                        context.openLink(
+                            "https://github.com/abeljoeman/KeyPass/blob/prototype/v0.1/NOTICE.md"
+                        )
                     }
                 )
             }
         }
-        
-        // Privacy and terms
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text(
-            text = "© ${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)} Yogesh Paliyal. All rights reserved.",
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }

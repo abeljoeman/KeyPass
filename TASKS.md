@@ -17,7 +17,7 @@
 - [ ] **T002** Review and approve `TSD.md`.
 - [ ] **T003** Review ADRs in `docs/adr/`.
 - [ ] **T004** Review `docs/THREAT_MODEL.md`.
-- [ ] **T005** Confirm KeyPass and Kotpass license notices required for reuse/distribution.
+- [x] **T005** Confirm KeyPass and Kotpass license notices required for reuse/distribution.
 
 **Checkpoint:** scope and architecture are explicit.
 
@@ -170,9 +170,9 @@ Prototype is done only when:
 
 Do not proceed from UX validation into public/store release preparation until all items below are resolved:
 
-- [ ] **B001** Select the final product name; `KeyPass` remains the working development name until then.
+- [x] **B001** Select the final product name; `KeyPass` remains the working development name until then.
 - [ ] **B002** Perform appropriate trademark/name clearance for intended markets.
-- [ ] **B003** Finalize app icon/logo and brand assets.
+- [x] **B003** Finalize app icon/logo and brand assets.
 - [ ] **B004** Finalize Android `applicationId` / package identity strategy.
 - [ ] **B005** Finalize signing/store identity and store-facing product name.
 - [ ] **B006** Confirm upstream/open-source attribution and third-party license presentation.

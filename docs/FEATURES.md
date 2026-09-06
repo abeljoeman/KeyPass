@@ -66,7 +66,7 @@ Status taxonomy:
 ## Connectivity and Branding
 
 - `[CURRENT]` No backend required for core prototype.
-- `[CURRENT]` `KeyPass` is the working development name.
-- `[PROPOSED]` Replaceable product-name/app-mark/brand-accent slots.
+- `[CURRENT]` `RAHSA` is the selected product name and its supplied shield is the primary mark.
+- `[CURRENT]` Product-name/app-mark slots use the RAHSA identity assets.
 - `[FUTURE]` Cloud sync, OCR, Play Store release readiness.
-- `[FUTURE]` Final brand/name/trademark/logo/`applicationId`/store identity at the mandatory Brand Decision Gate.
+- `[FUTURE]` Complete trademark clearance, `applicationId`, signing/store identity, and full attribution review at the mandatory Brand Decision Gate.

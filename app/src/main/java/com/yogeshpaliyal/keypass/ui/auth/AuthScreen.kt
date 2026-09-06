@@ -109,7 +109,7 @@ fun AuthScreen(state: AuthState) {
             Spacer(modifier = Modifier.height(32.dp))
             Image(
                 modifier = Modifier.size(72.dp),
-                painter = painterResource(R.drawable.ic_vault_shield_lock),
+                painter = painterResource(R.drawable.logo_rahsa),
                 contentDescription = null
             )
             Spacer(modifier = Modifier.height(16.dp))

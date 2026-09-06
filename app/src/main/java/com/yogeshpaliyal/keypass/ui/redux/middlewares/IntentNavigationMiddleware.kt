@@ -1,7 +1,6 @@
 package com.yogeshpaliyal.keypass.ui.redux.middlewares
 
 import android.content.Intent
-import com.yogeshpaliyal.keypass.BuildConfig
 import com.yogeshpaliyal.keypass.MyApplication
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.generate.GeneratePasswordActivity
@@ -36,19 +35,19 @@ private fun Store<KeyPassState>.handleAction(action: Any, state: KeyPassState) {
         }
 
         is IntentNavigation.ShareApp -> {
-            val sendIntent = Intent()
-            sendIntent.action = Intent.ACTION_SEND
-            sendIntent.putExtra(
-                Intent.EXTRA_TEXT,
-                "KeyPass Password Manager\n Offline, Secure, Open Source https://play.google.com/store/apps/details?id=" + BuildConfig.APPLICATION_ID
-            )
-            sendIntent.type = "text/plain"
-            state.context?.startActivity(
-                Intent.createChooser(
-                    sendIntent,
-                    state.context.getString(R.string.share_keypass)
+            state.context?.let { context ->
+                val sendIntent = Intent().apply {
+                    this.action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_app_message))
+                    type = "text/plain"
+                }
+                context.startActivity(
+                    Intent.createChooser(
+                        sendIntent,
+                        context.getString(R.string.app_name)
+                    )
                 )
-            )
+            }
         }
     }
 }

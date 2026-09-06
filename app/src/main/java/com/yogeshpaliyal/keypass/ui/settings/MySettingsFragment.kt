@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.yogeshpaliyal.common.utils.email
+import com.yogeshpaliyal.common.utils.openLink
 import com.yogeshpaliyal.common.utils.setUserSettings
 import com.yogeshpaliyal.keypass.BuildConfig
 import com.yogeshpaliyal.keypass.R
@@ -87,10 +87,7 @@ fun MySettingCompose() {
         SettingsNavigationRow(
             title = stringResource(R.string.send_feedback),
             onClick = {
-                context.email(
-                    context.getString(R.string.feedback_to_keypass),
-                    "yogeshpaliyal.foss@gmail.com"
-                )
+                context.openLink("https://github.com/abeljoeman/KeyPass/issues")
             }
         )
 

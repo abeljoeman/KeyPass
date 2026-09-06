@@ -1,6 +1,6 @@
 # Product Roadmap
 
-**Updated:** 2026-09-05
+**Updated:** 2026-09-06
 
 This roadmap communicates sequencing and decision gates. It is not a promise of release dates.
 
@@ -14,7 +14,7 @@ This roadmap communicates sequencing and decision gates. It is not a promise of 
 - Corrupted-vault overwrite regression protection.
 - Physical-device regression pass and `v0.1-prototype` tag.
 
-## Now — UX/UI Source of Truth
+## Completed — UX/UI Source of Truth
 
 - Approved UX flows and component mapping.
 - Dark-only Material 3 direction.
@@ -24,7 +24,7 @@ This roadmap communicates sequencing and decision gates. It is not a promise of 
 
 **Exit:** consolidated source-of-truth patch reviewed and committed.
 
-## Next — UI Foundation Pilot
+## Completed — UI Foundation Pilot
 
 1. Fixed dark Material 3 theme and dark startup.
 2. Typography cleanup.
@@ -34,7 +34,7 @@ This roadmap communicates sequencing and decision gates. It is not a promise of 
 
 **Principle:** no architecture migration.
 
-## Then — Screen Rollout
+## Completed — Screen Rollout
 
 1. Auth/Create/Confirm/Unlock.
 2. Vault/Dashboard.
@@ -46,7 +46,7 @@ This roadmap communicates sequencing and decision gates. It is not a promise of 
 
 Each task is small, reviewable, built, and tested.
 
-## Then — UX Validation
+## Completed — UX Validation
 
 - Loading feedback on slower physical hardware.
 - Empty/no-results/error/destructive flows.
@@ -54,15 +54,18 @@ Each task is small, reviewable, built, and tested.
 - Font scaling and basic TalkBack.
 - Regression of lock/unlock, CRUD persistence, secure clipboard, and corrupt-vault protection.
 
-## Mandatory Brand Decision Gate
+## Now — Mandatory Brand Decision Gate
 
 **STOP HERE before public/store release preparation.**
 
-Resolve:
+Resolved:
 
-- Final product name.
+- Final product name: **RAHSA**.
+- Final app icon/logo and brand assets: supplied RAHSA shield integrated.
+
+Still required:
+
 - Trademark/name clearance for intended markets.
-- Final app icon/logo and brand assets.
 - Final Android `applicationId` / package identity strategy.
 - Signing/store identity.
 - Store-facing product name/listing identity.
@@ -71,8 +74,8 @@ Resolve:
 Until complete:
 
 ```text
-Working development name: KeyPass
-Final public brand: TBD
+Final product name: RAHSA
+Public release status: BLOCKED on remaining gate items
 ```
 
 ## After Brand Gate — Release Readiness

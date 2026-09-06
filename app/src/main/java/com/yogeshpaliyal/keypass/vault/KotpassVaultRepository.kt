@@ -274,7 +274,7 @@ class KotpassVaultRepository(
     }
 
     private companion object {
-        const val DatabaseName = "KeyPass"
+        const val DatabaseName = "RAHSA"
         const val RootGroupName = "Root"
     }
 }

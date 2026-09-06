@@ -2,13 +2,13 @@ package com.yogeshpaliyal.keypass.ui
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.yogeshpaliyal.common.data.UserSettings
 import com.yogeshpaliyal.common.utils.getUserSettings
 import com.yogeshpaliyal.keypass.BuildConfig
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.databinding.ActivityCrashBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.runBlocking
@@ -37,11 +37,9 @@ class CrashActivity : AppCompatActivity() {
         binding.txtCrash.text = getCrashWithMetaData(intent.extras?.getString(ARG_DATA))
 
         binding.btnSendFeedback.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO)
-            intent.data = Uri.parse("mailto:")
-
-            intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("yogeshpaliyal.foss+keypass@gmail.com"))
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Crash Report in KeyPass")
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crash_report_subject))
             intent.putExtra(Intent.EXTRA_TEXT, binding.txtCrash.text.toString())
 
             startActivity(Intent.createChooser(intent, ""))

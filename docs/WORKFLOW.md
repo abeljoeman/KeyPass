@@ -106,8 +106,8 @@ Asisten pada sesi baru harus memverifikasi informasi tersebut langsung dari repo
 
 ## 9. Checkpoint saat ini
 
-- Phase 11 selesai sampai T116.
-- Commit terakhir saat dokumen ini dibuat: `76be25a fix: align global navigation and back behavior`.
-- Branch: `prototype/v0.1`, 14 commit di depan `origin/prototype/v0.1`.
-- Working tree bersih sebelum pembuatan dokumen ini.
-- Sesi berikutnya dimulai dari Phase 12, task T120. Scope harus dibaca kembali secara exact dari `TASKS.md` sebelum implementasi.
+- Phase 12 selesai sampai T125.
+- Checkpoint Phase 12: `85d39e3 test: record phase 12 physical ux validation`.
+- Branch: `prototype/v0.1`; checkpoint tersebut 21 commit di depan `origin/prototype/v0.1`.
+- Brand Decision Gate sedang berjalan: nama **RAHSA** dan primary mark sudah dipilih.
+- Berikutnya: selesaikan B002, B004, B005, dan B006 sesuai `docs/BRAND_DECISION.md`; public/store release tetap diblokir sampai seluruh gate selesai.

@@ -4,7 +4,7 @@
     <string name="settings_password_hint">Password hint</string>
     <string name="settings_auto_lock">Auto-lock</string>
     <string name="settings_help_about">HELP &amp; ABOUT</string>
-    <string name="settings_share_keypass">Share KeyPass</string>
+    <string name="settings_share_keypass">Share RAHSA</string>
     <string name="settings_about">About</string>
-    <string name="settings_version">KeyPass version %1$s</string>
+    <string name="settings_version">RAHSA version %1$s</string>
 </resources>

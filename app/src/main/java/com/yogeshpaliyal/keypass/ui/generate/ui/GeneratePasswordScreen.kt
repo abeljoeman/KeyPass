@@ -56,7 +56,7 @@ fun GeneratePasswordScreen(
                     copySensitiveTextToClipboard(
                         context = context,
                         text = viewState.password,
-                        label = "KeyPass"
+                        label = context.getString(R.string.app_name)
                     )
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(copiedMessage)

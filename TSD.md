@@ -345,7 +345,7 @@ The current broad Auth open-error mapping may conflate wrong password and unread
 
 ## 17. Brand Decision Gate
 
-`KeyPass` remains the working development name during the UI pilot.
+`RAHSA` is the selected final product name. The supplied RAHSA shield is the approved primary mark.
 
 After UI implementation/pilot + UX validation, STOP before public/store release preparation and resolve:
 
@@ -357,4 +357,4 @@ After UI implementation/pilot + UX validation, STOP before public/store release 
 6. Store-facing product name/listing identity.
 7. Upstream/open-source attribution presentation.
 
-Do not invest in a new KeyPass-specific logo/marketing identity before this gate.
+Implementation must preserve the approved RAHSA artwork and keep package/signing changes blocked until owner-controlled identities are selected. See `docs/BRAND_DECISION.md`.

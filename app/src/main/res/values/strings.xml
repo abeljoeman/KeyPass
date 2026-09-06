@@ -20,10 +20,17 @@
     <string name="app_developer_x">X (previously Twitter)</string>
     <string name="app_developer_linkedin">LinkedIn</string>
     <string name="source_code">Source Code</string>
+    <string name="open_source_credits">Open-source credits</string>
+    <string name="upstream_keypass">KeyPass upstream project</string>
+    <string name="upstream_keypass_desc">Original application by Yogesh Paliyal (MIT)</string>
+    <string name="kotpass_library">Kotpass</string>
+    <string name="kotpass_library_desc">KDBX library by KeeMobile (MIT)</string>
+    <string name="license_notices">License notices</string>
+    <string name="license_notices_desc">Open the complete attribution notice</string>
     <string name="app_developer_github">Github</string>
     <string name="password">Password</string>
     <string name="copied_to_clipboard">Copied to clipboard</string>
-    <string name="login_to_enter_keypass">Login to enter KeyPass</string>
+    <string name="login_to_enter_keypass">Login to enter RAHSA</string>
     <string name="lock_vault">Lock vault</string>
 
     <!-- Accessibility descriptions for icon-only actions. -->
@@ -48,8 +55,10 @@
     <string name="delete_account_title">Are you sure?</string>
     <string name="delete_account_msg">Do you really want to delete this entry, it can\'t be restored</string>
     <string name="cancel">Cancel</string>
-    <string name="feedback_to_keypass">Feedback to KeyPass</string>
-    <string name="share_keypass">Share KeyPass</string>
+    <string name="feedback_to_keypass">Feedback for RAHSA</string>
+    <string name="share_keypass">Share RAHSA</string>
+    <string name="share_app_message">RAHSA — Offline, secure password manager.</string>
+    <string name="crash_report_subject">Crash report in RAHSA</string>
     <string name="message_no_accounts">No Accounts found, please add from below button</string>
     <string name="your_vault">Your Vault</string>
     <string name="search_credentials">Search credentials</string>

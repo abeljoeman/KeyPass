@@ -2,8 +2,8 @@
 
 **Status:** Approved planning baseline
 **Date:** 2026-09-05
-**Working product name:** KeyPass
-**Final public brand:** TBD at Brand Decision Gate
+**Product name:** RAHSA
+**Brand status:** Name and primary mark selected; remaining gate items tracked in `docs/BRAND_DECISION.md`
 
 This document defines the approved UX/UI direction for the next implementation phase. It is intentionally constrained to capabilities that already exist in the retained prototype.
 
@@ -43,7 +43,7 @@ Do not:
 
 ## 3. Product Identity
 
-`KeyPass` is the working development name only.
+`RAHSA` is the selected product name. The supplied blue shield with white R monogram and padlock is the primary mark.
 
 Brand identity must be visible at key entry/identity moments but must not compete with credential content or security-critical actions.
 
@@ -56,7 +56,7 @@ Prepare replaceable identity slots for:
 
 Operational screens should express identity mainly through color, typography, spacing, icon style, and navigation rather than repeated logos.
 
-Do not create a new KeyPass-specific logo during this UI phase. Final name/logo work happens at the Brand Decision Gate.
+Do not redraw or reinterpret the approved RAHSA mark without an explicit brand revision.
 
 ## 4. Global Navigation and Lock State
 
@@ -455,11 +455,12 @@ Resolve:
 6. Store-facing name/listing identity.
 7. Upstream MIT attribution and third-party license presentation.
 
-Until then:
+Current decision:
 
 ```text
-Working name: KeyPass
-Final public brand: TBD
+Product name: RAHSA
+Primary mark: approved and integrated
+Release identity: blocked pending B002, B004, B005, and B006
 ```
 
 This gate is mandatory.

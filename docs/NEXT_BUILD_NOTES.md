@@ -108,6 +108,6 @@ Physical baseline: Samsung Galaxy A11 (`SM-A115F`, Android 12/API 31) plus emula
 
 After UI implementation/pilot + UX validation, stop before release work.
 
-Decide final name, trademark clearance, app icon/logo, final `applicationId`/package identity, signing/store identity, listing identity, and attribution/license presentation.
+RAHSA and its primary logo are selected. Complete trademark clearance, final `applicationId`/package identity, signing/store identity, listing identity, and attribution/license presentation.
 
-Until then: **KeyPass** is the working development name.
+Until the remaining items close: **RAHSA** is the selected name, but public/store release work remains blocked.

@@ -4,12 +4,19 @@ This file records changes that have actually landed in the project. Roadmap item
 
 ## Unreleased
 
+### Brand
+
+- Selected **RAHSA** as the product name and integrated the supplied shield logo.
+- Replaced user-facing KeyPass labels in active prototype flows and generated legacy, adaptive, and monochrome Android icon assets.
+- Added a brand decision record plus explicit KeyPass/Kotpass MIT attribution.
+- Kept package and release-signing identities unchanged until their owner-controlled values are approved.
+
 ### Planning / UX
 
 - Added approved UX/UI baseline for the next incremental interface refinement.
 - Added feature inventory, roadmap, and next-build notes.
 - Added the mandatory Brand Decision Gate before public/store release preparation.
-- Kept `KeyPass` as the working development name while final branding remains undecided.
+- Kept `KeyPass` as the working development name until the Brand Decision Gate.
 - Aligned PRD/TSD with the current app-private `vault.kdbx` flow and removal of external open/import choices.
 - Defined dark-only Material 3, loading/error, accessibility, icon, and replaceable brand-layer directions without expanding feature scope.
 

@@ -231,10 +231,10 @@ The refinement is successful when:
 - Core CRUD, search, generator, clipboard, and lock behavior remain regression-safe.
 - Accessibility basics are validated, including touch targets, localized icon semantics, font scaling, and a basic TalkBack pass.
 
-Working product name:
+Final product name:
 
 ```text
-KeyPass
+RAHSA
 ```
 
-Final public branding remains undecided. The team MUST stop at the Brand Decision Gate before public/store release preparation to decide the final name, trademark clearance, app icon/logo, final `applicationId`/package identity strategy, signing/store identity, and attribution presentation.
+RAHSA and its supplied shield logo were selected at the Brand Decision Gate. Public/store release preparation remains blocked until trademark clearance, the final `applicationId`/package identity strategy, signing/store identity, and complete attribution presentation are resolved in `docs/BRAND_DECISION.md`.

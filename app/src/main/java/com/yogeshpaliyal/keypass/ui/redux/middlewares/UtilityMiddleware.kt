@@ -1,6 +1,7 @@
 package com.yogeshpaliyal.keypass.ui.redux.middlewares
 
 import android.widget.Toast
+import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.redux.actions.BatchActions
 import com.yogeshpaliyal.keypass.ui.redux.actions.CopyToClipboard
 import com.yogeshpaliyal.keypass.ui.redux.actions.ToastAction
@@ -46,7 +47,7 @@ private fun Store<KeyPassState>.handleAction(action: Any, state: KeyPassState) {
                     copySensitiveTextToClipboard(
                         context = it,
                         text = action.password,
-                        label = "KeyPass"
+                        label = it.getString(R.string.app_name)
                     )
                     dispatch(ToastAction(action.successMessage))
                 }

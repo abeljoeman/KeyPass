@@ -24,7 +24,7 @@ dependencyResolutionManagement {
 //    }
 //}
 
-rootProject.name = "KeyPass"
+rootProject.name = "RAHSA"
 include(":app")
 include(":shared")
 include(":common")

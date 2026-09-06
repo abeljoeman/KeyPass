@@ -65,7 +65,7 @@ fun BiometricPrompt(show: Boolean, onDismiss: () -> Unit) {
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(context.getString(R.string.app_name))
-            .setSubtitle(context.getString(R.string.login_to_enter_keypass))
+            .setSubtitle(context.getString(R.string.unlock_your_vault))
             .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK)
             .setNegativeButtonText(context.getText(R.string.cancel))
             .build()
