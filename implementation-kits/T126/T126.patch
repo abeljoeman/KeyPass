@@ -1,0 +1,172 @@
+diff --git a/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt b/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
+--- a/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
++++ b/common/src/main/java/com/yogeshpaliyal/common/utils/PasswordGenerator.kt
+@@ -1,50 +1,46 @@
+ package com.yogeshpaliyal.common.utils
+ 
+ import com.yogeshpaliyal.common.data.PasswordConfig
++import java.security.SecureRandom
+ 
+ class PasswordGenerator(
+     val passwordConfig: PasswordConfig
+ ) {
+-    private val UPPER_CASE = 0
+-    private val LOWER_CASE = 1
+-    private val NUMBERS = 2
+-    private val SYMBOLS = 3
+-    private val BLANKSPACES = 4
+-
+     companion object {
+         val totalSymbol = listOf('!', '@', '#', '$', '%', '&', '*', '+', '=', '-', '~', '?', '/', '_')
++        private val secureRandom = SecureRandom()
+     }
+ 
+     fun generatePassword(): String {
+-        var password = ""
+-        val list = ArrayList<Int>()
++        val allowedCharacters = ArrayList<Char>()
++
+         if (passwordConfig.includeUppercaseLetters) {
+-            list.add(UPPER_CASE)
++            allowedCharacters.addAll('A'..'Z')
+         }
+         if (passwordConfig.includeLowercaseLetters) {
+-            list.add(LOWER_CASE)
++            allowedCharacters.addAll('a'..'z')
+         }
+         if (passwordConfig.includeNumbers) {
+-            list.add(NUMBERS)
++            allowedCharacters.addAll('0'..'9')
+         }
+         if (passwordConfig.includeSymbols) {
+-            list.add(SYMBOLS)
++            allowedCharacters.addAll(passwordConfig.listOfSymbols)
+         }
+-
+         if (passwordConfig.includeBlankSpaces) {
+-            list.add(BLANKSPACES)
++            allowedCharacters.add(' ')
+         }
+ 
+-        for (i in 1..passwordConfig.length.toInt()) {
+-            if (list.isNotEmpty()) {
+-                when (list.random()) {
+-                    UPPER_CASE -> password += ('A'..'Z').random().toString()
+-                    LOWER_CASE -> password += ('a'..'z').random().toString()
+-                    NUMBERS -> password += ('0'..'9').random().toString()
+-                    SYMBOLS -> password += passwordConfig.listOfSymbols.random().toString()
+-                    BLANKSPACES -> password += (' ').toString()
+-                }
+-            }
++        val passwordLength = passwordConfig.length.toInt()
++        if (passwordLength <= 0 || allowedCharacters.isEmpty()) {
++            return ""
+         }
+-        return password
++
++        return buildString(passwordLength) {
++            repeat(passwordLength) {
++                append(allowedCharacters[secureRandom.nextInt(allowedCharacters.size)])
++            }
++        }
+     }
+ }
+diff --git a/app/src/test/java/com/yogeshpaliyal/keypass/security/PasswordGeneratorTest.kt b/app/src/test/java/com/yogeshpaliyal/keypass/security/PasswordGeneratorTest.kt
+new file mode 100644
+--- /dev/null
++++ b/app/src/test/java/com/yogeshpaliyal/keypass/security/PasswordGeneratorTest.kt
+@@ -0,0 +1,103 @@
++package com.yogeshpaliyal.keypass.security
++
++import com.yogeshpaliyal.common.data.PasswordConfig
++import com.yogeshpaliyal.common.utils.PasswordGenerator
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class PasswordGeneratorTest {
++
++    @Test
++    fun generatePassword_usesRequestedLengthAndCombinedAllowedAlphabet() {
++        val symbols = listOf('!', '?')
++        val config = config(
++            length = 256,
++            uppercase = true,
++            lowercase = true,
++            numbers = true,
++            symbols = true,
++            symbolList = symbols,
++            blankSpaces = true,
++        )
++        val allowed = (
++            ('A'..'Z').toList() +
++                ('a'..'z').toList() +
++                ('0'..'9').toList() +
++                symbols +
++                listOf(' ')
++            ).toSet()
++
++        repeat(5) {
++            val generated = PasswordGenerator(config).generatePassword()
++
++            assertEquals(256, generated.length)
++            assertTrue(generated.all { it in allowed })
++        }
++    }
++
++    @Test
++    fun generatePassword_respectsUppercaseOnlyConfiguration() {
++        val generated = PasswordGenerator(
++            config(length = 64, uppercase = true)
++        ).generatePassword()
++
++        assertEquals(64, generated.length)
++        assertTrue(generated.all { it in 'A'..'Z' })
++    }
++
++    @Test
++    fun generatePassword_respectsCustomSymbolAlphabet() {
++        val symbols = listOf('^', ':')
++        val generated = PasswordGenerator(
++            config(length = 64, symbols = true, symbolList = symbols)
++        ).generatePassword()
++
++        assertEquals(64, generated.length)
++        assertTrue(generated.all { it in symbols })
++    }
++
++    @Test
++    fun generatePassword_respectsBlankSpaceOnlyConfiguration() {
++        val generated = PasswordGenerator(
++            config(length = 12, blankSpaces = true)
++        ).generatePassword()
++
++        assertEquals(" ".repeat(12), generated)
++    }
++
++    @Test
++    fun generatePassword_returnsEmptyWhenNoCharactersAreEnabled() {
++        val generated = PasswordGenerator(config(length = 32)).generatePassword()
++
++        assertTrue(generated.isEmpty())
++    }
++
++    private fun config(
++        length: Int,
++        uppercase: Boolean = false,
++        lowercase: Boolean = false,
++        numbers: Boolean = false,
++        symbols: Boolean = false,
++        symbolList: List<Char> = PasswordGenerator.totalSymbol,
++        blankSpaces: Boolean = false,
++    ): PasswordConfig = PasswordConfig(
++        length = length.toFloat(),
++        includeUppercaseLetters = uppercase,
++        includeLowercaseLetters = lowercase,
++        includeSymbols = symbols,
++        listOfSymbols = symbolList,
++        includeNumbers = numbers,
++        includeBlankSpaces = blankSpaces,
++        password = "",
++    )
++}
