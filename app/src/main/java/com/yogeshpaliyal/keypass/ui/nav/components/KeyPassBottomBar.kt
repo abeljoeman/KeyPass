@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
@@ -42,9 +43,9 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
                 }
             },
             icon = {
-                Icon(
-                    painter = painterResource(R.drawable.ic_vault_shield_lock),
-                    contentDescription = null
+                Image(
+                    painter = painterResource(R.drawable.logo_rahsa),
+                    contentDescription = stringResource(R.string.nav_vault)
                 )
             },
             label = { Text(stringResource(R.string.nav_vault)) }
