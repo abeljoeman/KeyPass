@@ -12,25 +12,26 @@ Start every new planning or Codex session with `docs/GOVERNANCE_STATUS.md`.
 4. `docs/adr/*.md`
 5. `docs/THREAT_MODEL.md`
 6. `TASKS.md`
-7. Implementation code
+7. active Implementation Kit
+8. implementation code
 
 If documents conflict, resolve the higher-authority decision before implementation.
 
-Execution/status documents (`AGENTS.md`, `docs/WORKFLOW.md`, `docs/GOVERNANCE_STATUS.md`) describe how and when work is performed; they do not override approved product/security decisions.
+Execution/status documents (`AGENTS.md`, `docs/WORKFLOW.md`, `docs/GOVERNANCE_STATUS.md`) describe how and when work is performed; they do not override approved product/security decisions. Implementation Kits are non-authoritative execution aids.
 
 ## Current operational documents
 
 ### `docs/GOVERNANCE_STATUS.md`
 
-First-read status page: RAHSA naming, stable baseline, current workstream, active/parked/historical documents, implementation gate, and model-cost policy.
+First-read status page: RAHSA naming, stable baseline, current workstream, planning/preparation/execution gate, active/parked/historical documents, and model-cost policy.
 
 ### `ENGINEERING_PRINCIPLES.md`
 
-Non-negotiable engineering governance: reuse-first, no custom crypto, baseline preservation, explicit OSS provenance, planning/implementation separation, and cost-effective AI development.
+Non-negotiable engineering governance: reuse-first, no custom crypto, baseline preservation, explicit OSS provenance, planning/preparation/implementation separation, and cost-effective AI development.
 
 ### `AGENTS.md`
 
-Mandatory Codex repository instructions. Codex may modify application code only when `TASKS.md` exposes one approved active Txxx and preflight passes.
+Mandatory Codex repository instructions. Codex may modify application code only when `TASKS.md` exposes one approved active Txxx + active kit and preflight passes.
 
 ### `PRD.md`
 
@@ -46,11 +47,21 @@ Security assets, threats, boundaries, and mitigations. Update when a planned fea
 
 ### `TASKS.md`
 
-Machine-readable execution gate plus approved implementation tasks. Roadmap/ideas do not authorize coding.
+Machine-readable execution gate plus approved implementation tasks. Roadmap/ideas do not authorize coding. Active implementation requires `EXECUTION_STATUS`, `ACTIVE_TASK`, and `ACTIVE_KIT` to agree.
 
 ### `docs/WORKFLOW.md`
 
-Planning in ChatGPT → documentation approval → one-task-at-a-time Codex execution.
+Standard lifecycle: planning in ChatGPT → documentation/task approval → just-in-time Implementation Kit → one-task-at-a-time Codex execution → validation/checkpoint → planning freeze.
+
+### `docs/IMPLEMENTATION_KIT.md`
+
+Defines the required manifest and optional patch/PowerShell helper standard used to reduce repeated Codex exploration while keeping task/security authority and validation intact.
+
+Use `docs/IMPLEMENTATION_KIT_TEMPLATE.md` when preparing `implementation-kits/Txxx/README.md`.
+
+### `implementation-kits/`
+
+Repository workspace for just-in-time task execution packages. Only the manifest is mandatory; patch/helper files are optional. Never store secrets, keystores, signing material, or real vault data here.
 
 ### `docs/ROADMAP.md`
 
@@ -98,9 +109,9 @@ Build/test requirements for implementation are defined by the active Txxx accept
 
 ## Codex handoff pattern
 
-Do not paste the whole governance into every prompt. Keep governance in the repository.
+Do not paste the whole governance or implementation plan into every prompt. Keep governance and the active Implementation Kit in the repository.
 
-A handoff should identify only the repo/branch/checkpoint and exact active task, then instruct Codex to obey repository governance.
+A handoff identifies only the repo/branch/checkpoint, exact active task, and active kit, then instructs Codex to obey repository governance.
 
 Before implementation Codex runs:
 
@@ -108,4 +119,4 @@ Before implementation Codex runs:
 python scripts/governance_preflight.py --implementation Txxx
 ```
 
-If `TASKS.md` has `ACTIVE_TASK: NONE`, implementation must not start.
+If `TASKS.md` has `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`, implementation must not start.

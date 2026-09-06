@@ -1,6 +1,6 @@
 # Engineering Principles — RAHSA
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Updated:** 2026-09-06
 
 These principles govern engineering decisions for RAHSA. They supersede prototype-era governance where the two conflict.
@@ -89,7 +89,7 @@ Prioritize tests around security and persistence boundaries: vault create/open/r
 
 Do not chase coverage percentage for its own sake.
 
-## XI. Planning and Implementation Are Separate
+## XI. Planning, Preparation, and Implementation Are Separate
 
 Product/security planning is completed before Codex implementation.
 
@@ -99,31 +99,49 @@ Planning flow:
 Discussion/research
 → PRD
 → TSD / ADR / Threat Model as needed
-→ TASKS.md
+→ phase TASKS.md
 → owner approval
+```
+
+After an owner-approved task exists, ChatGPT may prepare a just-in-time **Implementation Kit** for the next task only. The kit may contain a manifest, patch, or deterministic helper scripts, but it is a non-authoritative execution aid and must not be applied to application source as part of planning/preparation.
+
+Preparation flow:
+
+```text
+latest verified checkpoint
+→ next approved Txxx
+→ JIT Implementation Kit
+→ activate exactly Txxx + ACTIVE_KIT
 ```
 
 Implementation flow:
 
 ```text
-approved active Txxx
-→ Codex executes exactly one task
+approved active Txxx + READY kit
+→ Codex preflight
+→ Codex executes/reviews exactly one task
 → build/test/validation
 → focused checkpoint
+→ return execution gate to planning freeze
 ```
 
 Codex MUST NOT invent product scope or architecture during implementation. If an active task requires contradicting a higher-level decision, stop and return the conflict to planning.
+
+A prepared patch/script does not override `TASKS.md` or a higher-level source of truth and does not remove Codex responsibility for independent review and validation.
 
 ## XII. Cost-Effective AI Development
 
 Use the lowest-cost model and lowest reasoning effort reasonably likely to complete the task correctly and safely. Do not default to the strongest model.
 
-- Inspection, status, grep, smoke tests, mechanical work: prefer Luna + low.
-- Focused normal implementation: prefer Terra + medium.
-- Security-sensitive vault/master-password/authentication semantics, difficult lifecycle races, or architecture-critical problems: consider Sol with a justified reasoning level.
+Classify the task's inherent risk before considering Implementation Kit completeness.
+
+- Inspection, status, grep, smoke tests, deterministic low-risk kit application, mechanical work: prefer Luna + low.
+- Low-risk kit requiring limited adaptation: Luna + low/medium may be sufficient.
+- Focused normal implementation/review: prefer Terra + medium.
+- Security-sensitive vault/master-password/authentication/Keystore/recovery semantics, difficult lifecycle races, or architecture-critical problems: consider Sol with a justified reasoning level.
 - `xhigh`/`max` require an explicit reason.
 
-Correctness and security take precedence over token savings, but higher cost requires a concrete expected benefit.
+A complete patch can reduce exploration/coding cost; it cannot lower the security-risk classification of the task. Correctness and security take precedence over token savings, but higher cost requires a concrete expected benefit.
 
 ## XIII. Public Release Work Is Parked
 
@@ -148,9 +166,11 @@ docs/THREAT_MODEL.md
         ↓
      TASKS.md
         ↓
+Implementation Kit
+        ↓
        Code
 ```
 
-`AGENTS.md`, `docs/WORKFLOW.md`, and `docs/GOVERNANCE_STATUS.md` govern execution mechanics/status and MUST NOT override product/security decisions above.
+`AGENTS.md`, `docs/WORKFLOW.md`, and `docs/GOVERNANCE_STATUS.md` govern execution mechanics/status and MUST NOT override product/security decisions above. `docs/IMPLEMENTATION_KIT.md` governs the non-authoritative execution-package format.
 
-A code change that violates a higher-level document is not accepted merely because it builds.
+A code change that violates a higher-level document is not accepted merely because it builds or because it came from a prepared patch.
