@@ -1,7 +1,7 @@
 # Prototype Physical Test Results — v0.1
 
 **Status:** Release regression complete; ready to tag `v0.1-prototype`
-**Date:** 2026-09-05
+**Date:** 2026-09-06
 **Test plan:** `docs/TEST_PLAN.md`
 
 ## Environment
@@ -115,6 +115,21 @@ Final smoke regression was run on the Galaxy A11 from commit `f7fe324`.
 - KeyPass fatal exception in Logcat: NO.
 
 The full `testFreeDebugUnitTest` suite also completed successfully before the final push of `f7fe324`.
+
+## Phase 12 Physical UX Validation (T125)
+
+Validation was repeated on the Samsung Galaxy A11 using the latest `freeDebug` build at checkpoint `d04c611`.
+
+- Device: Samsung Galaxy A11 (`SM-A115F`), Android 12 / API 31.
+- ADB serial: `R9RN901G06R`.
+- Display: 720x1560, density 280, font scale 1.3.
+- Latest APK installation and launch: PASS.
+- Unlock with disposable `Test1234!`: PASS; transient `Unlocking…` feedback visible.
+- Dashboard search/no-result/clear, dirty-form discard, long-title, and lock/unlock flows: PASS.
+- Add/detail/delete regression with the instrumented test runner: PASS (`OK (2 tests)`, 54.9 seconds).
+- Touch-target, icon semantics, and basic TalkBack checks: PASS; accessibility settings restored after testing.
+
+No new blocking UX finding was identified. Previously documented limitations remain: Android 12 background clipboard cleanup may be skipped, corrupted-vault feedback is intentionally generic, and very long or multiline titles need later product refinement.
 
 ## Accepted Security / Platform Limitation
 
