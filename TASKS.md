@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture) is owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture) and ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency) are owner-approved and accepted.** The remaining Phase 13 technical design, ADR 0006, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 proposed; ADR 0007 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -85,24 +85,36 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T129 — Implement real Change Master Password
 
-**Objective:** Add current-password reauthentication, advisory strength, optional hint edit, real Kotpass KDBX credential modification, candidate verification, and safe promotion.
+**Planning status:** Architecture approved via accepted ADR 0007; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-020..035; `TSD.md` §10; ADR 0005; Threat Model T14/T21.
+**Objective:** Add current-password reauthentication, advisory strength, optional hint edit, mandatory consequence acknowledgment, real Kotpass KDBX credential modification, candidate verification, crash-consistent safe promotion, and post-commit cleanup.
+
+**References:** `PRD.md` P13-FR-020..028; `TSD.md` §10; accepted ADR 0005; accepted ADR 0007; Threat Model T14/T21.
 
 **Acceptance:**
-- Current password is verified against KDBX before re-key.
-- New password non-empty and confirmation matches.
+- Current password is verified against the active KDBX before re-key.
+- New password is non-empty and confirmation matches.
 - Strength indicator is advisory only.
-- Existing hint is prefilled; hint changes only after successful promotion.
+- Existing hint is prefilled; hint changes only after successful promotion/finalization.
+- Before the final action is enabled, the UI clearly warns that the old Master Password will stop working and that RAHSA cannot recover/open the vault if the new Master Password is forgotten.
+- User must complete a swipe-to-acknowledge using the same existing Material 3/platform pattern as Create Vault; the swipe only records acknowledgment and does not execute re-key.
+- TalkBack/accessibility can perform an equivalent intentional acknowledgment action.
 - Uses Kotpass 0.13.0 credential-modification API; no custom KDBX crypto.
-- Success leaves session unlocked; old password fails; new password opens.
-- Any pre-promotion failure preserves old vault/password/hint.
-- If biometric state exists, success invalidates it; otherwise no irrelevant message/state is created.
+- Before the final action starts, Back/navigation away, abandoned Home/background flow, process death, force-close, or recreation does not persist password drafts or acknowledgment; reopening starts password fields empty and acknowledgment false, with current persisted hint allowed to prefill again.
+- Existing Auto-Lock/session behavior is preserved; this task does not redesign lock policy.
+- After the operation starts, Back/Home/navigation is not treated as a transaction cancel.
+- Candidate is verified with the new password before promotion and uses accepted one-LKG safe-promotion semantics.
+- Verified candidate promotion is the commit point: before commit the old vault/password/hint are authoritative; after commit the new vault/password are authoritative.
+- A minimal app-private non-secret recovery/finalization marker may be used to complete post-commit hint/biometric/temp cleanup after crash/process death; it must contain no Master Password or decrypted vault data.
+- Post-commit finalization is idempotent and invalidates prior biometric quick-unlock state when present.
+- Any pre-commit failure preserves old vault/password/hint and prior biometric state.
+- Success leaves session unlocked when the process survives; old password fails and new password opens.
+- If biometric state existed, success invalidates it and informs the user; otherwise no irrelevant biometric state/message is created.
 - Operation is single-flight.
 
-**Validation:** repository/UI tests + old/new password reopen tests + failure injection + build/device smoke.
+**Validation:** repository/UI tests + old/new password reopen tests + failure injection + Back/Home/recreation/process-death/force-close boundary tests + pre-commit/post-commit recovery tests + build/device smoke.
 
-**Out of scope:** password history/expiry/complexity enforcement, recovery key.
+**Out of scope:** password history/expiry/complexity enforcement, recovery key, custom transaction framework, external-backup prerequisite.
 
 **Dependency note:** zxcvbn4j remains the preferred strength-estimator candidate and must pass version/license/security verification in the JIT kit before being added.
 
