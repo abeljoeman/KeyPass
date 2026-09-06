@@ -19,7 +19,7 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126 and T127 complete; execution frozen before T128.**
+**Phase 13 — T126 and T127 complete; T128 is the only active implementation task.**
 
 Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
@@ -44,15 +44,21 @@ implementation-kits/T127/README.md
 PREPARED_AGAINST: ba1e86e6580bc6a3b07d1094692a8a98f4b641b5
 ```
 
+T128 — One-LKG Safe Promotion Foundation — has an owner-approved READY JIT Implementation Kit at:
+
+```text
+implementation-kits/T128/README.md
+```
+
 The current execution gate in `TASKS.md` is:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T128
+ACTIVE_KIT: implementation-kits/T128/README.md
 ```
 
-No implementation task is currently active. T128–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
+T128 is the only implementation task currently authorized. Codex running against the local Windows checkout `G:\Projects\KeyPass` is the single writer for T128 implementation and validation. GitHub `prototype/v0.2` remains the authoritative remote history. T129–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
 
 A later cosmetic refinement of the T127 warning copy and swipe presentation is desired. That refinement is not part of T127 behavioral acceptance and must not silently reopen or broaden T127 security semantics.
 
@@ -108,7 +114,7 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 ```text
 T126 Password Generator Security Hardening       COMPLETE — e69ee80
 T127 Create Vault Recovery Acknowledgment        COMPLETE — 7cc4f94
-T128 One-LKG Safe Promotion Foundation           NOT ACTIVE
+T128 One-LKG Safe Promotion Foundation           ACTIVE IMPLEMENTATION
 T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
 T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
 T131 Manual External KDBX Backup via SAF         NOT ACTIVE
@@ -116,7 +122,7 @@ T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T126 and T127 are complete. No implementation task is active.
+T126 and T127 are complete. T128 alone is active.
 
 ## Standard planning-to-execution workflow
 
@@ -128,9 +134,10 @@ Discussion / research in ChatGPT
 → owner approval
 → ChatGPT prepares JIT Implementation Kit for next Txxx
 → TASKS activates exactly one Txxx + ACTIVE_KIT
-→ Codex preflight
-→ Codex executes/reviews/builds/tests exactly one task
-→ focused checkpoint
+→ local Codex preflight
+→ local Codex executes/reviews/builds/tests exactly one task
+→ required local/physical validation
+→ focused checkpoint pushed to authoritative branch
 → TASKS returns to PLANNING_FREEZE / NONE / NONE
 → return to ChatGPT/owner before next task
 ```
@@ -178,7 +185,8 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/IMPLEMENTATION_KIT.md`
 - `implementation-kits/T126/README.md` — historical READY kit for completed T126.
 - `implementation-kits/T127/README.md` — historical READY kit for completed T127.
-- `TASKS.md` — T126/T127 complete; execution frozen; T128–T133 inactive.
+- `implementation-kits/T128/README.md` — READY and active for T128 local Codex execution.
+- `TASKS.md` — T126/T127 complete; T128 active; T129–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -209,12 +217,12 @@ Codex may modify application code only when `TASKS.md` exposes exactly one appro
 Current state:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T128
+ACTIVE_KIT: implementation-kits/T128/README.md
 ```
 
-No application implementation is authorized. T128 requires a new JIT Implementation Kit prepared against the latest checkpoint and separate explicit owner activation before Codex may implement it.
+Application implementation is authorized for T128 only. Codex must execute T128 from the local Windows checkout under the READY T128 kit, maintain the one-writer rule, run the required automated/build/physical validation, and stop before T129. The kit may be corrected by Codex only for factual/technical errors or narrowly necessary T128-scoped execution clarifications; such corrections must not broaden T128 scope and must be reported in the T128 handoff.
 
 ## Cost policy
 
