@@ -19,7 +19,7 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126 complete; T127 ACTIVE IMPLEMENTATION.**
+**Phase 13 — T126 and T127 complete; execution frozen before T128.**
 
 Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
@@ -30,22 +30,31 @@ e69ee8021e1c50c1ae244be2ad25790f0fd31dc0
 feat: harden password generator randomness
 ```
 
-The T127 JIT Implementation Kit is READY at:
+T127 — Create Vault Recovery Acknowledgment — was implemented, automated validation passed, physical-device behavior was validated on Samsung SM-A115F, lifecycle acknowledgment reset passed, TalkBack semantic/non-swipe acknowledgment passed, and the implementation was checkpointed and pushed at:
+
+```text
+7cc4f94f321fd86d343b554fce1c99406e3b0265
+feat: add create vault recovery acknowledgment
+```
+
+The T127 JIT Implementation Kit is retained as historical execution evidence at:
 
 ```text
 implementation-kits/T127/README.md
 PREPARED_AGAINST: ba1e86e6580bc6a3b07d1094692a8a98f4b641b5
 ```
 
-The owner explicitly activated T127. The current execution gate in `TASKS.md` is:
+The current execution gate in `TASKS.md` is:
 
 ```text
-EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: T127
-ACTIVE_KIT: implementation-kits/T127/README.md
+EXECUTION_STATUS: PLANNING_FREEZE
+ACTIVE_TASK: NONE
+ACTIVE_KIT: NONE
 ```
 
-Exactly one implementation task is active. T128–T133 remain inactive and must not be implemented or opportunistically prepared during T127.
+No implementation task is currently active. T128–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
+
+A later cosmetic refinement of the T127 warning copy and swipe presentation is desired. That refinement is not part of T127 behavioral acceptance and must not silently reopen or broaden T127 security semantics.
 
 ## Approved Phase 13 product direction
 
@@ -98,7 +107,7 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 
 ```text
 T126 Password Generator Security Hardening       COMPLETE — e69ee80
-T127 Create Vault Recovery Acknowledgment        ACTIVE IMPLEMENTATION
+T127 Create Vault Recovery Acknowledgment        COMPLETE — 7cc4f94
 T128 One-LKG Safe Promotion Foundation           NOT ACTIVE
 T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
 T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
@@ -107,7 +116,7 @@ T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T127 is the sole authorized implementation task. Completion still requires automated validation plus the required physical-device/TalkBack validation before checkpoint/reset.
+T126 and T127 are complete. No implementation task is active.
 
 ## Standard planning-to-execution workflow
 
@@ -164,12 +173,12 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/adr/0010-safe-kdbx-restore-finalization.md` — accepted.
 - `docs/adr/0011-password-generator-secure-random.md` — accepted.
 - `docs/adr/0012-create-vault-recovery-acknowledgment.md` — accepted.
-- `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 threat extension; implementation validation gates remain unchecked until execution/testing.
+- `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 threat extension; remaining implementation validation gates continue to be updated task-by-task.
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
 - `implementation-kits/T126/README.md` — historical READY kit for completed T126.
-- `implementation-kits/T127/README.md` — READY kit for the currently active T127.
-- `TASKS.md` — T126 complete; T127 active; T128–T133 inactive.
+- `implementation-kits/T127/README.md` — historical READY kit for completed T127.
+- `TASKS.md` — T126/T127 complete; execution frozen; T128–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -187,7 +196,7 @@ For new capability design and implementation, evaluate in order:
 
 Phase 13 verified reuse findings include Kotpass `0.13.0` `modifyCredentials()` for KDBX credential changes, Android SAF for provider-neutral document I/O, AndroidX Biometric + Android Keystore for quick unlock, Material 3 for swipe/progress/animation UX, and `java.security.SecureRandom` for generator hardening.
 
-For T127, reuse the existing Create Vault flow and an existing Material 3/platform/project swipe primitive or established pattern. Do not add a recovery marker, custom gesture framework, or new dependency merely for acknowledgment.
+For T127, the completed implementation reuses the existing Create Vault flow and Material 3 swipe primitives, keeps acknowledgment ephemeral, and uses a TalkBack semantic action without adding a recovery marker or new dependency.
 
 ## Public release status
 
@@ -200,19 +209,13 @@ Codex may modify application code only when `TASKS.md` exposes exactly one appro
 Current state:
 
 ```text
-EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: T127
-ACTIVE_KIT: implementation-kits/T127/README.md
+EXECUTION_STATUS: PLANNING_FREEZE
+ACTIVE_TASK: NONE
+ACTIVE_KIT: NONE
 ```
 
-Codex may implement **T127 only**, after running:
-
-```powershell
-python scripts/governance_preflight.py --implementation T127
-```
-
-T128–T133 remain blocked.
+No application implementation is authorized. T128 requires a new JIT Implementation Kit prepared against the latest checkpoint and separate explicit owner activation before Codex may implement it.
 
 ## Cost policy
 
-Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. T126 was a narrow low-risk hardening task. T127 is a focused UX/state/accessibility change around an unrecoverability warning and is classified NORMAL for execution planning. Vault/Master Password/Keystore/recovery semantics in later tasks remain security-sensitive regardless of kit completeness.
+Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. T126 was a narrow low-risk hardening task. T127 was a focused NORMAL-risk UX/state/accessibility change around an unrecoverability warning. Vault/Master Password/Keystore/recovery semantics in later tasks remain security-sensitive regardless of kit completeness.
