@@ -209,6 +209,30 @@ class KotpassVaultRepositoryTest {
     }
 
     @Test
+    fun promotion_preservesOldActiveAsLkgBeforeCandidateBecomesActive() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            val activeB = testCredential("B")
+            setup.createCredential(activeB)
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val operations = RecordingFileOperations()
+            val repository = KotpassVaultRepository(vaultFile, operations)
+            repository.openVault("test-password".toCharArray())
+
+            repository.createCredential(testCredential("C", "423e4567-e89b-12d3-a456-426614174003"))
+
+            assertMoveOccursBefore(
+                operations.moves,
+                vaultFile.name to lkgFile(vaultFile).name,
+                "rahsa-vault-candidate-" to vaultFile.name
+            )
+            assertArrayEquals(activeBefore, lkgFile(vaultFile).readBytes())
+            assertEquals(1, lkgFiles(vaultFile).size)
+        }
+    }
+
+    @Test
     fun freshVault_doesNotCreateSyntheticLkgUntilFirstMutation() = runBlocking {
         val directory = File.createTempFile("fresh-vault-", "").also { temporary ->
             check(temporary.delete() && temporary.mkdirs())
@@ -266,6 +290,11 @@ class KotpassVaultRepositoryTest {
 
             assertTrue(result.isFailure)
             assertTrue("Candidate must be validated before promotion is attempted.", operations.candidateWasRead)
+            assertMoveOccursBefore(
+                operations.moves,
+                vaultFile.name to lkgFile(vaultFile).name,
+                "rahsa-vault-candidate-" to vaultFile.name
+            )
             assertArrayEquals(activeBefore, vaultFile.readBytes())
             assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
             assertEquals(1, lkgFiles(vaultFile).size)
@@ -392,6 +421,20 @@ class KotpassVaultRepositoryTest {
     private fun testCredentials(): Credentials =
         Credentials.from(EncryptedValue.fromString("test-password"))
 
+    private fun assertMoveOccursBefore(
+        moves: List<Pair<String, String>>,
+        before: Pair<String, String>,
+        after: Pair<String, String>
+    ) {
+        val beforeIndex = moves.indexOfFirst { (source, destination) ->
+            source == before.first && destination == before.second
+        }
+        val afterIndex = moves.indexOfFirst { (source, destination) ->
+            source.startsWith(after.first) && destination == after.second
+        }
+        assertTrue("Expected $before before $after, recorded moves: $moves", beforeIndex >= 0 && afterIndex > beforeIndex)
+    }
+
     private open class DelegatingFileOperations : VaultFileOperations {
         override fun createTempFile(prefix: String, suffix: String, directory: File): File =
             File.createTempFile(prefix, suffix, directory)
@@ -403,6 +446,15 @@ class KotpassVaultRepositoryTest {
         override fun move(source: File, destination: File): Boolean = source.renameTo(destination)
 
         override fun delete(file: File): Boolean = file.delete()
+    }
+
+    private class RecordingFileOperations : DelegatingFileOperations() {
+        val moves = mutableListOf<Pair<String, String>>()
+
+        override fun move(source: File, destination: File): Boolean {
+            moves += source.name to destination.name
+            return super.move(source, destination)
+        }
     }
 
     private class FailCandidateValidationOperations : DelegatingFileOperations() {
@@ -419,6 +471,7 @@ class KotpassVaultRepositoryTest {
     ) : DelegatingFileOperations() {
         var candidateWasRead = false
             private set
+        val moves = mutableListOf<Pair<String, String>>()
         private var failed = false
 
         override fun openInput(file: File): FileInputStream {
@@ -429,6 +482,7 @@ class KotpassVaultRepositoryTest {
         }
 
         override fun move(source: File, destination: File): Boolean {
+            moves += source.name to destination.name
             if (!failed && source.name.startsWith("rahsa-vault-candidate-") && destination == target) {
                 failed = true
                 return false

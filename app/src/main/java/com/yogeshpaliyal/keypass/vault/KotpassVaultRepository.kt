@@ -271,37 +271,45 @@ class KotpassVaultRepository(
         // Confirm the on-disk source before it is allowed to become the next LKG.
         decode(target, credentials)
 
-        val previousActive = prepareEmptyTempFile("rahsa-vault-previous-", parent)
         val previousLkg = lkgFile(target)
         val displacedLkg = if (previousLkg.exists()) {
             prepareEmptyTempFile("rahsa-vault-displaced-lkg-", parent)
         } else {
             null
         }
+        var priorLkgDisplaced = false
+        var activePreservedAsLkg = false
         var promoted = false
 
         try {
-            if (!fileOperations.move(target, previousActive)) {
-                throw IOException("Could not preserve the existing vault file.")
+            if (displacedLkg != null && !fileOperations.move(previousLkg, displacedLkg)) {
+                throw IOException("Could not preserve the previous LKG.")
             }
+            priorLkgDisplaced = displacedLkg != null
+
+            if (!fileOperations.move(target, previousLkg)) {
+                throw IOException("Could not preserve the existing vault file as LKG.")
+            }
+            activePreservedAsLkg = true
+
             if (!fileOperations.move(candidate, target)) {
                 throw IOException("Could not install the updated vault file.")
             }
             decode(target, credentials)
-
-            if (displacedLkg != null && !fileOperations.move(previousLkg, displacedLkg)) {
-                throw IOException("Could not preserve the previous LKG.")
-            }
-            if (!fileOperations.move(previousActive, previousLkg)) {
-                throw IOException("Could not install the new LKG.")
-            }
             promoted = true
         } catch (failure: Exception) {
-            rollbackPromotion(target, candidate, previousActive, previousLkg, displacedLkg, failure)
+            rollbackPromotion(
+                target,
+                candidate,
+                previousLkg,
+                displacedLkg,
+                activePreservedAsLkg,
+                priorLkgDisplaced,
+                failure
+            )
             throw failure
         } finally {
             if (promoted) {
-                deleteIfPresent(previousActive)
                 displacedLkg?.let(::deleteIfPresent)
             }
         }
@@ -310,22 +318,25 @@ class KotpassVaultRepository(
     private fun rollbackPromotion(
         target: File,
         candidate: File,
-        previousActive: File,
         previousLkg: File,
         displacedLkg: File?,
+        activePreservedAsLkg: Boolean,
+        priorLkgDisplaced: Boolean,
         failure: Exception
     ) {
-        if (!target.exists() && previousActive.exists() && !fileOperations.move(previousActive, target)) {
-            failure.addSuppressed(IOException("Could not restore the previous active vault."))
-        } else if (target.exists() && previousActive.exists()) {
+        if (activePreservedAsLkg && !target.exists() && previousLkg.exists()) {
+            if (!fileOperations.move(previousLkg, target)) {
+                failure.addSuppressed(IOException("Could not restore the previous active vault."))
+            }
+        } else if (activePreservedAsLkg && target.exists() && previousLkg.exists()) {
             if (candidate.exists()) {
                 deleteIfPresent(candidate)
             }
-            if (!fileOperations.move(target, candidate) || !fileOperations.move(previousActive, target)) {
+            if (!fileOperations.move(target, candidate) || !fileOperations.move(previousLkg, target)) {
                 failure.addSuppressed(IOException("Could not restore the previous active vault."))
             }
         }
-        if (displacedLkg != null && displacedLkg.exists() && !fileOperations.move(displacedLkg, previousLkg)) {
+        if (priorLkgDisplaced && displacedLkg != null && displacedLkg.exists() && !fileOperations.move(displacedLkg, previousLkg)) {
             failure.addSuppressed(IOException("Could not restore the previous LKG."))
         }
     }
