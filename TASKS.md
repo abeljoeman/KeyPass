@@ -11,7 +11,7 @@ There is currently **no active implementation task**.
 
 Codex MUST NOT modify application code while `ACTIVE_TASK: NONE` or `ACTIVE_KIT: NONE`.
 
-Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), ADR 0010 (safe KDBX restore validation/promotion/finalization), and ADR 0011 (password generator SecureRandom + combined alphabet) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
+Phase 13 product requirements are owner-approved. **ADR 0005 (one-LKG safe promotion + SAF backup/restore architecture), ADR 0006 (fail-closed biometric quick unlock with Android Keystore), ADR 0007 (Change Master Password re-key, acknowledgment, and crash consistency), ADR 0008 (resumable destructive reset), ADR 0009 (manual external KDBX backup via provider-neutral SAF), ADR 0010 (safe KDBX restore validation/promotion/finalization), ADR 0011 (password generator SecureRandom + combined alphabet), and ADR 0012 (Create Vault ephemeral recovery acknowledgment) are owner-approved and accepted.** The remaining Phase 13 technical design, Threat Model extension, and the draft tasks below still require owner review/approval before any task is activated.
 
 ## Completed historical work
 
@@ -23,7 +23,7 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 **Phase status:** DRAFT TASK PLAN — NOT ACTIVE  
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
-**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; ADR 0011 accepted; `docs/THREAT_MODEL.md` under review
+**Technical review:** `TSD.md` Phase 13 draft; ADR 0005 accepted; ADR 0006 accepted; ADR 0007 accepted; ADR 0008 accepted; ADR 0009 accepted; ADR 0010 accepted; ADR 0011 accepted; ADR 0012 accepted; `docs/THREAT_MODEL.md` under review
 
 Only one approved task may later be activated at a time, with a JIT Implementation Kit prepared against the latest checkpoint.
 
@@ -52,21 +52,28 @@ Only one approved task may later be activated at a time, with a JIT Implementati
 
 ## T127 — Add Create Vault unrecoverability acknowledgment
 
-**Objective:** Require an explicit recovery warning and swipe-to-acknowledge before Create Vault can be enabled.
+**Planning status:** Architecture approved via accepted ADR 0012; implementation task remains NOT ACTIVE.
 
-**References:** `PRD.md` P13-FR-010..015; `TSD.md` §9; Threat Model T13.
+**Objective:** Require a clear unrecoverability warning and ephemeral swipe-to-acknowledge before an explicit final Create Vault action can be enabled, without adding a recovery marker or new gesture dependency.
+
+**References:** `PRD.md` P13-FR-010..015; `TSD.md` §9; accepted ADR 0012; Threat Model T13.
 
 **Acceptance:**
-- Warning clearly states RAHSA cannot recover/decrypt vault if Master Password is forgotten.
-- User must complete swipe acknowledgment before final Create Vault action is enabled.
-- Swipe does not create vault automatically.
-- Uses existing Material 3/platform swipe component/pattern; no custom gesture framework/dependency.
-- TalkBack/accessibility can intentionally acknowledge via semantics/action.
-- Duplicate Create Vault execution is prevented.
+- Warning clearly states RAHSA cannot recover/decrypt the vault if the Master Password is forgotten.
+- User must complete swipe acknowledgment before the final Create Vault action can be enabled.
+- The final Create Vault action remains a separate explicit action and is enabled only when existing password validation passes and acknowledgment is true.
+- Swipe completion records acknowledgment only; it never creates the vault automatically.
+- Uses an existing Material 3/platform/project swipe primitive or established pattern; no custom gesture framework or new dependency is added for this requirement.
+- TalkBack/accessibility exposes an equivalent intentional semantic action rather than requiring a physical swipe only.
+- Acknowledgment is ephemeral and not persisted; reopening after Back/navigation away, abandoned Home/background flow, process death, force-close, or non-preserving recreation starts with acknowledgment false.
+- Password drafts are not persisted merely to preserve this acknowledgment flow.
+- Before the explicit Create Vault action starts, abandoning the flow performs no authoritative vault mutation.
+- After Create Vault starts, duplicate execution is prevented and existing reviewed vault-creation/safe-write behavior is reused.
+- No `CREATE_VAULT_IN_PROGRESS` or other new T127-specific recovery/transaction marker is introduced.
 
-**Validation:** Compose/unit/instrumentation tests where practical + TalkBack/physical-device smoke.
+**Validation:** Compose/unit/instrumentation tests where practical + Back/navigation/recreation/process-death state tests + TalkBack/physical-device smoke + duplicate-action test.
 
-**Out of scope:** recovery key, repeated warning on every unlock, vault-storage redesign.
+**Out of scope:** recovery key, repeated warning on every unlock, vault-storage redesign, third-party swipe dependency, T127-specific recovery marker.
 
 ## T128 — Establish one-LKG safe promotion foundation
 
