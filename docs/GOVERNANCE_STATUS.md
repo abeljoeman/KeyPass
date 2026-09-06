@@ -19,7 +19,7 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126 complete; T127 JIT kit READY, awaiting explicit activation.**
+**Phase 13 — T126 complete; T127 ACTIVE IMPLEMENTATION.**
 
 Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
@@ -37,15 +37,15 @@ implementation-kits/T127/README.md
 PREPARED_AGAINST: ba1e86e6580bc6a3b07d1094692a8a98f4b641b5
 ```
 
-The current execution gate in `TASKS.md` remains:
+The owner explicitly activated T127. The current execution gate in `TASKS.md` is:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T127
+ACTIVE_KIT: implementation-kits/T127/README.md
 ```
 
-No implementation task is currently active. T127 may be activated only through a separate explicit owner instruction; preparation of the READY kit does not itself authorize implementation.
+Exactly one implementation task is active. T128–T133 remain inactive and must not be implemented or opportunistically prepared during T127.
 
 ## Approved Phase 13 product direction
 
@@ -98,7 +98,7 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 
 ```text
 T126 Password Generator Security Hardening       COMPLETE — e69ee80
-T127 Create Vault Recovery Acknowledgment        KIT READY — NOT ACTIVE
+T127 Create Vault Recovery Acknowledgment        ACTIVE IMPLEMENTATION
 T128 One-LKG Safe Promotion Foundation           NOT ACTIVE
 T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
 T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
@@ -107,7 +107,7 @@ T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T126 is complete. T127 has a READY JIT kit but still requires separate explicit activation; T128–T133 remain untouched.
+T127 is the sole authorized implementation task. Completion still requires automated validation plus the required physical-device/TalkBack validation before checkpoint/reset.
 
 ## Standard planning-to-execution workflow
 
@@ -168,8 +168,8 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
 - `implementation-kits/T126/README.md` — historical READY kit for completed T126.
-- `implementation-kits/T127/README.md` — READY kit for T127; task not active.
-- `TASKS.md` — T126 complete; execution frozen; T127–T133 inactive.
+- `implementation-kits/T127/README.md` — READY kit for the currently active T127.
+- `TASKS.md` — T126 complete; T127 active; T128–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -200,12 +200,18 @@ Codex may modify application code only when `TASKS.md` exposes exactly one appro
 Current state:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T127
+ACTIVE_KIT: implementation-kits/T127/README.md
 ```
 
-T127's kit is READY, but Codex must not implement it until `TASKS.md` explicitly activates T127 and references `implementation-kits/T127/README.md`.
+Codex may implement **T127 only**, after running:
+
+```powershell
+python scripts/governance_preflight.py --implementation T127
+```
+
+T128–T133 remain blocked.
 
 ## Cost policy
 
