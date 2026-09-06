@@ -1,8 +1,8 @@
 # Threat Model — RAHSA Android Password Manager
 
-**Status:** v0.2 review preserved; Phase 13 extension **DRAFT — owner review required**  
+**Status:** v0.2 review preserved; Phase 13 extension **CONSOLIDATED — final owner approval required**  
 **Updated:** 2026-09-06  
-**Scope:** Local-first Android app, including proposed Phase 13 access/data-safety boundaries
+**Scope:** Local-first Android app, including owner-approved Phase 13 access/data-safety architectures
 
 ## 1. Assets
 
@@ -19,6 +19,7 @@ High-value assets:
 - Restore-candidate password input.
 - Biometric wrapped unlock ciphertext/metadata.
 - Android Keystore key protecting biometric quick-unlock state.
+- Non-secret operation markers used for re-key finalization, reset completion, and restore finalization.
 
 ## 2. Trust boundaries
 
@@ -80,13 +81,13 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 ### T2 — Master Password persisted — Critical
 
 - Master Password exists transiently for active operations/session needs.
-- Never store plaintext in SharedPreferences, DataStore, Room, files, or logs.
+- Never store plaintext in SharedPreferences, DataStore, Room, files, logs, or recovery markers.
 - Phase 13 biometric stores only Keystore-protected wrapped secret material.
 
 ### T3 — Secret values leaked to logs — High
 
 - Never log credential payloads, Master Password, generated passwords, restore passwords, wrapped-secret plaintext, or decrypted vault data.
-- Review error/crash paths.
+- Review error/crash/finalization paths.
 
 ### T4 — Screenshot/screen-record leakage — Medium/High
 
@@ -129,6 +130,7 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 
 - Minimize dependencies; pin versions; record source/license/security impact.
 - Prefer AndroidX/platform and established OSS.
+- T126 adds no randomness dependency; T129 strength dependency remains JIT-reviewed only.
 
 ### T12 — AI-generated insecure implementation — High
 
@@ -144,17 +146,19 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 - Explicit unrecoverability warning before Create New Vault.
 - Mandatory swipe acknowledgment using existing Material/platform interaction.
 - Swipe only acknowledges; explicit Create Vault action remains required.
-- Accessibility semantics/action must provide equivalent intentional acknowledgment.
+- Accessibility semantics/action provides equivalent intentional acknowledgment.
+- Acknowledgment is ephemeral and resets when the flow is abandoned/recreated; no recovery marker is introduced.
 
 ### T14 — Master Password change corrupts or permanently replaces the only valid vault — Critical
 
 **Mitigation:**
-- Verify current password.
-- Create new-credential KDBX candidate separately using Kotpass credential-modification APIs.
+- Verify current password against active KDBX.
+- Create a new-credential KDBX candidate separately using Kotpass credential-modification APIs.
 - Validate candidate with new password before promotion.
 - Preserve valid old active as LKG before verified candidate promotion.
-- Update hint only after successful promotion.
-- Test failure injection around write/verify/promotion steps.
+- Treat candidate promotion as the explicit commit point.
+- Before commit, old vault/password/hint remain authoritative.
+- Test failure injection around write/verify/promotion boundaries.
 
 ### T15 — LKG is overwritten by corrupt/unverified data — High
 
@@ -170,16 +174,18 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 - Treat SAF URI as untrusted external input.
 - Copy to app-private candidate first.
 - Decode/open with user-supplied backup password using Kotpass before confirmation.
-- Wrong password/unsupported/corrupt file stops with zero active mutation.
-- Full replacement only after explicit confirmation and safe promotion.
+- Wrong password/unsupported/corrupt/copy failure stops with zero active mutation.
+- Show replacement confirmation only after validation.
+- Full replacement only after explicit confirmation and accepted safe promotion.
 
 ### T17 — Backup operation leaks plaintext data — Critical
 
 **Mitigation:**
-- Backup the already-encrypted KDBX artifact through SAF.
+- Copy the already-encrypted active KDBX artifact directly through SAF.
 - No plaintext export/container.
 - No secret logging.
 - External location is explicitly user selected and outside RAHSA's confidentiality guarantee once written.
+- Backup never decrypts/re-serializes merely for transport.
 
 ### T18 — Duplicate critical operation races produce inconsistent vault state — High
 
@@ -187,26 +193,27 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 - UI in-progress disablement plus logic-layer single-flight guard.
 - Serialize relevant vault replacement mutations.
 - No concurrent change-password/restore/reset/create operations.
+- Avoid a broad global transaction framework; keep guards local and explicit.
 
 ### T19 — Biometric bypass via UI-only success — Critical
 
 **Mitigation:**
 - Biometric success alone never marks repository/session unlocked.
-- `BiometricPrompt.CryptoObject` unlocks the Keystore-protected wrapped secret.
+- `BiometricPrompt.CryptoObject` unwraps the Keystore-protected secret.
 - Normal `VaultRepository.openVault` must succeed before unlocked navigation.
 
 ### T20 — Biometric wrapped secret becomes usable after security assumptions change — High
 
 **Mitigation:**
-- Keystore key requires qualifying biometric authentication.
+- Keystore key requires qualifying `BIOMETRIC_STRONG` authentication.
 - Configure enrollment invalidation where supported.
-- Missing/invalid key, enrollment/security change, unwrap failure, Master Password change, restore, or reset disables quick unlock.
+- Missing/invalid key, enrollment/security change, unwrap failure, Master Password change, restore, reset, reinstall, or new device disables/removes quick unlock.
 - No device-credential fallback for this feature.
 
 ### T21 — Wrapped Master Password or transient plaintext leaks through persistence/logs — Critical
 
 **Mitigation:**
-- Persist ciphertext + non-secret cipher metadata only.
+- Persist ciphertext + non-secret cipher/state metadata only.
 - Never log wrapped plaintext/cipher operation inputs.
 - Clear transient buffers/state as soon as practical.
 - Wrapped state is app-private and not exported in KDBX backup.
@@ -215,15 +222,74 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 
 **Mitigation:**
 - Determinate progress only when measurable.
-- Indeterminate progress for validation/decrypt stages.
+- Indeterminate progress for validation/decrypt/promotion or providers without reliable size.
 - Subtle Material 3 animation is status feedback, not fabricated completion percentage.
 
 ### T23 — Destructive reset deletes user-managed backups — High
 
 **Mitigation:**
-- Reset deletion scope is limited to RAHSA-managed internal vault/LKG/temp, hint, and biometric state.
+- Reset deletion scope is limited to RAHSA-managed internal vault/LKG/temp, hint, biometric state, and related Keystore alias.
 - Never delete external SAF backup documents.
 - Require exact typed `DELETE`.
+- Preserve unrelated UI preferences.
+
+### T24 — Re-key crashes after vault promotion but before metadata/biometric cleanup — High
+
+**Risk:** The new KDBX may already be authoritative while old hint or biometric state remains, creating misleading or stale security metadata.
+
+**Mitigation:**
+- Promotion is the explicit commit point; after commit the new KDBX/password remain authoritative.
+- Use a minimal non-secret post-commit finalization marker when needed.
+- On restart, complete hint application, biometric invalidation, and temp cleanup idempotently.
+- Marker contains no Master Password or decrypted vault data.
+- Never speculatively roll back the promoted KDBX because UI completion was interrupted.
+
+### T25 — Destructive reset is interrupted and leaves a partially deleted old security state — Critical data/state consistency risk
+
+**Mitigation:**
+- Persist non-secret `RESET_IN_PROGRESS` (or equivalent) before destructive cleanup.
+- Once reset starts, Back/Home/navigation is not a transaction cancel.
+- Cleanup is idempotent and converges toward fully reset state.
+- Startup completes pending reset before normal vault routing.
+- Missing/already-deleted artifacts are treated as already-cleaned where safe.
+- Do not reconstruct or roll back a started destructive reset.
+
+### T26 — Restore crashes after candidate promotion but before biometric/session/temp finalization — High
+
+**Risk:** Restored KDBX is authoritative but stale biometric state or temp artifacts may remain.
+
+**Mitigation:**
+- Promotion is the explicit commit point.
+- After commit, restored KDBX/password remain authoritative.
+- Use a minimal non-secret restore-finalization marker when needed.
+- Restart completes biometric invalidation, temp cleanup, and routing/session reconciliation idempotently before normal use.
+- Marker stores no backup password, external URI, credentials, or decrypted vault data.
+
+### T27 — Partial biometric enable/disable accidentally leaves quick unlock usable — Critical
+
+**Mitigation:**
+- Enable is fail-closed: `enabled = true` only after key generation, biometric authentication, wrapping, complete state persistence, and consistency verification all succeed.
+- Interrupted/failed enable remains OFF; incomplete state/orphan key is cleanup-only.
+- Disable fails closed toward OFF; cleanup is idempotent and partial removal cannot safely resurrect the feature.
+- No biometric-specific recovery marker is introduced.
+
+### T28 — Non-cryptographic randomness weakens generated credentials — High
+
+**Mitigation:**
+- Use direct `java.security.SecureRandom` bounded selection.
+- Build one allowed alphabet from enabled character categories and select each character from that alphabet.
+- Remove category-first/default Kotlin random selection from secret generation.
+- Add no third-party randomness dependency.
+
+### T29 — Operation marker accidentally becomes a new secret store — Critical
+
+**Mitigation:**
+- Markers are narrow, app-private, non-secret state only.
+- Re-key marker stores no old/new Master Password or decrypted vault data.
+- Reset marker stores no credentials or vault contents.
+- Restore marker stores no backup password, external URI, credentials, or decrypted vault data.
+- No markers are added for Create Vault, manual backup, or biometric enable/disable.
+- Marker use must be task-specific and idempotent, not a generic workflow database.
 
 ## 6. Security assumptions
 
@@ -236,23 +302,32 @@ RAHSA does not claim to protect against a fully compromised/rooted operating sys
 
 ## 7. Phase 13 security validation gates
 
-- [ ] Generator no longer uses non-security Kotlin default randomness for secret generation.
-- [ ] New-vault recovery warning cannot be bypassed through ordinary UI flow and is accessible.
+Planning architecture is approved, but these implementation gates remain unchecked until code/device validation occurs:
+
+- [ ] Generator uses `SecureRandom` combined-alphabet selection and no non-security Kotlin default randomness for secret generation.
+- [ ] New-vault recovery warning cannot be bypassed through ordinary UI flow, acknowledgment is ephemeral, explicit Create remains required, and accessibility equivalent works.
 - [ ] Master Password re-key: wrong current password is non-destructive.
 - [ ] Re-key: old password fails/new password opens after success.
-- [ ] Re-key failure injection preserves old valid vault and hint.
+- [ ] Re-key failure injection preserves old valid vault/hint/biometric state before commit.
+- [ ] Re-key post-commit process death preserves new authoritative vault and resumes non-secret finalization idempotently.
 - [ ] LKG never accepts unverified candidate data.
 - [ ] Active corruption + valid LKG requires user confirmation to restore.
-- [ ] Backup produces encrypted KDBX through a user-selected SAF destination.
-- [ ] Invalid/wrong-password restore cannot mutate active vault.
+- [ ] Destructive reset deletes nothing before final action and completes idempotently after restart once started.
+- [ ] Destructive reset preserves UI preferences and external user-managed backups.
+- [ ] Backup produces encrypted KDBX through a user-selected SAF destination without decrypt/re-serialize transport.
+- [ ] Backup failure/interruption leaves active/LKG unchanged and creates no internal recovery marker.
+- [ ] Invalid/wrong-password/corrupt restore cannot mutate active vault.
+- [ ] Restore confirmation is shown only after candidate validation.
 - [ ] Successful restore preserves old active as LKG when applicable.
-- [ ] Restore/password-change/reset invalidate biometric state.
+- [ ] Restore post-commit process death preserves restored authoritative vault and resumes non-secret finalization idempotently.
+- [ ] Restore/password-change/reset invalidate biometric state when applicable.
+- [ ] Biometric partial enable remains OFF; partial disable fails closed toward OFF.
 - [ ] Biometric success performs actual repository vault open.
 - [ ] Biometric cancellation does not loop prompts.
-- [ ] Enrollment/key invalidation falls back to Master Password.
+- [ ] Enrollment/key/inconsistent-state invalidation falls back to Master Password.
 - [ ] No Phase 13 secret values appear in Logcat during representative tests.
 - [ ] Critical operations reject duplicate execution.
-- [ ] External user-managed backups survive destructive reset.
+- [ ] Approved operation markers contain no secret material and are cleaned idempotently.
 
 ## 8. Historical v0.2 review record
 
