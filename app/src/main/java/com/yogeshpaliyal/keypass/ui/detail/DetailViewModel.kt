@@ -81,17 +81,32 @@ class DetailViewModel internal constructor(
         editBaseline = null
     }
 
+    fun hasUnsavedChanges(isNewCredential: Boolean): Boolean {
+        val current = _credential.value ?: return false
+        val baseline = if (isNewCredential) {
+            emptyCredential()
+        } else {
+            editBaseline ?: current
+        }
+        return current.normalizedForEditComparison() != baseline.normalizedForEditComparison()
+    }
+
     fun createCredential(
         credential: Credential,
-        onExecCompleted: () -> Unit
-    ): Job = launchSave(
-        mutation = {
-            vaultRepository.createCredential(
-                credential.copy(id = UUID.randomUUID().toString())
-            )
-        },
-        onSuccess = onExecCompleted
-    )
+        onExecCompleted: (String) -> Unit
+    ): Job {
+        val createdId = UUID.randomUUID().toString()
+        return launchSave(
+            mutation = {
+                vaultRepository.createCredential(
+                    credential.copy(id = createdId)
+                )
+            },
+            onSuccess = {
+                onExecCompleted(createdId)
+            }
+        )
+    }
 
     fun updateCredential(
         credential: Credential,
@@ -184,6 +199,11 @@ class DetailViewModel internal constructor(
             _operationError.value = DetailOperationError.VaultWriteFailed
             false
         }
+
+    private fun Credential.normalizedForEditComparison() = copy(
+        url = url?.takeUnless(String::isEmpty),
+        notes = notes?.takeUnless(String::isEmpty)
+    )
 
     private fun emptyCredential() = Credential(
         id = "",
