@@ -1,7 +1,7 @@
 # T128 JIT Implementation Kit — Exactly-One Encrypted LKG + Validate-Before-Promote
 
 KIT_STATUS: READY
-TASK: T128
+TASK_ID: T128
 BASELINE_BRANCH: prototype/v0.2
 IMPLEMENTATION_BASELINE: f3c909b23bf1fd65f0a30e8af5bf59cf12387a2d
 PREVIOUS_KIT_COMMIT: 6ebba5585c91b7fd066143e37fd7c9ade82e0f63
@@ -57,7 +57,7 @@ Before editing implementation files, Codex MUST:
 3. confirm that latest remote history remains a descendant of `IMPLEMENTATION_BASELINE`; report unexpected divergence;
 4. read `TASKS.md`, `docs/GOVERNANCE_STATUS.md`, this kit, `TSD.md`, and `docs/adr/0005-data-safety-kdbx-lkg-saf.md`;
 5. verify governance has been explicitly activated for T128;
-6. run `python scripts/governance_preflight.py` and stop on failure;
+6. run `python scripts/governance_preflight.py --implementation T128` and stop on failure;
 7. verify `git status` is clean before implementation;
 8. verify no other writer is modifying the same branch/worktree;
 9. confirm the local Android SDK/JDK/Gradle environment required by the repository is usable;
@@ -213,11 +213,11 @@ The local Codex writer owns the complete T128 validation loop. A remote/Cloud bu
 
 Run, at minimum, from the Windows checkout using repository-working command variants:
 
-1. `python scripts/governance_preflight.py` before implementation;
+1. `python scripts/governance_preflight.py --implementation T128` before implementation;
 2. focused T128 repository/unit tests during development;
-3. `\.\gradlew.bat test` (or the exact repository-equivalent full unit-test task if this aggregate task is not valid);
-4. `\.\gradlew.bat assembleFreeDebug`;
-5. `python scripts/governance_preflight.py` again before handoff;
+3. `.\gradlew.bat test` (or the exact repository-equivalent full unit-test task if this aggregate task is not valid);
+4. `.\gradlew.bat assembleFreeDebug`;
+5. `python scripts/governance_preflight.py --implementation T128` again before handoff;
 6. `git diff --check` and relevant repository lint/static checks if already part of the established workflow;
 7. clean final `git status` after the focused implementation checkpoint/commit.
 
