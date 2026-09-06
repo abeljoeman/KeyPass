@@ -19,19 +19,19 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — Access & Data Safety Foundation technical planning approved; JIT T126 preparation pending.**
+**Phase 13 — T126 Password Generator Security Hardening ACTIVE.**
 
-Owner product review is complete and the Phase 13 PRD amendment is approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. The consolidated `TSD.md`, `docs/THREAT_MODEL.md`, accepted ADRs, and task architecture package are now **owner-approved as the Phase 13 technical package**.
+Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012. A READY JIT Implementation Kit exists for T126 and the owner has explicitly activated **T126 only**.
 
-There is **no active implementation task**. `TASKS.md` must remain:
+The current execution gate in `TASKS.md` must be:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T126
+ACTIVE_KIT: implementation-kits/T126/README.md
 ```
 
-No application code may be modified under this gate. The next permitted planning/preparation step is a JIT Implementation Kit for **T126 only** against the latest checkpoint; T126 remains inactive until that kit is READY and `TASKS.md` explicitly activates exactly T126.
+Codex may modify application code only within the approved T126 scope after `python scripts/governance_preflight.py --implementation T126` succeeds. T127–T133 remain NOT ACTIVE and must not be implemented, bundled, or opportunistically advanced during T126.
 
 ## Approved Phase 13 product direction
 
@@ -83,17 +83,17 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 ## Phase 13 task sequence
 
 ```text
-T126 Password Generator Security Hardening
-T127 Create Vault Recovery Acknowledgment
-T128 One-LKG Safe Promotion Foundation
-T129 Change Master Password / Real KDBX Re-key
-T130 Forgot Master Password / Destructive Reset
-T131 Manual External KDBX Backup via SAF
-T132 Safe KDBX Restore via SAF
-T133 Secure Biometric Quick Unlock
+T126 Password Generator Security Hardening       ACTIVE
+T127 Create Vault Recovery Acknowledgment        NOT ACTIVE
+T128 One-LKG Safe Promotion Foundation           NOT ACTIVE
+T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
+T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
+T131 Manual External KDBX Backup via SAF         NOT ACTIVE
+T132 Safe KDBX Restore via SAF                    NOT ACTIVE
+T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-The consolidated Phase 13 technical package and every task architecture are owner-approved, but all implementation tasks remain **NOT ACTIVE**. JIT preparation for T126 may now proceed; activation is a separate explicit gate after a repository-local READY kit exists.
+T126 is the sole active implementation task. After T126 validation and focused checkpoint, execution returns to `PLANNING_FREEZE / NONE / NONE`; T127 requires a new JIT kit and separate explicit activation.
 
 ## Standard planning-to-execution workflow
 
@@ -153,7 +153,8 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/THREAT_MODEL.md` — owner-approved consolidated Phase 13 threat extension; implementation validation gates remain unchecked until execution/testing.
 - `docs/WORKFLOW.md`
 - `docs/IMPLEMENTATION_KIT.md`
-- `TASKS.md` — T126–T133 approved definitions; execution frozen.
+- `implementation-kits/T126/README.md` — READY JIT kit for the sole active task.
+- `TASKS.md` — T126 active; T127–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -171,7 +172,7 @@ For new capability design and implementation, evaluate in order:
 
 Phase 13 verified reuse findings include Kotpass `0.13.0` `modifyCredentials()` for KDBX credential changes, Android SAF for provider-neutral document I/O, AndroidX Biometric + Android Keystore for quick unlock, Material 3 for swipe/progress/animation UX, and `java.security.SecureRandom` for generator hardening.
 
-Security-critical assumptions and optional new dependencies must be rechecked during the relevant JIT kit/task.
+For active T126, use direct `java.security.SecureRandom` combined-alphabet selection and add no new dependency, UX, passphrase mode, or complexity policy.
 
 ## Public release status
 
@@ -179,9 +180,13 @@ Public/Play Store release work remains **PARKED** until explicitly resumed.
 
 ## Implementation Kit / Codex gate
 
-Codex may modify application code only when `TASKS.md` exposes exactly one approved active Txxx and repository-local READY kit, and governance preflight passes.
+Codex may modify application code only when `TASKS.md` exposes exactly one approved active Txxx and repository-local READY kit, and governance preflight passes. The current authorized command is:
 
-After every successful task checkpoint, return to:
+```powershell
+python scripts/governance_preflight.py --implementation T126
+```
+
+After T126 passes required validation and a focused checkpoint is created, return to:
 
 ```text
 EXECUTION_STATUS: PLANNING_FREEZE
@@ -189,8 +194,8 @@ ACTIVE_TASK: NONE
 ACTIVE_KIT: NONE
 ```
 
-Codex does not automatically continue to the next task.
+Codex must stop after that checkpoint and must not automatically continue to T127.
 
 ## Cost policy
 
-Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. Vault/Master Password/Keystore/recovery semantics remain security-sensitive work even with a prepared patch.
+Use the lowest-cost model/reasoning sufficient for the task, but classify inherent risk first. Prepared kits reduce exploration cost, not security classification. T126 is a narrow low-risk deterministic hardening task; its READY kit recommends Luna + low. Vault/Master Password/Keystore/recovery semantics in later tasks remain security-sensitive regardless of kit completeness.
