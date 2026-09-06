@@ -19,7 +19,7 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126–T128 complete; planning freeze pending the next owner-authorized task.**
+**Phase 13 — T126 and T127 complete; T128 is active only for an owner-review safe-promotion correction.**
 
 Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
@@ -44,7 +44,7 @@ implementation-kits/T127/README.md
 PREPARED_AGAINST: ba1e86e6580bc6a3b07d1094692a8a98f4b641b5
 ```
 
-T128 — One-LKG Safe Promotion Foundation — was implemented and validated under its owner-approved JIT Implementation Kit at:
+T128 — One-LKG Safe Promotion Foundation — is reactivated solely for an owner-review safe-promotion ordering correction under its owner-approved JIT Implementation Kit at:
 
 ```text
 implementation-kits/T128/README.md
@@ -53,12 +53,12 @@ implementation-kits/T128/README.md
 The current execution gate in `TASKS.md` is:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T128
+ACTIVE_KIT: implementation-kits/T128/README.md
 ```
 
-No implementation task is currently authorized. T128 was completed by the single local writer. GitHub `prototype/v0.2` remains the authoritative remote history. T129–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
+T128 is currently authorized only for the owner-review safe-promotion ordering correction. GitHub `prototype/v0.2` remains the authoritative remote history. T129–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
 
 A later cosmetic refinement of the T127 warning copy and swipe presentation is desired. That refinement is not part of T127 behavioral acceptance and must not silently reopen or broaden T127 security semantics.
 
@@ -114,7 +114,7 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 ```text
 T126 Password Generator Security Hardening       COMPLETE — e69ee80
 T127 Create Vault Recovery Acknowledgment        COMPLETE — 7cc4f94
-T128 One-LKG Safe Promotion Foundation           COMPLETE
+T128 One-LKG Safe Promotion Foundation           ACTIVE OWNER-REVIEW CORRECTION
 T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
 T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
 T131 Manual External KDBX Backup via SAF         NOT ACTIVE
@@ -122,7 +122,7 @@ T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T126–T128 are complete. No task is active.
+T126 and T127 are complete. T128 alone is active for the owner-review correction.
 
 ## Standard planning-to-execution workflow
 
@@ -185,8 +185,8 @@ Execution/status documents and kits never override higher-level product/security
 - `docs/IMPLEMENTATION_KIT.md`
 - `implementation-kits/T126/README.md` — historical READY kit for completed T126.
 - `implementation-kits/T127/README.md` — historical READY kit for completed T127.
-- `implementation-kits/T128/README.md` — completed execution evidence for T128.
-- `TASKS.md` — T126–T128 complete; planning freeze; T129–T133 inactive.
+- `implementation-kits/T128/README.md` — READY and active for the T128 owner-review correction.
+- `TASKS.md` — T126/T127 complete; T128 active owner-review correction; T129–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -217,12 +217,12 @@ Codex may modify application code only when `TASKS.md` exposes exactly one appro
 Current state:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T128
+ACTIVE_KIT: implementation-kits/T128/README.md
 ```
 
-No application implementation is currently authorized. T128 completed under the READY T128 kit with one-writer validation. T129–T133 remain inactive and require their own owner-authorized activation.
+Application implementation is authorized only for the T128 owner-review safe-promotion ordering correction under the READY kit. T129–T133 remain inactive and require their own owner-authorized activation.
 
 ## Cost policy
 
