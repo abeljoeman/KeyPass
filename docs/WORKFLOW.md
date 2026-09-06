@@ -106,8 +106,8 @@ Asisten pada sesi baru harus memverifikasi informasi tersebut langsung dari repo
 
 ## 9. Checkpoint saat ini
 
-- Phase 12 selesai sampai T125.
-- Checkpoint Phase 12: `85d39e3 test: record phase 12 physical ux validation`.
-- Branch: `prototype/v0.1`; checkpoint tersebut 21 commit di depan `origin/prototype/v0.1`.
-- Brand Decision Gate sedang berjalan: nama **RAHSA** dan primary mark sudah dipilih.
+- Phase 12 selesai sampai T125 dan batch brand RAHSA telah dibungkus sebagai prototype v0.2.
+- Checkpoint sebelum rilis v0.2: `aae0760 fix: keep legacy vault navigation icon`.
+- Branch rilis: `prototype/v0.2`; tag: `v0.2-prototype`.
+- Brand Decision Gate: nama, logo, launcher icon, dan identity surface RAHSA telah diterapkan.
 - Berikutnya: selesaikan B002, B004, B005, dan B006 sesuai `docs/BRAND_DECISION.md`; public/store release tetap diblokir sampai seluruh gate selesai.

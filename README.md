@@ -6,6 +6,8 @@ RAHSA is an offline Android password manager backed by a local KDBX vault.
 Credentials remain on the device; the prototype has no backend and requests no
 Internet permission.
 
+**Current checkpoint:** `v0.2-prototype`.
+
 ## Prototype capabilities
 
 - Create, unlock, and explicitly lock a local KDBX vault.

@@ -228,7 +228,7 @@ private fun MainContent() {
                     summary = R.string.license_notices_desc,
                     onClickItem = {
                         context.openLink(
-                            "https://github.com/abeljoeman/KeyPass/blob/prototype/v0.1/NOTICE.md"
+                            "https://github.com/abeljoeman/KeyPass/blob/prototype/v0.2/NOTICE.md"
                         )
                     }
                 )

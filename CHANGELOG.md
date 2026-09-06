@@ -4,6 +4,8 @@ This file records changes that have actually landed in the project. Roadmap item
 
 ## Unreleased
 
+## v0.2-prototype
+
 ### Brand
 
 - Selected **RAHSA** as the product name and integrated the supplied shield logo.
