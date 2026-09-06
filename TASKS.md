@@ -1,17 +1,17 @@
 # RAHSA Implementation Tasks
 
-**EXECUTION_STATUS: ACTIVE_IMPLEMENTATION**
-**ACTIVE_TASK: T127**
-**ACTIVE_KIT: implementation-kits/T127/README.md**
+**EXECUTION_STATUS: PLANNING_FREEZE**
+**ACTIVE_TASK: NONE**
+**ACTIVE_KIT: NONE**
 **Stable baseline:** `v0.2-prototype` (`5d6acd3 release: prepare v0.2 prototype`)
 
 ## Current execution gate
 
-Exactly one implementation task is active: **T127**.
+No implementation task is active.
 
-T126 is complete. T127 is authorized for implementation only through `implementation-kits/T127/README.md`. T128–T133 remain NOT ACTIVE and MUST NOT be implemented or opportunistically prepared during this execution cycle.
+T126 and T127 are complete. T128–T133 remain NOT ACTIVE and MUST NOT be implemented or opportunistically prepared without a new JIT kit and explicit activation.
 
-Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. T127 activation does not authorize any later Phase 13 task.
+Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. Completion of T127 does not authorize any later Phase 13 task.
 
 ## Completed historical work
 
@@ -21,11 +21,11 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 # Phase 13 — Access & Data Safety Foundation
 
-**Phase status:** APPROVED TASK PLAN — T127 ACTIVE
+**Phase status:** APPROVED TASK PLAN — PLANNING FREEZE
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
 **Technical review:** owner-approved consolidated `TSD.md`; accepted ADRs 0005–0012; owner-approved `docs/THREAT_MODEL.md`
 
-T126 is complete. T127 is the sole active implementation task. Every later task requires its own new JIT Implementation Kit against the latest checkpoint and separate explicit activation.
+T126 and T127 are complete. Every later task requires its own new JIT Implementation Kit against the latest checkpoint and separate explicit activation.
 
 ## T126 — Harden Password Generator randomness
 
@@ -52,7 +52,7 @@ T126 is complete. T127 is the sole active implementation task. Every later task 
 
 ## T127 — Add Create Vault unrecoverability acknowledgment
 
-**Planning status:** ACTIVE IMPLEMENTATION — owner-authorized; READY kit: `implementation-kits/T127/README.md`.
+**Planning status:** COMPLETE — implemented, automated validation passed, Samsung SM-A115F physical smoke passed, lifecycle reset behavior passed, TalkBack semantic/non-swipe acknowledgment passed, and checkpointed at `7cc4f94f321fd86d343b554fce1c99406e3b0265`.
 
 **Objective:** Require a clear unrecoverability warning and ephemeral swipe-to-acknowledge before an explicit final Create Vault action can be enabled, without adding a recovery marker or new gesture dependency.
 
@@ -267,7 +267,7 @@ Do not create current-roadmap tasks for:
 
 ## Just-in-time Implementation Kit gate
 
-The READY JIT kit for **T127 only** is `implementation-kits/T127/README.md` and is the sole kit authorized for the current execution cycle. Do not prepare or execute T128–T133 during T127.
+The T127 JIT kit at `implementation-kits/T127/README.md` is retained as historical execution evidence for completed T127. No Implementation Kit is currently active.
 
 Every active task requires:
 
@@ -282,16 +282,16 @@ Do not pre-generate all Phase 13 patches.
 The execution gate is currently:
 
 ```text
-EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
-ACTIVE_TASK: T127
-ACTIVE_KIT: implementation-kits/T127/README.md
+EXECUTION_STATUS: PLANNING_FREEZE
+ACTIVE_TASK: NONE
+ACTIVE_KIT: NONE
 ```
 
-T127 is authorized for implementation only within its approved scope and READY kit. T128–T133 remain inactive.
+T127 was validated and checkpointed. T128–T133 require their own JIT kit and explicit activation.
 
 ## End of each task
 
-After T127 implementation, automated validation, required physical-device/TalkBack validation, and focused checkpoint, reset to:
+After each task's implementation, required automated/physical validation, and focused checkpoint, reset to:
 
 ```text
 EXECUTION_STATUS: PLANNING_FREEZE
