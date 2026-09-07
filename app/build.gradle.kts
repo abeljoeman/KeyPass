@@ -163,4 +163,7 @@ dependencies {
 
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("app.keemobile:kotpass:0.13.0")
+    // Offline advisory-only strength estimation; Android has no equivalent platform API.
+    // https://github.com/nulab/zxcvbn4j 1.9.0, MIT; no network/permission expansion.
+    implementation("com.nulab-inc:zxcvbn:1.9.0")
 }

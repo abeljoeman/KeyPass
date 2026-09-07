@@ -80,6 +80,23 @@ suspend fun Context.setPasswordHint(passwordHint: String?) {
     }
 }
 
+suspend fun Context.finalizeMasterPasswordChange(
+    passwordHint: String?,
+    disableBiometric: Boolean
+) {
+    getUserSettingsDataStore().updateData { settings ->
+        settings.finalizedForMasterPasswordChange(passwordHint, disableBiometric)
+    }
+}
+
+fun UserSettings.finalizedForMasterPasswordChange(
+    passwordHint: String?,
+    disableBiometric: Boolean
+): UserSettings = copy(
+    passwordHint = passwordHint,
+    isBiometricEnable = if (disableBiometric) false else isBiometricEnable
+)
+
 suspend fun Context.getPasswordHint(): String? {
     return getUserSettings().passwordHint
 }

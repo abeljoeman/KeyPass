@@ -8,6 +8,10 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -370,6 +374,209 @@ class KotpassVaultRepositoryTest {
         }
     }
 
+    @Test
+    fun changeMasterPassword_wrongCurrentPasswordLeavesActiveAndLkgUntouched() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("before-rekey"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val repository = openKnownVault(vaultFile)
+            var markerPrepared = false
+
+            val result = runCatching {
+                repository.changeMasterPassword(
+                    "wrong-current".toCharArray(),
+                    "new-password".toCharArray()
+                ) { markerPrepared = true }
+            }
+
+            assertTrue(result.exceptionOrNull() is InvalidCurrentMasterPasswordException)
+            assertFalse(markerPrepared)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(vaultFile, "test-password")
+            assertPasswordRejected(vaultFile, "new-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_rekeysActiveAndPreservesOldCredentialLkg() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val activeBefore = vaultFile.readBytes()
+            val repository = openKnownVault(vaultFile)
+
+            repository.changeMasterPassword(
+                "test-password".toCharArray(),
+                "new-password".toCharArray()
+            )
+
+            assertDecryptableKdbx(vaultFile, "new-password")
+            assertPasswordRejected(vaultFile, "test-password")
+            assertArrayEquals(activeBefore, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(lkgFile(vaultFile), "test-password")
+            assertPasswordRejected(lkgFile(vaultFile), "new-password")
+            assertEquals(1, lkgFiles(vaultFile).size)
+            assertEquals(2, repository.listCredentials().size)
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_candidateValidationFailurePreservesOldAuthority() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("before-candidate-failure"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val repository = KotpassVaultRepository(vaultFile, FailCandidateValidationOperations())
+            repository.openVault("test-password".toCharArray())
+            var markerPrepared = false
+
+            val result = runCatching {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                ) { markerPrepared = true }
+            }
+
+            assertTrue(result.isFailure)
+            assertFalse(markerPrepared)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(vaultFile, "test-password")
+            assertPasswordRejected(vaultFile, "new-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_markerPreparationFailureIsPreCommitAndNonDestructive() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val activeBefore = vaultFile.readBytes()
+            val repository = openKnownVault(vaultFile)
+
+            val result = runCatching {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                ) { throw IOException("Injected marker preparation failure.") }
+            }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertFalse(lkgFile(vaultFile).exists())
+            assertDecryptableKdbx(vaultFile, "test-password")
+            assertPasswordRejected(vaultFile, "new-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_promotionFailureRestoresPriorActiveAndPriorLkg() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("before-promotion-failure"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val operations = FailCandidatePromotionOperations(vaultFile)
+            val repository = KotpassVaultRepository(vaultFile, operations)
+            repository.openVault("test-password".toCharArray())
+
+            val result = runCatching {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                )
+            }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertEquals(1, lkgFiles(vaultFile).size)
+            assertDecryptableKdbx(vaultFile, "test-password")
+            assertPasswordRejected(vaultFile, "new-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_promotedActiveVerificationFailureRollsBackBothRoles() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val setup = openKnownVault(vaultFile)
+            setup.createCredential(testCredential("before-verify-failure"))
+            setup.lock()
+            val activeBefore = vaultFile.readBytes()
+            val lkgBefore = lkgFile(vaultFile).readBytes()
+            val operations = FailPromotedActiveVerificationOperations(vaultFile)
+            val repository = KotpassVaultRepository(vaultFile, operations)
+            repository.openVault("test-password".toCharArray())
+
+            val result = runCatching {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                )
+            }
+
+            assertTrue(result.isFailure)
+            assertArrayEquals(activeBefore, vaultFile.readBytes())
+            assertArrayEquals(lkgBefore, lkgFile(vaultFile).readBytes())
+            assertDecryptableKdbx(vaultFile, "test-password")
+            assertPasswordRejected(vaultFile, "new-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_afterNormalMutationStillKeepsExactlyOneLkg() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val repository = openKnownVault(vaultFile)
+            repository.createCredential(testCredential("normal-mutation"))
+            val activeBeforeRekey = vaultFile.readBytes()
+
+            repository.changeMasterPassword(
+                "test-password".toCharArray(),
+                "new-password".toCharArray()
+            )
+
+            assertArrayEquals(activeBeforeRekey, lkgFile(vaultFile).readBytes())
+            assertEquals(1, lkgFiles(vaultFile).size)
+            assertDecryptableKdbx(vaultFile, "new-password")
+            assertDecryptableKdbx(lkgFile(vaultFile), "test-password")
+        }
+    }
+
+    @Test
+    fun changeMasterPassword_duplicateConcurrentInvocationIsRejected() = runBlocking {
+        withKnownVaultFixture { vaultFile ->
+            val repository = openKnownVault(vaultFile)
+            val candidateReady = CountDownLatch(1)
+            val allowPromotion = CountDownLatch(1)
+            val first = async(Dispatchers.Default) {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                ) {
+                    candidateReady.countDown()
+                    check(allowPromotion.await(30, TimeUnit.SECONDS))
+                }
+            }
+            assertTrue(candidateReady.await(30, TimeUnit.SECONDS))
+
+            val duplicate = runCatching {
+                repository.changeMasterPassword(
+                    "test-password".toCharArray(),
+                    "new-password".toCharArray()
+                )
+            }
+            allowPromotion.countDown()
+            first.await()
+
+            assertTrue(duplicate.exceptionOrNull() is IllegalStateException)
+            assertDecryptableKdbx(vaultFile, "new-password")
+            assertDecryptableKdbx(lkgFile(vaultFile), "test-password")
+        }
+    }
+
     private suspend fun openKnownVault(vaultFile: File): KotpassVaultRepository {
         val repository = KotpassVaultRepository(vaultFile)
         repository.openVault("test-password".toCharArray())
@@ -412,14 +619,26 @@ class KotpassVaultRepositoryTest {
         notes = "T128 promotion test"
     )
 
-    private fun assertDecryptableKdbx(file: File) {
+    private fun assertDecryptableKdbx(file: File, password: String = "test-password") {
         FileInputStream(file).use { input ->
-            KeePassDatabase.decode(input, testCredentials())
+            KeePassDatabase.decode(input, credentials(password))
         }
     }
 
+    private fun assertPasswordRejected(file: File, password: String) {
+        val result = runCatching {
+            FileInputStream(file).use { input ->
+                KeePassDatabase.decode(input, credentials(password))
+            }
+        }
+        assertTrue("Password must not open ${file.name}.", result.isFailure)
+    }
+
     private fun testCredentials(): Credentials =
-        Credentials.from(EncryptedValue.fromString("test-password"))
+        credentials("test-password")
+
+    private fun credentials(password: String): Credentials =
+        Credentials.from(EncryptedValue.fromString(password))
 
     private fun assertMoveOccursBefore(
         moves: List<Pair<String, String>>,
@@ -488,6 +707,29 @@ class KotpassVaultRepositoryTest {
                 return false
             }
             return super.move(source, destination)
+        }
+    }
+
+    private class FailPromotedActiveVerificationOperations(
+        private val target: File
+    ) : DelegatingFileOperations() {
+        private var candidatePromoted = false
+        private var failed = false
+
+        override fun move(source: File, destination: File): Boolean {
+            val moved = super.move(source, destination)
+            if (moved && source.name.startsWith("rahsa-vault-candidate-") && destination == target) {
+                candidatePromoted = true
+            }
+            return moved
+        }
+
+        override fun openInput(file: File): FileInputStream {
+            if (candidatePromoted && !failed && file == target) {
+                failed = true
+                throw IOException("Injected promoted-active verification failure.")
+            }
+            return super.openInput(file)
         }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.annotation.StringRes
 import com.yogeshpaliyal.keypass.R
 
 @Composable
@@ -29,7 +30,8 @@ fun RecoveryAcknowledgment(
     acknowledged: Boolean,
     enabled: Boolean,
     onAcknowledged: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    @StringRes warningText: Int = R.string.create_vault_recovery_warning
 ) {
     val actionLabel = stringResource(R.string.recovery_acknowledgment_swipe)
     val acknowledgmentState = stringResource(
@@ -55,7 +57,7 @@ fun RecoveryAcknowledgment(
             )
         ) {
             Text(
-                text = stringResource(R.string.create_vault_recovery_warning),
+                text = stringResource(warningText),
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 style = MaterialTheme.typography.bodyMedium

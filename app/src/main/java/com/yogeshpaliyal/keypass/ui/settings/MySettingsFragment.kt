@@ -29,6 +29,7 @@ import com.yogeshpaliyal.keypass.ui.redux.actions.IntentNavigation
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
 import com.yogeshpaliyal.keypass.ui.redux.states.AboutState
 import com.yogeshpaliyal.keypass.ui.redux.states.ChangeAppHintState
+import com.yogeshpaliyal.keypass.ui.redux.states.ChangeMasterPasswordState
 import kotlinx.coroutines.launch
 import org.reduxkotlin.compose.rememberTypedDispatcher
 
@@ -60,6 +61,13 @@ fun MySettingCompose() {
             title = stringResource(R.string.settings_password_hint),
             onClick = {
                 dispatchAction(NavigationAction(ChangeAppHintState))
+            }
+        )
+
+        SettingsNavigationRow(
+            title = stringResource(R.string.change_master_password),
+            onClick = {
+                dispatchAction(NavigationAction(ChangeMasterPasswordState))
             }
         )
 

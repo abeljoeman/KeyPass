@@ -8,6 +8,7 @@ import app.keemobile.kotpass.database.decode
 import app.keemobile.kotpass.database.encode
 import app.keemobile.kotpass.database.getEntryBy
 import app.keemobile.kotpass.database.modifiers.modifyEntry
+import app.keemobile.kotpass.database.modifiers.modifyCredentials
 import app.keemobile.kotpass.database.modifiers.modifyParentGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
 import app.keemobile.kotpass.models.Entry
@@ -17,8 +18,11 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
+import java.security.MessageDigest
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 
 class KotpassVaultRepository(
@@ -27,6 +31,7 @@ class KotpassVaultRepository(
     private var fileOperations: VaultFileOperations = DefaultVaultFileOperations
     private val operationLock = Any()
     private val stateLock = Any()
+    private val masterPasswordChangeInProgress = AtomicBoolean(false)
     private var database: KeePassDatabase? = null
     private var sessionVersion = 0L
 
@@ -71,6 +76,45 @@ class KotpassVaultRepository(
                 }
                 completeUnlock(version, decoded)
             }
+        }
+    }
+
+    override suspend fun changeMasterPassword(
+        currentMasterPassword: CharArray,
+        newMasterPassword: CharArray,
+        onCandidateValidated: (encryptedCandidateFingerprint: String) -> Unit
+    ) {
+        check(masterPasswordChangeInProgress.compareAndSet(false, true)) {
+            "A Master Password change is already in progress."
+        }
+        try {
+            withContext(Dispatchers.IO + NonCancellable) {
+                synchronized(operationLock) {
+                    val (currentSession, version) = unlockedSession()
+                    if (!vaultFile.isFile) {
+                        throw FileNotFoundException("Vault file does not exist.")
+                    }
+
+                    val currentCredentials = credentialsFrom(currentMasterPassword)
+                    val activeDatabase = try {
+                        decode(vaultFile, currentCredentials)
+                    } catch (failure: Exception) {
+                        throw InvalidCurrentMasterPasswordException(failure)
+                    }
+                    val newCredentials = credentialsFrom(newMasterPassword)
+                    val candidate = activeDatabase.modifyCredentials { newCredentials }
+                    val persisted = persistDatabase(
+                        candidate = candidate,
+                        targetMustExist = true,
+                        activeCredentials = currentCredentials,
+                        candidateCredentials = newCredentials,
+                        onCandidateValidated = onCandidateValidated
+                    )
+                    completeMutation(currentSession, version, persisted)
+                }
+            }
+        } finally {
+            masterPasswordChangeInProgress.set(false)
         }
     }
 
@@ -202,7 +246,10 @@ class KotpassVaultRepository(
 
     private fun persistDatabase(
         candidate: KeePassDatabase,
-        targetMustExist: Boolean
+        targetMustExist: Boolean,
+        activeCredentials: Credentials = candidate.credentials,
+        candidateCredentials: Credentials = candidate.credentials,
+        onCandidateValidated: (encryptedCandidateFingerprint: String) -> Unit = {}
     ): KeePassDatabase {
         val target = vaultFile.absoluteFile
         val parent = target.parentFile
@@ -226,8 +273,16 @@ class KotpassVaultRepository(
             fileOperations.openOutput(temporary).use { output ->
                 candidate.encode(output)
             }
-            val validated = decode(temporary, candidate.credentials)
-            promoteValidatedCandidate(temporary, target, targetMustExist, parent, candidate.credentials)
+            val validated = decode(temporary, candidateCredentials)
+            onCandidateValidated(encryptedFingerprint(temporary))
+            promoteValidatedCandidate(
+                candidate = temporary,
+                target = target,
+                targetMustExist = targetMustExist,
+                parent = parent,
+                activeCredentials = activeCredentials,
+                candidateCredentials = candidateCredentials
+            )
             return validated
         } finally {
             if (temporary.exists() && !fileOperations.delete(temporary)) {
@@ -244,7 +299,8 @@ class KotpassVaultRepository(
         target: File,
         targetMustExist: Boolean,
         parent: File,
-        credentials: Credentials
+        activeCredentials: Credentials,
+        candidateCredentials: Credentials
     ) {
         if (!targetMustExist) {
             if (target.exists()) {
@@ -254,7 +310,7 @@ class KotpassVaultRepository(
                 throw IOException("Could not install the new vault file.")
             }
             try {
-                decode(target, credentials)
+                decode(target, candidateCredentials)
             } catch (failure: Exception) {
                 if (!fileOperations.move(target, candidate)) {
                     failure.addSuppressed(IOException("Could not preserve the failed vault candidate."))
@@ -269,7 +325,7 @@ class KotpassVaultRepository(
         }
 
         // Confirm the on-disk source before it is allowed to become the next LKG.
-        decode(target, credentials)
+        decode(target, activeCredentials)
 
         val previousLkg = lkgFile(target)
         val displacedLkg = if (previousLkg.exists()) {
@@ -295,7 +351,7 @@ class KotpassVaultRepository(
             if (!fileOperations.move(candidate, target)) {
                 throw IOException("Could not install the updated vault file.")
             }
-            decode(target, credentials)
+            decode(target, candidateCredentials)
             promoted = true
         } catch (failure: Exception) {
             rollbackPromotion(
@@ -349,6 +405,20 @@ class KotpassVaultRepository(
         }
 
     private fun lkgFile(target: File): File = File(target.parentFile, "${target.nameWithoutExtension}.lkg.kdbx")
+
+    private fun encryptedFingerprint(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        fileOperations.openInput(file).use { input ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                digest.update(buffer, 0, count)
+            }
+            buffer.fill(0)
+        }
+        return digest.digest().joinToString(separator = "") { byte -> "%02x".format(byte) }
+    }
 
     private fun deleteIfPresent(file: File) {
         if (file.exists() && !fileOperations.delete(file)) {
