@@ -1,10 +1,16 @@
 package com.yogeshpaliyal.keypass.ui.style
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.themeadapter.material3.Mdc3Theme
 import com.yogeshpaliyal.keypass.R
 
@@ -49,17 +55,57 @@ private fun keyPassDarkColorScheme(): ColorScheme =
         surfaceContainerLowest = colorResource(R.color.keypass_background),
     )
 
+private fun Typography.withRahsaHierarchy(): Typography =
+    copy(
+        titleLarge = titleLarge.copy(
+            fontSize = 22.sp,
+            lineHeight = 28.sp,
+            fontWeight = FontWeight.Medium,
+        ),
+        titleMedium = titleMedium.copy(
+            fontSize = 16.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.Medium,
+        ),
+        bodyLarge = bodyLarge.copy(
+            fontSize = 16.sp,
+            lineHeight = 24.sp,
+            fontWeight = FontWeight.Normal,
+        ),
+        bodyMedium = bodyMedium.copy(
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Normal,
+        ),
+        labelLarge = labelLarge.copy(
+            fontSize = 14.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Medium,
+        ),
+        labelMedium = labelMedium.copy(
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 0.6.sp,
+        ),
+    )
+
+private fun Shapes.withRahsaShapes(): Shapes =
+    copy(
+        extraSmall = RoundedCornerShape(8.dp),
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(12.dp),
+        large = RoundedCornerShape(16.dp),
+        extraLarge = RoundedCornerShape(24.dp),
+    )
+
 @Composable
 fun KeyPassTheme(content: @Composable () -> Unit) {
-    // T100 changes colors only. Keep inherited typography/shapes until T101.
     Mdc3Theme {
-        val inheritedTypography = MaterialTheme.typography
-        val inheritedShapes = MaterialTheme.shapes
-
         MaterialTheme(
             colorScheme = keyPassDarkColorScheme(),
-            typography = inheritedTypography,
-            shapes = inheritedShapes,
+            typography = MaterialTheme.typography.withRahsaHierarchy(),
+            shapes = MaterialTheme.shapes.withRahsaShapes(),
             content = content,
         )
     }
