@@ -12,7 +12,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -125,9 +125,9 @@ fun Homepage(homeState: HomeState) {
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 modifier = Modifier.testTag("addCredential"),
-                shape = MaterialTheme.shapes.medium,
+                shape = MaterialTheme.shapes.large,
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 elevation = FloatingActionButtonDefaults.elevation(
@@ -138,15 +138,13 @@ fun Homepage(homeState: HomeState) {
                 ),
                 onClick = {
                     dispatchAction(NavigationAction(AccountDetailState()))
-                },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = null
-                    )
-                },
-                text = { Text(stringResource(R.string.add_credential)) }
-            )
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Add,
+                    contentDescription = stringResource(R.string.a11y_add_credential)
+                )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -155,6 +153,18 @@ fun Homepage(homeState: HomeState) {
                 .padding(paddingValues)
         ) {
             if (shouldShowSearch) {
+                Text(
+                    modifier = Modifier.padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = 2.dp,
+                        bottom = 0.dp
+                    ),
+                    text = stringResource(R.string.credential_count, credentials.size),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                )
+
                 SearchBar(
                     keyword = keyword,
                     updateKeyword = {
