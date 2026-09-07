@@ -4,13 +4,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.yogeshpaliyal.keypass.R
 import com.yogeshpaliyal.keypass.ui.nav.BottomNavViewModel
 import com.yogeshpaliyal.keypass.ui.redux.actions.NavigationAction
@@ -32,8 +35,18 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
     }
 
     val dispatchAction = rememberDispatcher()
+    val itemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        selectedTextColor = MaterialTheme.colorScheme.onSurface,
+        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp
+    ) {
         NavigationBarItem(
             selected = currentScreen is HomeState,
             onClick = {
@@ -41,6 +54,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
                     dispatchAction(NavigationAction(HomeState(), true))
                 }
             },
+            colors = itemColors,
             icon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_vault_shield_lock),
@@ -57,6 +71,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
                     dispatchAction(NavigationAction(PasswordGeneratorState(), true))
                 }
             },
+            colors = itemColors,
             icon = {
                 Icon(
                     imageVector = Icons.Default.Password,
@@ -73,6 +88,7 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
                     dispatchAction(NavigationAction(SettingsState, true))
                 }
             },
+            colors = itemColors,
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
