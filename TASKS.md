@@ -1,17 +1,17 @@
 # RAHSA Implementation Tasks
 
-**EXECUTION_STATUS: PLANNING_FREEZE**
-**ACTIVE_TASK: NONE**
-**ACTIVE_KIT: NONE**
+**EXECUTION_STATUS: ACTIVE_IMPLEMENTATION**
+**ACTIVE_TASK: T129**
+**ACTIVE_KIT: implementation-kits/T129/README.md**
 **Stable baseline:** `v0.2-prototype` (`5d6acd3 release: prepare v0.2 prototype`)
 
 ## Current execution gate
 
-No implementation task is active.
+T129 is the only active implementation task. Its READY JIT Implementation Kit is `implementation-kits/T129/README.md`.
 
-T126–T128 are complete. T129–T133 remain NOT ACTIVE and MUST NOT be implemented or opportunistically prepared without their own new JIT kit and explicit activation.
+T126–T128 are complete. T130 remains NOT ACTIVE with a non-executable planning pre-kit only; T131–T133 remain NOT ACTIVE. Activation of T129 authorizes only T129.
 
-Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**. Activation of T128 authorizes only T128 and does not authorize any later Phase 13 task.
+Phase 13 product requirements, consolidated technical package, accepted ADRs 0005–0012, Threat Model extension, and task architectures T126–T133 are **owner-approved**.
 
 ## Completed historical work
 
@@ -21,11 +21,11 @@ The full historical checklist remains available in Git history and at the `v0.2-
 
 # Phase 13 — Access & Data Safety Foundation
 
-**Phase status:** APPROVED TASK PLAN — PLANNING FREEZE
+**Phase status:** APPROVED TASK PLAN — T129 ACTIVE IMPLEMENTATION
 **Authoritative product scope:** `PRD.md` Phase 13 amendment  
 **Technical review:** owner-approved consolidated `TSD.md`; accepted ADRs 0005–0012; owner-approved `docs/THREAT_MODEL.md`
 
-T126–T128 are complete. Every later task requires its own new JIT Implementation Kit against the latest checkpoint and separate explicit activation.
+T126–T128 are complete. T129 is explicitly activated against its READY JIT kit. T130–T133 remain inactive and require their own READY JIT kit plus separate explicit activation before implementation.
 
 ## T126 — Harden Password Generator randomness
 
@@ -97,7 +97,7 @@ T126–T128 are complete. Every later task requires its own new JIT Implementati
 
 ## T129 — Implement real Change Master Password
 
-**Planning status:** Architecture approved via accepted ADR 0007; implementation task remains NOT ACTIVE.
+**Planning status:** ACTIVE IMPLEMENTATION — owner-authorized against READY kit `implementation-kits/T129/README.md`.
 
 **Objective:** Add current-password reauthentication, advisory strength, optional hint edit, mandatory consequence acknowledgment, real Kotpass KDBX credential modification, candidate verification, crash-consistent safe promotion, and post-commit cleanup.
 
@@ -132,7 +132,7 @@ T126–T128 are complete. Every later task requires its own new JIT Implementati
 
 ## T130 — Add Forgot Master Password and destructive reset
 
-**Planning status:** Architecture approved via accepted ADR 0008; implementation task remains NOT ACTIVE.
+**Planning status:** Architecture approved via accepted ADR 0008; implementation task remains NOT ACTIVE. A planning-only `implementation-kits/T130/PREKIT.md` exists but is NOT READY and NOT executable.
 
 **Objective:** Add honest forgotten-password guidance, hint display, typed-`DELETE` destructive reset, and resumable crash-consistent cleanup scoped to RAHSA-managed local vault/security state.
 
@@ -267,9 +267,17 @@ Do not create current-roadmap tasks for:
 
 ## Just-in-time Implementation Kit gate
 
-The T127 and T128 JIT kits are retained as historical/completed execution evidence. There is no active implementation kit.
+The T127 and T128 JIT kits are retained as historical/completed execution evidence. T129 has the only active READY implementation kit.
 
-T128 historical execution evidence remains at `implementation-kits/T128/README.md`.
+Current active kit:
+
+```text
+implementation-kits/T129/README.md
+TASK_ID: T129
+KIT_STATUS: READY
+```
+
+`implementation-kits/T130/PREKIT.md` is planning evidence only; it is NOT READY, NOT executable, and MUST NOT be referenced as `ACTIVE_KIT`.
 
 Every active task requires:
 
@@ -284,16 +292,16 @@ Do not pre-generate all Phase 13 patches.
 The execution gate is currently:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T129
+ACTIVE_KIT: implementation-kits/T129/README.md
 ```
 
-T128 is complete at owner-accepted checkpoint `34e6b19053aa0d2f3a7ed7381add175fb2d9e4b4`. T129–T133 remain unavailable until their own JIT kits are READY and the owner explicitly activates them.
+Only T129 is authorized. T130–T133 remain unavailable until their own JIT kits are READY and the owner explicitly activates them.
 
 ## End of each task
 
-After each task's implementation, required automated/physical validation, and focused checkpoint, reset to:
+After each task's implementation, required automated/physical validation, **owner/ChatGPT review acceptance**, and focused checkpoint, reset to:
 
 ```text
 EXECUTION_STATUS: PLANNING_FREEZE
