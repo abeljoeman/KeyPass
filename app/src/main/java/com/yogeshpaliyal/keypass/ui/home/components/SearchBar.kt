@@ -50,7 +50,7 @@ fun SearchBar(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 6.dp)
             .onFocusChanged { setSearchFocused(it.isFocused) },
         value = keyword ?: "",
         singleLine = true,
@@ -58,7 +58,7 @@ fun SearchBar(
         placeholder = {
             Text(
                 text = stringResource(R.string.search_credentials),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.84f)
             )
         },
         leadingIcon = {
@@ -68,7 +68,7 @@ fun SearchBar(
                 tint = if (isSearchFocused) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f)
                 }
             )
         },
@@ -87,7 +87,8 @@ fun SearchBar(
                 IconButton(onClick = { setMenuVisible(!isMenuVisible) }) {
                     Icon(
                         painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.Sort),
-                        contentDescription = stringResource(R.string.a11y_sort_credentials)
+                        contentDescription = stringResource(R.string.a11y_sort_credentials),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f)
                     )
                 }
             }
@@ -101,7 +102,7 @@ fun SearchBar(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.82f),
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.62f),
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary
