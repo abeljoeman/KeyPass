@@ -1,6 +1,7 @@
 package com.yogeshpaliyal.keypass.ui.home.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +34,7 @@ fun CredentialListItem(
         ListItem(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 72.dp)
+                .heightIn(min = 68.dp)
                 .clickable { onClick(credential) },
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent
@@ -41,9 +42,14 @@ fun CredentialListItem(
             leadingContent = {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(38.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
+                            shape = CircleShape
+                        )
                         .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.88f),
                             shape = CircleShape
                         )
                 ) {
@@ -69,15 +75,15 @@ fun CredentialListItem(
                 Text(
                     text = credential.username,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.84f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
         )
         HorizontalDivider(
-            modifier = Modifier.padding(start = 68.dp, end = 16.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
+            modifier = Modifier.padding(start = 66.dp, end = 16.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f)
         )
     }
 }
