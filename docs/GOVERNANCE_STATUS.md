@@ -1,6 +1,6 @@
 # RAHSA Governance Status
 
-**Updated:** 2026-09-06  
+**Updated:** 2026-09-07  
 **Status:** Current operational source of truth
 
 Read this file first when starting a new planning or Codex session.
@@ -19,7 +19,7 @@ Read this file first when starting a new planning or Codex session.
 
 ## Current workstream
 
-**Phase 13 — T126–T128 complete; planning freeze pending the next owner-authorized task.**
+**Phase 13 — T126–T128 complete; T129 ACTIVE_IMPLEMENTATION.**
 
 Owner product review and the consolidated Phase 13 technical package are approved. All task-level architectures T126–T133 are owner-approved through accepted ADRs 0005–0012.
 
@@ -57,15 +57,25 @@ Its JIT Implementation Kit is retained as historical/completed execution evidenc
 implementation-kits/T128/README.md
 ```
 
+T129 — Change Master Password / Real KDBX Re-key — is now explicitly owner-authorized for implementation using:
+
+```text
+implementation-kits/T129/README.md
+TASK_ID: T129
+KIT_STATUS: READY
+```
+
 The current execution gate in `TASKS.md` is:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T129
+ACTIVE_KIT: implementation-kits/T129/README.md
 ```
 
-No implementation task is currently authorized. GitHub `prototype/v0.2` remains the authoritative remote history. T129–T133 remain inactive and require their own new JIT kit and separate explicit owner activation.
+Only T129 is authorized. **Local Codex on Windows in `G:\Projects\KeyPass` is the single implementation writer.** GitHub `prototype/v0.2` remains authoritative remote history.
+
+T130 has planning evidence at `implementation-kits/T130/PREKIT.md`, but that document is `DRAFT_NOT_READY`, non-executable, and MUST NOT be used as an active kit. T130–T133 remain inactive.
 
 A later cosmetic refinement of the T127 warning copy and swipe presentation is desired. That refinement is not part of T127 behavioral acceptance and must not silently reopen or broaden T127 security semantics.
 
@@ -122,14 +132,14 @@ All are **Accepted — owner-approved Phase 13 architecture**.
 T126 Password Generator Security Hardening       COMPLETE — e69ee80
 T127 Create Vault Recovery Acknowledgment        COMPLETE — 7cc4f94
 T128 One-LKG Safe Promotion Foundation           COMPLETE — 34e6b19
-T129 Change Master Password / Real KDBX Re-key   NOT ACTIVE
-T130 Forgot Master Password / Destructive Reset  NOT ACTIVE
+T129 Change Master Password / Real KDBX Re-key   ACTIVE_IMPLEMENTATION
+T130 Forgot Master Password / Destructive Reset  NOT ACTIVE — PREKIT DRAFT ONLY
 T131 Manual External KDBX Backup via SAF         NOT ACTIVE
 T132 Safe KDBX Restore via SAF                    NOT ACTIVE
 T133 Secure Biometric Quick Unlock                NOT ACTIVE
 ```
 
-T126–T128 are complete. No task is active.
+T129 is the only active implementation task.
 
 ## Standard planning-to-execution workflow
 
@@ -144,7 +154,9 @@ Discussion / research in ChatGPT
 → local Codex preflight
 → local Codex executes/reviews/builds/tests exactly one task
 → required local/physical validation
-→ focused checkpoint pushed to authoritative branch
+→ focused implementation checkpoint
+→ owner/ChatGPT review acceptance while task remains active
+→ owner-authorized push/closure checkpoint as appropriate
 → TASKS returns to PLANNING_FREEZE / NONE / NONE
 → return to ChatGPT/owner before next task
 ```
@@ -193,7 +205,9 @@ Execution/status documents and kits never override higher-level product/security
 - `implementation-kits/T126/README.md` — historical READY kit for completed T126.
 - `implementation-kits/T127/README.md` — historical READY kit for completed T127.
 - `implementation-kits/T128/README.md` — historical/completed execution evidence for T128.
-- `TASKS.md` — T126–T128 complete; planning freeze; T129–T133 inactive.
+- `implementation-kits/T129/README.md` — READY and ACTIVE kit for T129 only.
+- `implementation-kits/T130/PREKIT.md` — planning draft only; NOT READY / NOT executable.
+- `TASKS.md` — T126–T128 complete; T129 active; T130–T133 inactive.
 - `docs/ROADMAP.md`
 - `docs/FEATURES.md`
 
@@ -213,6 +227,8 @@ Phase 13 verified reuse findings include Kotpass `0.13.0` `modifyCredentials()` 
 
 For T127, the completed implementation reuses the existing Create Vault flow and Material 3 swipe primitives, keeps acknowledgment ephemeral, and uses a TalkBack semantic action without adding a recovery marker or new dependency.
 
+For T129, implementation must reuse the accepted T128 one-LKG safe-promotion seam, extending it narrowly only where old-active and new-candidate credentials differ, and must use Kotpass credential modification rather than custom KDBX cryptography.
+
 ## Public release status
 
 Public/Play Store release work remains **PARKED** until explicitly resumed.
@@ -224,12 +240,12 @@ Codex may modify application code only when `TASKS.md` exposes exactly one appro
 Current state:
 
 ```text
-EXECUTION_STATUS: PLANNING_FREEZE
-ACTIVE_TASK: NONE
-ACTIVE_KIT: NONE
+EXECUTION_STATUS: ACTIVE_IMPLEMENTATION
+ACTIVE_TASK: T129
+ACTIVE_KIT: implementation-kits/T129/README.md
 ```
 
-No application implementation is currently authorized. T128 is complete at owner-accepted checkpoint `34e6b19053aa0d2f3a7ed7381add175fb2d9e4b4`. T129–T133 remain inactive and require their own owner-authorized activation.
+Application implementation is authorized for **T129 only**. Local Codex on Windows is the single writer. T130–T133 remain inactive. T129 must remain active through its implementation checkpoint and owner/ChatGPT review; Codex must not self-close governance before acceptance.
 
 ## Cost policy
 
