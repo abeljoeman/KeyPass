@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.yogeshpaliyal.keypass.R
@@ -52,16 +55,26 @@ fun CredentialDetail(
     val websiteUrl = credential.url?.let(::normalizeWebsiteUrl)
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                ),
                 title = {
-                    Text(text = stringResource(R.string.credential_detail_screen_title))
+                    Text(
+                        text = stringResource(R.string.credential_detail_screen_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             painter = rememberVectorPainter(image = Icons.AutoMirrored.Rounded.ArrowBack),
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
@@ -70,7 +83,10 @@ fun CredentialDetail(
                         enabled = !isSaving,
                         onClick = onEdit
                     ) {
-                        Text(text = stringResource(R.string.credential_detail_edit))
+                        Text(
+                            text = stringResource(R.string.credential_detail_edit),
+                            style = MaterialTheme.typography.labelLarge
+                        )
                     }
                 }
             )
@@ -81,13 +97,15 @@ fun CredentialDetail(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             Text(
                 text = credential.title.ifBlank {
                     stringResource(R.string.credential_detail_untitled)
                 },
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -139,7 +157,10 @@ fun CredentialDetail(
                                     }
                                 }
                             ) {
-                                Text(text = stringResource(R.string.credential_detail_open))
+                                Text(
+                                    text = stringResource(R.string.credential_detail_open),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
                             }
                         }
                     } else {
@@ -164,7 +185,10 @@ fun CredentialDetail(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text(text = stringResource(R.string.credential_detail_delete))
+                    Text(
+                        text = stringResource(R.string.credential_detail_delete),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
         }
@@ -189,7 +213,7 @@ private fun CredentialDetailField(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = label,
@@ -205,6 +229,7 @@ private fun CredentialDetailField(
                 modifier = Modifier.weight(1f),
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = maxLines,
                 overflow = if (maxLines == Int.MAX_VALUE) {
                     TextOverflow.Clip
@@ -214,6 +239,9 @@ private fun CredentialDetailField(
             )
             trailingContent?.invoke()
         }
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+        )
     }
 }
 
@@ -228,7 +256,8 @@ private fun CopyCredentialValueButton(
     ) {
         Icon(
             painter = rememberVectorPainter(image = Icons.Rounded.ContentCopy),
-            contentDescription = stringResource(R.string.a11y_copy_to_clipboard)
+            contentDescription = stringResource(R.string.a11y_copy_to_clipboard),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
