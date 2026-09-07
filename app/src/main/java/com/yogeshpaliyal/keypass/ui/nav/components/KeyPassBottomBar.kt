@@ -52,13 +52,13 @@ fun KeyPassBottomBar(viewModel: BottomNavViewModel) {
         selectedIconColor = MaterialTheme.colorScheme.primary,
         selectedTextColor = MaterialTheme.colorScheme.primary,
         indicatorColor = Color.Transparent,
-        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f),
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.88f)
     )
 
     Column {
         HorizontalDivider(
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.32f)
         )
 
         NavigationBar(
@@ -132,11 +132,11 @@ private fun RahsaNavIconContainer(
 ) {
     Box(
         modifier = Modifier
-            .size(width = 40.dp, height = 32.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .size(width = 36.dp, height = 28.dp)
+            .clip(RoundedCornerShape(10.dp))
             .background(
                 if (selected) {
-                    MaterialTheme.colorScheme.primaryContainer
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.82f)
                 } else {
                     Color.Transparent
                 }
