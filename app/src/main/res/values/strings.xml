@@ -61,6 +61,7 @@
     <string name="crash_report_subject">Crash report in RAHSA</string>
     <string name="message_no_accounts">No Accounts found, please add from below button</string>
     <string name="your_vault">Your Vault</string>
+    <string name="credential_count">%1$d credentials</string>
     <string name="search_credentials">Search credentials</string>
     <string name="add_credential">Add credential</string>
     <string name="vault_empty_title">Your vault is empty</string>
