@@ -9,7 +9,10 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ChevronRight
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -73,14 +76,21 @@ fun CredentialListItem(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f)
+                )
             }
         )
         HorizontalDivider(
             modifier = Modifier.padding(start = 68.dp, end = 16.dp),
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
         )
     }
 }
 
 private fun Credential.getInitials() =
-    (title.firstOrNull() ?: username.firstOrNull() ?: 'K').toString()
+    (title.firstOrNull() ?: username.firstOrNull() ?: 'K').uppercaseChar().toString()
